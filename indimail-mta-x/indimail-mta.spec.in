@@ -450,7 +450,6 @@ echo ../resolv.conf 1>&3
 
 %if %{undefined nodebug}
  /bin/chmod -R 755 %{buildroot}%{_prefix}/bin
- /bin/chmod -R 755 %{buildroot}%{_prefix}/sbin
  /bin/chmod -R 755 %{buildroot}%{libexecdir}
 %endif
 
@@ -630,69 +629,69 @@ echo ../resolv.conf 1>&3
 %attr(755,root,root)                    %{_prefix}/bin/qdane
 %endif
 
-%attr(755,root,root)                    %{_prefix}/sbin/udplogger
-%attr(751,root,root)                    %{_prefix}/sbin/greydaemon
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-greyd
+%attr(755,root,root)                    %{_prefix}/bin/udplogger
+%attr(751,root,root)                    %{_prefix}/bin/greydaemon
+%attr(751,root,root)                    %{_prefix}/bin/qmail-greyd
 %if %notlsarr == 0
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-daned
+%attr(751,root,root)                    %{_prefix}/bin/qmail-daned
 %endif
 
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-popbull
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-poppass
-%attr(751,root,root)                    %{_prefix}/sbin/ofmipd
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-direct
-%attr(755,root,root)                    %{_prefix}/sbin/spawn-filter
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-getpw
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-local
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-remote
-%attr(755,root,root)                    %{_prefix}/sbin/rd-remote
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-pw2u
-%attr(755,root,root)                    %{_prefix}/sbin/cdbtest
-%attr(755,root,root)                    %{_prefix}/sbin/cdbstats
-%attr(755,root,root)                    %{_prefix}/sbin/cdbdump
-%attr(755,root,root)                    %{_prefix}/sbin/cdbget
-%attr(755,root,root)                    %{_prefix}/sbin/cdbgetm
-%attr(755,root,root)                    %{_prefix}/sbin/cdbmake
-%attr(755,root,root)                    %{_prefix}/sbin/qscanq-stdin
+%attr(755,root,root)                    %{_prefix}/bin/qmail-popbull
+%attr(755,root,root)                    %{_prefix}/bin/qmail-poppass
+%attr(751,root,root)                    %{_prefix}/bin/ofmipd
+%attr(755,root,root)                    %{_prefix}/bin/qmail-direct
+%attr(755,root,root)                    %{_prefix}/bin/spawn-filter
+%attr(755,root,root)                    %{_prefix}/bin/qmail-getpw
+%attr(755,root,root)                    %{_prefix}/bin/qmail-local
+%attr(755,root,root)                    %{_prefix}/bin/qmail-remote
+%attr(755,root,root)                    %{_prefix}/bin/rd-remote
+%attr(755,root,root)                    %{_prefix}/bin/qmail-pw2u
+%attr(755,root,root)                    %{_prefix}/bin/cdbtest
+%attr(755,root,root)                    %{_prefix}/bin/cdbstats
+%attr(755,root,root)                    %{_prefix}/bin/cdbdump
+%attr(755,root,root)                    %{_prefix}/bin/cdbget
+%attr(755,root,root)                    %{_prefix}/bin/cdbgetm
+%attr(755,root,root)                    %{_prefix}/bin/cdbmake
+%attr(755,root,root)                    %{_prefix}/bin/qscanq-stdin
 
-%attr(755,root,root)                    %{_prefix}/sbin/plugtest
-%attr(755,root,root)                    %{_prefix}/sbin/ldap-checkpwd
-%attr(711,root,root)                    %{_prefix}/sbin/svctool
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-nullqueue
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-multi
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-spamfilter
-%attr(755,root,root)                    %{_prefix}/sbin/cleanq
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-tcpok
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-tcpto
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-qmqpc
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-newu
-%attr(755,root,root)                    %{_prefix}/sbin/cdb-database
-%attr(755,root,root)                    %{_prefix}/sbin/sql-database
-%attr(755,root,root)                    %{_prefix}/sbin/ctrlenv
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-cdb
-%attr(755,root,root)                    %{_prefix}/sbin/qmail-sql
+%attr(755,root,root)                    %{_prefix}/bin/plugtest
+%attr(755,root,root)                    %{_prefix}/bin/ldap-checkpwd
+%attr(711,root,root)                    %{_prefix}/bin/svctool
+%attr(755,root,root)                    %{_prefix}/bin/qmail-nullqueue
+%attr(755,root,root)                    %{_prefix}/bin/qmail-multi
+%attr(755,root,root)                    %{_prefix}/bin/qmail-spamfilter
+%attr(755,root,root)                    %{_prefix}/bin/cleanq
+%attr(755,root,root)                    %{_prefix}/bin/qmail-tcpok
+%attr(755,root,root)                    %{_prefix}/bin/qmail-tcpto
+%attr(755,root,root)                    %{_prefix}/bin/qmail-qmqpc
+%attr(755,root,root)                    %{_prefix}/bin/qmail-newu
+%attr(755,root,root)                    %{_prefix}/bin/cdb-database
+%attr(755,root,root)                    %{_prefix}/bin/sql-database
+%attr(755,root,root)                    %{_prefix}/bin/ctrlenv
+%attr(755,root,root)                    %{_prefix}/bin/qmail-cdb
+%attr(755,root,root)                    %{_prefix}/bin/qmail-sql
 
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-smtpd
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-qmqpd
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-qmtpd
-%attr(751,root,root)                    %{_prefix}/sbin/qscheduler
-%attr(751,root,root)                    %{_prefix}/sbin/qmonitor
-%attr(751,root,root)                    %{_prefix}/sbin/setqload
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-start
-%attr(751,root,root)                    %{_prefix}/sbin/slowq-start
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-lspawn
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-rspawn
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-clean
-%attr(751,root,root)                    %{_prefix}/sbin/qmail-send
-%attr(751,root,root)                    %{_prefix}/sbin/slowq-send
-%attr(751,root,root)                    %{_prefix}/sbin/qmta-send
-%attr(751,root,root)                    %{_prefix}/sbin/mini-smtpd
-%attr(751,root,root)                    %{_prefix}/sbin/todo-proc
-%attr(755,root,root)                    %{_prefix}/sbin/surblfilter
-%attr(755,root,root)                    %{_prefix}/sbin/surblqueue
+%attr(751,root,root)                    %{_prefix}/bin/qmail-smtpd
+%attr(751,root,root)                    %{_prefix}/bin/qmail-qmqpd
+%attr(751,root,root)                    %{_prefix}/bin/qmail-qmtpd
+%attr(751,root,root)                    %{_prefix}/bin/qscheduler
+%attr(751,root,root)                    %{_prefix}/bin/qmonitor
+%attr(751,root,root)                    %{_prefix}/bin/setqload
+%attr(751,root,root)                    %{_prefix}/bin/qmail-start
+%attr(751,root,root)                    %{_prefix}/bin/slowq-start
+%attr(751,root,root)                    %{_prefix}/bin/qmail-lspawn
+%attr(751,root,root)                    %{_prefix}/bin/qmail-rspawn
+%attr(751,root,root)                    %{_prefix}/bin/qmail-clean
+%attr(751,root,root)                    %{_prefix}/bin/qmail-send
+%attr(751,root,root)                    %{_prefix}/bin/slowq-send
+%attr(751,root,root)                    %{_prefix}/bin/qmta-send
+%attr(751,root,root)                    %{_prefix}/bin/mini-smtpd
+%attr(751,root,root)                    %{_prefix}/bin/todo-proc
+%attr(755,root,root)                    %{_prefix}/bin/surblfilter
+%attr(755,root,root)                    %{_prefix}/bin/surblqueue
 
-%attr(755,root,root)                    %{_prefix}/sbin/relaytest
-%attr(755,root,root)                    %{_prefix}/sbin/splogger
+%attr(755,root,root)                    %{_prefix}/bin/relaytest
+%attr(755,root,root)                    %{_prefix}/bin/splogger
 
 %attr(755,root,root)                    %{libexecdir}/authcram
 %attr(755,root,root)                    %{libexecdir}/columnt
@@ -837,19 +836,19 @@ echo ../resolv.conf 1>&3
 %attr(0644,root,root)                   %{shareddir}/doc/PIC.local2rem
 
 %if %{defined suse_version} || %{defined sles_version}
-%verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
-%verify (not user group mode caps) %attr(2551, root, qscand)    %{_prefix}/sbin/run-cleanq
-%verify (not user group mode caps) %attr(2551, root, qmail)     %{_prefix}/sbin/qmail-dkim
-%verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
-%verify (not user group mode caps) %attr(4551, qscand, qscand)  %{_prefix}/sbin/qscanq
-%verify (not user group mode caps) %attr(4551, root, root)      %{_prefix}/sbin/sys-checkpwd
+%verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/bin/qhpsi
+%verify (not user group mode caps) %attr(2551, root, qscand)    %{_prefix}/bin/run-cleanq
+%verify (not user group mode caps) %attr(2551, root, qmail)     %{_prefix}/bin/qmail-dkim
+%verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/bin/qmail-queue
+%verify (not user group mode caps) %attr(4551, qscand, qscand)  %{_prefix}/bin/qscanq
+%verify (not user group mode caps) %attr(4551, root, root)      %{_prefix}/bin/sys-checkpwd
 %else
-%attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
-%attr(2551,root,qscand)                 %{_prefix}/sbin/run-cleanq
-%attr(2551,root,qmail)                  %{_prefix}/sbin/qmail-dkim
-%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
-%attr(4551,qscand,qscand)               %{_prefix}/sbin/qscanq
-%attr(4551,root,root)                   %{_prefix}/sbin/sys-checkpwd
+%attr(6551,qscand,qmail)                %{_prefix}/bin/qhpsi
+%attr(2551,root,qscand)                 %{_prefix}/bin/run-cleanq
+%attr(2551,root,qmail)                  %{_prefix}/bin/qmail-dkim
+%attr(6551,qmailq,qmail)                %{_prefix}/bin/qmail-queue
+%attr(4551,qscand,qscand)               %{_prefix}/bin/qscanq
+%attr(4551,root,root)                   %{_prefix}/bin/sys-checkpwd
 %endif
 
 %files -n indimail-mini
@@ -879,9 +878,9 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/bin/mailsubj
 %attr(0755,root,root)              %{_prefix}/bin/irmail
 %attr(0755,root,root)              %{_prefix}/bin/qmail-showctl
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-direct
-%attr(0755,root,root)              %{_prefix}/sbin/mini-smtpd
+%attr(0755,root,root)              %{_prefix}/bin/qmail-qmqpc
+%attr(0755,root,root)              %{_prefix}/bin/qmail-direct
+%attr(0755,root,root)              %{_prefix}/bin/mini-smtpd
 
 %ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 %ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/global_vars/CONFSPLIT
@@ -957,17 +956,17 @@ echo ../resolv.conf 1>&3
 %attr(0755,root,root)              %{_prefix}/bin/qmaildirwatch
 %attr(0755,root,root)              %{_prefix}/bin/srsfilter
 %attr(0755,root,root)              %{_prefix}/bin/queue-fix
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-qmqpc
-%attr(0755,root,root)              %{_prefix}/sbin/qmail-direct
-%attr(0751,root,root)              %{_prefix}/sbin/qmta-send
-%attr(0751,root,root)              %{_prefix}/sbin/mini-smtpd
-%attr(0751,root,root)              %{_prefix}/sbin/qmail-lspawn
-%attr(0751,root,root)              %{_prefix}/sbin/qmail-local
-%attr(0751,root,root)              %{_prefix}/sbin/qmail-rspawn
-%attr(0751,root,root)              %{_prefix}/sbin/qmail-remote
-%attr(0751,root,root)              %{_prefix}/sbin/qmail-clean
-%attr(0751,root,root)              %{_prefix}/sbin/qmail-tcpok
-%attr(0751,root,root)              %{_prefix}/sbin/qmail-tcpto
+%attr(0755,root,root)              %{_prefix}/bin/qmail-qmqpc
+%attr(0755,root,root)              %{_prefix}/bin/qmail-direct
+%attr(0751,root,root)              %{_prefix}/bin/qmta-send
+%attr(0751,root,root)              %{_prefix}/bin/mini-smtpd
+%attr(0751,root,root)              %{_prefix}/bin/qmail-lspawn
+%attr(0751,root,root)              %{_prefix}/bin/qmail-local
+%attr(0751,root,root)              %{_prefix}/bin/qmail-rspawn
+%attr(0751,root,root)              %{_prefix}/bin/qmail-remote
+%attr(0751,root,root)              %{_prefix}/bin/qmail-clean
+%attr(0751,root,root)              %{_prefix}/bin/qmail-tcpok
+%attr(0751,root,root)              %{_prefix}/bin/qmail-tcpto
 
 %ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 %ghost %attr(0644,root,qmail)      %config(noreplace,missingok) %{qsysconfdir}/control/defaultqueue/QUEUEDIR
@@ -1033,11 +1032,11 @@ echo ../resolv.conf 1>&3
 # qmail-inject generates Message-ID without any risk of collision
 
 %if %{defined suse_version} || %{defined sles_version}
-%verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/sbin/qhpsi
-%verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/sbin/qmail-queue
+%verify (not user group mode caps) %attr(6551, qscand, qmail)   %{_prefix}/bin/qhpsi
+%verify (not user group mode caps) %attr(6551, qmailq, qmail)   %{_prefix}/bin/qmail-queue
 %else
-%attr(6551,qscand,qmail)                %{_prefix}/sbin/qhpsi
-%attr(6551,qmailq,qmail)                %{_prefix}/sbin/qmail-queue
+%attr(6551,qscand,qmail)                %{_prefix}/bin/qhpsi
+%attr(6551,qmailq,qmail)                %{_prefix}/bin/qmail-queue
 %endif
 
 # value of argv1 ($1) passed to scriptlets
@@ -1069,16 +1068,16 @@ if [ $ID -ne 0 ] ; then
   echo "You are not root" 1>&2
   exit 1
 fi
-%{_prefix}/sbin/svctool --check-install --servicedir=%{servicedir} \
+%{_prefix}/bin/svctool --check-install --servicedir=%{servicedir} \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1
 
 %if %{defined suse_version} || %{defined sles_version}
-%verify_permissions -e %{_prefix}/sbin/qhpsi
-%verify_permissions -e %{_prefix}/sbin/run-cleanq
-%verify_permissions -e %{_prefix}/sbin/qmail-queue
-%verify_permissions -e %{_prefix}/sbin/qscanq
-%verify_permissions -e %{_prefix}/sbin/sys-checkpwd
-%verify_permissions -e %{_prefix}/sbin/qmail-dkim
+%verify_permissions -e %{_prefix}/bin/qhpsi
+%verify_permissions -e %{_prefix}/bin/run-cleanq
+%verify_permissions -e %{_prefix}/bin/qmail-queue
+%verify_permissions -e %{_prefix}/bin/qscanq
+%verify_permissions -e %{_prefix}/bin/sys-checkpwd
+%verify_permissions -e %{_prefix}/bin/qmail-dkim
 %verify_permissions -e %{qmaildir}/alias/
 %verify_permissions -e %{qmaildir}/autoturn/
 %verify_permissions -e %{qsysconfdir}/
@@ -1209,7 +1208,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     /bin/sh %{libexecdir}/qupgrade post upgrade %{version} $* | tai64n | tai64nlocal
   fi
   # selinux
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux | tai64n | tai64nlocal
+  %{_prefix}/bin/svctool --servicedir=%{servicedir} --config=qselinux | tai64n | tai64nlocal
   if [ -f %{_sysconfdir}/inittab ] ; then # one of these days, this will disappear
     /bin/grep "^#SV:" %{_sysconfdir}/inittab |/bin/grep svscan |/bin/grep respawn >/dev/null 2>&1
     if [ $? -eq 0 ] ; then
@@ -1234,7 +1233,7 @@ if [ $argv1 -eq 2 ] ; then # upgrade
     fi
   done
   svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list" | tai64n | tai64nlocal
+  %{_prefix}/bin/svctool --servicedir=%{servicedir} --refreshsvc="$svc_list" | tai64n | tai64nlocal
 
   log_it "starting indimail-mta services"
   if [ -d /run ] ; then
@@ -1289,7 +1288,7 @@ fi
 %{__chown} -R qmaill:nofiles %{logdir}
 
 (
-%{_prefix}/sbin/svctool --config=qmail --fsync --syncdir \
+%{_prefix}/bin/svctool --config=qmail --fsync --syncdir \
   --postmaster=%{qmaildir}/alias/Maildir/ | tai64n | tai64nlocal
 
 if [ %nodksignatures -eq 0 ] ; then
@@ -1312,12 +1311,12 @@ fi
 
 %if %{defined suse_version} || %{defined sles_version}
 %if 0%{?set_permissions:1} > 0
-  %set_permissions %{_prefix}/sbin/qhpsi
-  %set_permissions %{_prefix}/sbin/qmail-queue
-  %set_permissions %{_prefix}/sbin/qscanq
-  %set_permissions %{_prefix}/sbin/run-cleanq
-  %set_permissions %{_prefix}/sbin/sys-checkpwd
-  %set_permissions %{_prefix}/sbin/qmail-dkim
+  %set_permissions %{_prefix}/bin/qhpsi
+  %set_permissions %{_prefix}/bin/qmail-queue
+  %set_permissions %{_prefix}/bin/qscanq
+  %set_permissions %{_prefix}/bin/run-cleanq
+  %set_permissions %{_prefix}/bin/sys-checkpwd
+  %set_permissions %{_prefix}/bin/qmail-dkim
   %set_permissions %{qmaildir}/alias/
   %set_permissions %{qmaildir}/autoturn/
   %set_permissions %{qsysconfdir}/
@@ -1385,7 +1384,7 @@ do
   if [ $have_clamav -eq 1 ] ; then
     extra_opt="$extra_opt --qhpsi=\"$qhpsi\""
   fi
-  eval %{_prefix}/sbin/svctool --smtp=$port --servicedir=%{servicedir} \
+  eval %{_prefix}/bin/svctool --smtp=$port --servicedir=%{servicedir} \
     --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
     --query-cache --dnscheck --password-cache \
     --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 --persistdb \
@@ -1403,14 +1402,14 @@ extra_opt=""
 if [ $have_clamav -eq 1 ] ; then
   extra_opt="--qhpsi=\"$qhpsi\""
 fi
-eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
+eval %{_prefix}/bin/svctool --queueParam=defaultqueue \
   --qbase=%{qbase} --qcount=%{qcount} --qstart=1 \
   --min-free=52428800 --virus-filter \
   --dkverify="none" --dksign="none" \
   $extra_opt | tai64n | tai64nlocal
 
 # slowq service
-%{_prefix}/sbin/svctool --slowq --servicedir=%{servicedir} --qbase=%{qbase} \
+%{_prefix}/bin/svctool --slowq --servicedir=%{servicedir} --qbase=%{qbase} \
   --cntrldir=control --todo-proc --persistdb --starttls \
   --dmemory=%{send_soft_mem} --min-free=52428800 --dkverify=${ver_opt} \
   --dksign=${sign_opt} --private_key=%{qsysconfdir}/control/domainkeys/%/%{dkimkeyfn} \
@@ -1418,40 +1417,40 @@ eval %{_prefix}/sbin/svctool --queueParam=defaultqueue \
   --deliverylimit-count="-1" --deliverylimit-size="-1" --setgroups --setuser-priv --utf8 | tai64n | tai64nlocal
 
 # ODMR service
-%{_prefix}/sbin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
+%{_prefix}/bin/svctool --smtp=366 --odmr --servicedir=%{servicedir} \
   --forceauthsmtp --starttls --query-cache --password-cache --skipsend \
   --infifo=infifo --memory=%{smtp_soft_mem} | tai64n | tai64nlocal
 
 # Greylist daemon
-%{_prefix}/sbin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
+%{_prefix}/bin/svctool --greylist=1999 --servicedir=%{servicedir} --min-resend-min=2 \
     --resend-win-hr=24 --timeout-days=30 --context-file=greylist.context \
     --hash-size=65535 --save-interval=5 --whitelist=greylist.white | tai64n | tai64nlocal
 if [ %{notlsarr} -eq 0 ] ; then
   # qmail-daned tlsa daemon
-  %{_prefix}/sbin/qmail-daned > /dev/null 2>&1 || \
-  (test $? -ne 100 && %{_prefix}/sbin/svctool \
+  %{_prefix}/bin/qmail-daned > /dev/null 2>&1 || \
+  (test $? -ne 100 && %{_prefix}/bin/svctool \
     --tlsa=1998 --servicedir=%{servicedir} \
     --timeout-days=30 --context-file=tlsa.context \
     --hash-size=65535 --save-interval=5 --whitelist=tlsa.white ) | tai64n | tai64nlocal || \
     log_it "Not enabling qmail-daned service" 1>&2
 fi
 # qmail-qmtpd service
-eval %{_prefix}/sbin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
+eval %{_prefix}/bin/svctool --qmtp=209 --servicedir=%{servicedir} --qbase=%{qbase} \
   --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
   --memory=%{qmtp_soft_mem} --min-free=52428800 $extra_opt | tai64n | tai64nlocal
 # qmail-qmqpd service
-eval %{_prefix}/sbin/svctool --qmqp=628 --servicedir=%{servicedir} --qbase=%{qbase} \
+eval %{_prefix}/bin/svctool --qmqp=628 --servicedir=%{servicedir} --qbase=%{qbase} \
   --qcount=%{qcount} --qstart=1 --cntrldir=control --localip=0 --maxdaemons=75 --maxperip=25 \
   --memory=%{qmqp_soft_mem} --min-free=52428800 $extra_opt | tai64n | tai64nlocal
 touch %{servicedir}/qmail-qmqpd.628/down
 
 # virus/spam filtering
-%{_prefix}/sbin/svctool --qscanq --servicedir=%{servicedir} --scanint=200 | tai64n | tai64nlocal
+%{_prefix}/bin/svctool --qscanq --servicedir=%{servicedir} --scanint=200 | tai64n | tai64nlocal
 if [ $have_clamav -eq 1 ] ; then
-  %{_prefix}/sbin/svctool --config=clamd | tai64n | tai64nlocal
-  %{_prefix}/sbin/svctool --config=foxhole | tai64n | tai64nlocal
+  %{_prefix}/bin/svctool --config=clamd | tai64n | tai64nlocal
+  %{_prefix}/bin/svctool --config=foxhole | tai64n | tai64nlocal
   # create clamd, freshclam service
-  eval %{_prefix}/sbin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
+  eval %{_prefix}/bin/svctool --clamd --servicedir=%{servicedir} --clamdPrefix=$clamdPrefix \
     --sysconfdir=${mysysconfdir} | tai64n | tai64nlocal
   if [ $have_clamav -eq 1 ] ; then
     log_it "Checking if clamd/freshclam is running"
@@ -1493,7 +1492,7 @@ EOF
 %{__chown} qscand:qscand %{qsysconfdir}/control/signatures
 
 # udplogger service
-%{_prefix}/sbin/svctool --udplogger=3000 --localip=0 --timeout=10 \
+%{_prefix}/bin/svctool --udplogger=3000 --localip=0 --timeout=10 \
   --servicedir=%{servicedir} | tai64n | tai64nlocal
 
 # Recreate ld.so links and cache
@@ -1535,17 +1534,17 @@ do
   fi
   svc_list="$svc_list %{servicedir}/$i"
   # save variables
-  %{_prefix}/sbin/svctool --servicedir=%{servicedir} --service-name=$i \
+  %{_prefix}/bin/svctool --servicedir=%{servicedir} --service-name=$i \
     --export-variables=%{servicedir}/$i/variables/.variables  --force | tai64n | tai64nlocal
 done
 svc_list="$svc_list %{qsysconfdir}/control/defaultqueue"
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list" | tai64n | tai64nlocal
+%{_prefix}/bin/svctool --servicedir=%{servicedir} --autorefresh="0 $svc_list" | tai64n | tai64nlocal
 
 # selinux
-%{_prefix}/sbin/svctool --servicedir=%{servicedir} --config=qselinux | tai64n | tai64nlocal
+%{_prefix}/bin/svctool --servicedir=%{servicedir} --config=qselinux | tai64n | tai64nlocal
 
 log_it "configuring indimail-mta as alternatives"
-%{_prefix}/sbin/svctool --config=add-alt | tai64n | tai64nlocal
+%{_prefix}/bin/svctool --config=add-alt | tai64n | tai64nlocal
 
 if [ -f %{qsysconfdir}/indimail-mta.cron -a -d %{_sysconfdir}/cron.d ] ; then
   log_it "adding cron entries"
@@ -1564,8 +1563,8 @@ elif [ -f %{_sysconfdir}/systemd/system/multi-user.target.wants/svscan.service ]
   echo "1. Execute /bin/systemctl start svscan to start services"
   count=1
 else
-  if [ -f %{_prefix}/sbin/initsvc ] ; then
-  echo "1. Execute %{_prefix}/sbin/initsvc -on"
+  if [ -f %{_prefix}/bin/initsvc ] ; then
+  echo "1. Execute %{_prefix}/bin/initsvc -on"
   elif [ -f %{_sysconfdir}/init.d/svscan ] ; then
   echo "1. Execute %{_sysconfdir}/init.d/svscan start"
   else
@@ -1583,7 +1582,7 @@ if [ ! -f %{qsysconfdir}/certs/servercert.pem ] ; then
 count=`expr $count + 1`
 echo "$count. You need to create CERTS for SSL/TLS/STARTTLS"
 echo "   Execute the following command to create the certificate"
-echo "   %{_prefix}/sbin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
+echo "   %{_prefix}/bin/svctool --config=cert --postmaster=postmaster@$default_domain --common_name=$default_domain"
 fi
 echo
 log_it "Look at /var/log/%{name}-setup.log for the installation log"
@@ -1637,7 +1636,7 @@ if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
   fi
 fi
 log_it "removing indimail-mta as alternatives"
-%{_prefix}/sbin/svctool --config=remove-alt | tai64n | tai64nlocal
+%{_prefix}/bin/svctool --config=remove-alt | tai64n | tai64nlocal
 ) >> /var/log/%{name}-setup.log 2>&1
 
 ### SCRIPTLET ###############################################################################
@@ -1836,9 +1835,9 @@ fi
 %endif
 %endif
 
-if [ -f %{_prefix}/sbin/qmail-qmqpc ] ; then
+if [ -f %{_prefix}/bin/qmail-qmqpc ] ; then
   %{__mkdir_p} %{qsysconfdir}/control/defaultqueue
-  echo "%{_prefix}/sbin/qmail-qmqpc" > %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+  echo "%{_prefix}/bin/qmail-qmqpc" > %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 fi
 if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
   %{_sysconfdir}/init.d/sendmail stop
@@ -1890,11 +1889,18 @@ if [ -n "$alternatives_cmd" ] ; then
   else
     ext="gz"
   fi
-  $alternatives_cmd --install \
-    /usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
-    --slave %{mandir}/man8/sendmail.8."$ext" mta-sendmailman \
-      %{mandir}/man8/isendmail.8."$ext" \
-    --slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
+  if [ -L /usr/sbin ] ; then
+    $alternatives_cmd --install \
+      /usr/lib/sendmail mta %{_prefix}/bin/sendmail 120 \
+      --slave %{mandir}/man8/sendmail.8."$ext" mta-sendmailman \
+        %{mandir}/man8/isendmail.8."$ext"
+  else
+    $alternatives_cmd --install \
+      /usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
+      --slave %{mandir}/man8/sendmail.8."$ext" mta-sendmailman \
+        %{mandir}/man8/isendmail.8."$ext" \
+      --slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
+  fi
   $alternatives_cmd --set mta %{_prefix}/bin/sendmail
 else
   for i in $move; do
@@ -2033,8 +2039,8 @@ if [ $ID -ne 0 ] ; then
   exit 1
 fi
 %if %{defined suse_version} || %{defined sles_version}
-%verify_permissions -e %{_prefix}/sbin/qhpsi
-%verify_permissions -e %{_prefix}/sbin/qmail-queue
+%verify_permissions -e %{_prefix}/bin/qhpsi
+%verify_permissions -e %{_prefix}/bin/qmail-queue
 %verify_permissions -e %{qsysconfdir}/
 %verify_permissions -e %{qsysconfdir}/control/
 %verify_permissions -e %{qsysconfdir}/users/
@@ -2161,8 +2167,8 @@ fi
 (
 %if %{defined suse_version} || %{defined sles_version}
 %if 0%{?set_permissions:1} > 0
-  %set_permissions %{_prefix}/sbin/qhpsi
-  %set_permissions %{_prefix}/sbin/qmail-queue
+  %set_permissions %{_prefix}/bin/qhpsi
+  %set_permissions %{_prefix}/bin/qmail-queue
   %set_permissions %{qsysconfdir}/control/
   %set_permissions %{qsysconfdir}/users/
 %else
@@ -2176,7 +2182,7 @@ if [ ! -f %{qsysconfdir}/control/idhost ] ; then
 fi
 if [ ! -f %{qsysconfdir}/control/defaultqueue/QMAILQUEUE ] ; then
   %{__mkdir_p} %{qsysconfdir}/control/defaultqueue
-  echo "%{_prefix}/sbin/qmail-queue" > %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
+  echo "%{_prefix}/bin/qmail-queue" > %{qsysconfdir}/control/defaultqueue/QMAILQUEUE
 fi
 
 if [ ! -d%{qmaildir}/queue/qmta ] ; then
@@ -2194,8 +2200,8 @@ if [ -f %{_sysconfdir}/init.d/sendmail ] ; then
 fi
 move="/usr/lib/sendmail"
 if [ -L /usr/sbin ] ; then
-  link=$(readlink /usr/sbin)
-  if [ ! " $link" = " bin" -a ! " $link" = " /usr/sbin" ] ; then
+  p=$(realpath /usr/sbin)
+  if [ " $p" != " /usr/bin" ] ; then
     move="$move /usr/sbin/sendmail"
   fi
 else
@@ -2236,12 +2242,20 @@ if [ -n "$alternatives_cmd" ] ; then
   else
     ext="gz"
   fi
-  $alternatives_cmd --install \
-    /usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
-    --slave %{mandir}/man8/sendmail.8."$ext" mta-sendmailman \
-      %{mandir}/man8/isendmail.8."$ext" \
-    --slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
-    --slave /usr/bin/rmail mta-rmail %{_prefix}/bin/irmail
+  if [ -L /usr/sbin ] ; then
+    $alternatives_cmd --install \
+      /usr/lib/sendmail mta %{_prefix}/bin/sendmail 120 \
+      --slave %{mandir}/man8/sendmail.8."$ext" mta-sendmailman \
+        %{mandir}/man8/isendmail.8."$ext" \
+      --slave /usr/bin/rmail mta-rmail %{_prefix}/bin/irmail
+  else
+    $alternatives_cmd --install \
+      /usr/sbin/sendmail mta %{_prefix}/bin/sendmail 120 \
+      --slave %{mandir}/man8/sendmail.8."$ext" mta-sendmailman \
+        %{mandir}/man8/isendmail.8."$ext" \
+      --slave /usr/lib/sendmail mta-sendmail %{_prefix}/bin/sendmail \
+      --slave /usr/bin/rmail mta-rmail %{_prefix}/bin/irmail
+  fi
   $alternatives_cmd --set mta %{_prefix}/bin/sendmail
 else
   for i in $move; do

@@ -3,7 +3,6 @@
 d::::::
 d::::@prefix@::
 d::::@prefix@/bin::
-d::::@prefix@/sbin::
 d::::@prefix@/share::
 d::::@prefix@/libexec::
 d:::0755:@shareddir@::

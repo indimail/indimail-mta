@@ -21,10 +21,7 @@
 
 GEN_ALLOC_readyplus(sorted,stralloc,p,len,a,100,sorted_readyplus)
 
-int
-sorted_insert(sl, sa)
-	sorted         *sl;
-	stralloc       *sa;
+int sorted_insert(sorted *sl, stralloc *sa)
 {
 	int             i;
 	int             j;

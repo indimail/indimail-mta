@@ -121,60 +121,60 @@
 #
 # sbin
 #
-%attr(0755,root,root)  @prefix@/sbin/udplogger
-%attr(0755,root,root)  @prefix@/sbin/qmail-popbull
-%attr(0755,root,root)  @prefix@/sbin/ofmipd
-%attr(0755,root,root)  @prefix@/sbin/qmail-smtpd
-%attr(0755,root,root)  @prefix@/sbin/qmail-qmqpd
-%attr(0755,root,root)  @prefix@/sbin/qmail-qmtpd
-%attr(0755,root,root)  @prefix@/sbin/qmail-poppass
-%attr(0755,root,root)  @prefix@/sbin/cdbdump
-%attr(0755,root,root)  @prefix@/sbin/cdbstats
-%attr(0755,root,root)  @prefix@/sbin/cdbtest
-%attr(0755,root,root)  @prefix@/sbin/cdbget
-%attr(0755,root,root)  @prefix@/sbin/cdbgetm
-%attr(0755,root,root)  @prefix@/sbin/cdbmake
-%attr(0755,root,root)  @prefix@/sbin/qmail-tcpok #qmta
-%attr(0755,root,root)  @prefix@/sbin/qmail-tcpto #qmta
-%attr(0755,root,root)  @prefix@/sbin/qmail-multi
-%attr(0755,root,root)  @prefix@/sbin/qmail-spamfilter
-%attr(0755,root,root)  @prefix@/sbin/qmail-nullqueue
-%attr(0755,root,root)  @prefix@/sbin/qmail-qmqpc #indimail-mini #qmta
-%attr(0755,root,root)  @prefix@/sbin/qscanq-stdin
-%attr(0755,root,root)  @prefix@/sbin/ldap-checkpwd
-%attr(0755,root,root)  @prefix@/sbin/plugtest
-%attr(0711,root,root)  @prefix@/sbin/svctool
-%attr(0755,root,root)  @prefix@/sbin/sys-checkpwd
-%attr(0755,root,root)  @prefix@/sbin/cleanq
+%attr(0755,root,root)  @prefix@/bin/udplogger
+%attr(0755,root,root)  @prefix@/bin/qmail-popbull
+%attr(0755,root,root)  @prefix@/bin/ofmipd
+%attr(0755,root,root)  @prefix@/bin/qmail-smtpd
+%attr(0755,root,root)  @prefix@/bin/qmail-qmqpd
+%attr(0755,root,root)  @prefix@/bin/qmail-qmtpd
+%attr(0755,root,root)  @prefix@/bin/qmail-poppass
+%attr(0755,root,root)  @prefix@/bin/cdbdump
+%attr(0755,root,root)  @prefix@/bin/cdbstats
+%attr(0755,root,root)  @prefix@/bin/cdbtest
+%attr(0755,root,root)  @prefix@/bin/cdbget
+%attr(0755,root,root)  @prefix@/bin/cdbgetm
+%attr(0755,root,root)  @prefix@/bin/cdbmake
+%attr(0755,root,root)  @prefix@/bin/qmail-tcpok #qmta
+%attr(0755,root,root)  @prefix@/bin/qmail-tcpto #qmta
+%attr(0755,root,root)  @prefix@/bin/qmail-multi
+%attr(0755,root,root)  @prefix@/bin/qmail-spamfilter
+%attr(0755,root,root)  @prefix@/bin/qmail-nullqueue
+%attr(0755,root,root)  @prefix@/bin/qmail-qmqpc #indimail-mini #qmta
+%attr(0755,root,root)  @prefix@/bin/qscanq-stdin
+%attr(0755,root,root)  @prefix@/bin/ldap-checkpwd
+%attr(0755,root,root)  @prefix@/bin/plugtest
+%attr(0711,root,root)  @prefix@/bin/svctool
+%attr(0755,root,root)  @prefix@/bin/sys-checkpwd
+%attr(0755,root,root)  @prefix@/bin/cleanq
 
-%attr(0751,root,root)  @prefix@/sbin/qscheduler
-%attr(0751,root,root)  @prefix@/sbin/qmonitor
-%attr(0751,root,root)  @prefix@/sbin/setqload
-%attr(0751,root,root)  @prefix@/sbin/qmail-start
-%attr(0751,root,root)  @prefix@/sbin/qmail-lspawn #qmta
-%attr(0751,root,root)  @prefix@/sbin/qmail-rspawn #qmta
-%attr(0751,root,root)  @prefix@/sbin/qmail-clean #qmta
-%attr(0751,root,root)  @prefix@/sbin/qmail-send
-%attr(0751,root,root)  @prefix@/sbin/qmta-send #qmta
-%attr(0751,root,root)  @prefix@/sbin/todo-proc
-%attr(0755,root,root)  @prefix@/sbin/qmail-greyd
-%attr(0755,root,root)  @prefix@/sbin/greydaemon
-%attr(0755,root,root)  @prefix@/sbin/qmail-daned
-%attr(0755,root,root)  @prefix@/sbin/surblfilter
-%attr(0755,root,root)  @prefix@/sbin/surblqueue
-%attr(0755,root,root)  @prefix@/sbin/qmail-getpw
-%attr(0755,root,root)  @prefix@/sbin/qmail-local #qmta
-%attr(0755,root,root)  @prefix@/sbin/qmail-remote #qmta
-%attr(0755,root,root)  @prefix@/sbin/qmail-pw2u
-%attr(0755,root,root)  @prefix@/sbin/relaytest
-%attr(0755,root,root)  @prefix@/sbin/splogger
-%attr(0755,root,root)  @prefix@/sbin/qmail-cdb
-%attr(0755,root,root)  @prefix@/sbin/qmail-sql
-%attr(0755,root,root)  @prefix@/sbin/cdb-database
-%attr(0755,root,root)  @prefix@/sbin/sql-database
-%attr(0755,root,root)  @prefix@/sbin/ctrlenv
-%attr(0751,root,root)  @prefix@/sbin/qmail-newu
-%attr(0755,root,qmail) @prefix@/sbin/qmail-direct #indimail-mini #qmta
+%attr(0751,root,root)  @prefix@/bin/qscheduler
+%attr(0751,root,root)  @prefix@/bin/qmonitor
+%attr(0751,root,root)  @prefix@/bin/setqload
+%attr(0751,root,root)  @prefix@/bin/qmail-start
+%attr(0751,root,root)  @prefix@/bin/qmail-lspawn #qmta
+%attr(0751,root,root)  @prefix@/bin/qmail-rspawn #qmta
+%attr(0751,root,root)  @prefix@/bin/qmail-clean #qmta
+%attr(0751,root,root)  @prefix@/bin/qmail-send
+%attr(0751,root,root)  @prefix@/bin/qmta-send #qmta
+%attr(0751,root,root)  @prefix@/bin/todo-proc
+%attr(0755,root,root)  @prefix@/bin/qmail-greyd
+%attr(0755,root,root)  @prefix@/bin/greydaemon
+%attr(0755,root,root)  @prefix@/bin/qmail-daned
+%attr(0755,root,root)  @prefix@/bin/surblfilter
+%attr(0755,root,root)  @prefix@/bin/surblqueue
+%attr(0755,root,root)  @prefix@/bin/qmail-getpw
+%attr(0755,root,root)  @prefix@/bin/qmail-local #qmta
+%attr(0755,root,root)  @prefix@/bin/qmail-remote #qmta
+%attr(0755,root,root)  @prefix@/bin/qmail-pw2u
+%attr(0755,root,root)  @prefix@/bin/relaytest
+%attr(0755,root,root)  @prefix@/bin/splogger
+%attr(0755,root,root)  @prefix@/bin/qmail-cdb
+%attr(0755,root,root)  @prefix@/bin/qmail-sql
+%attr(0755,root,root)  @prefix@/bin/cdb-database
+%attr(0755,root,root)  @prefix@/bin/sql-database
+%attr(0755,root,root)  @prefix@/bin/ctrlenv
+%attr(0751,root,root)  @prefix@/bin/qmail-newu
+%attr(0755,root,qmail) @prefix@/bin/qmail-direct #indimail-mini #qmta
 
 %attr(0755,root,root)  @libexecdir@/cdbmake-12
 %attr(0755,root,root)  @libexecdir@/cdbmake-sv
@@ -251,12 +251,12 @@
 #
 # setuid / setgid
 #
-%attr(2551,root,qscand)   @prefix@/sbin/run-cleanq
-%attr(4551,qscand,qscand) @prefix@/sbin/qscanq
-%attr(6551,qmailq,qmail)  @prefix@/sbin/qmail-queue
-%attr(6551,qscand,qmail)  @prefix@/sbin/qhpsi
-%attr(4551,root,root)     @prefix@/sbin/sys-checkpwd
-%attr(2551,root,qmail)    @prefix@/sbin/qmail-dkim
+%attr(2551,root,qscand)   @prefix@/bin/run-cleanq
+%attr(4551,qscand,qscand) @prefix@/bin/qscanq
+%attr(6551,qmailq,qmail)  @prefix@/bin/qmail-queue
+%attr(6551,qscand,qmail)  @prefix@/bin/qhpsi
+%attr(4551,root,root)     @prefix@/bin/sys-checkpwd
+%attr(2551,root,qmail)    @prefix@/bin/qmail-dkim
 #
 # Boot
 #

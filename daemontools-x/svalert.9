@@ -32,11 +32,14 @@ You can have a line like below in your \fIrun\fR, \fIalert\fR,
 \fBshutdown\fR scripts. You can call \fBsvalert\fR in these scripts by
 executing as \fIsvalert\fR "$@". See \fBsupervise\fR(8) for the full
 explanation of the arguments passed to \fBrun\fR, \fBalert\fR and the
-\fBshutdown\fR scripts. \fBsvalert\fR will then use these arguments to send
-alerts on port \fB3001\fR as default using \fBudpclient\fR(1). You can send
-\fBSV_ALERT_PORT\fR to use a custom port. You can also set \fBUSE_SYSLOG\fR
-environment variable to send messages to system journal using the
-\fBlogger\fR(1) command.
+\fBshutdown\fR scripts. \fBsvalert\fR sends these alerts to the host name
+\fBprobe-server\fR in \fI/etc/hosts\fR. You can set the environment
+variable \fBPROBE_SERVER\fR to an IP address or hostname to override
+\fI/etc/hosts\fR. \fBsvalert\fR will then use the arguments passed to it,
+to send alerts on port \fB3001\fR as default using \fBudpclient\fR(1). You
+can send \fBSV_ALERT_PORT\fR to use a custom port. You can also set
+\fBUSE_SYSLOG\fR environment variable to send messages to system journal
+using the \fBlogger\fR(1) command.
 
 
 .SH SEE ALSO

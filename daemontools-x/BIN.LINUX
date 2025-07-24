@@ -1,2 +1,4 @@
 # installer input files for Linux programs in @prefix@/bin
 f:::0755:/bin/:inotify:inotify
+f:::0755:/bin/:docker-entrypoint:docker-entrypoint
+f:::0755:/bin/:runpod:runpod

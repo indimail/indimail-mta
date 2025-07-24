@@ -771,9 +771,12 @@ die_lcmd(int i)
 }
 
 no_return void
-die_regex()
+die_regex(const char *errstr)
 {
-	logerr(1, "regex compilation failed\n", NULL);
+	if (errstr)
+		logerr(1, "regex compilation failed [", errstr, "]\n", NULL);
+	else
+		logerr(1, "regex compilation failed \n", NULL);
 	logflush();
 	out("451 Sorry, regex compilation failed (#4.3.0)\r\n", NULL);
 	flush();
@@ -2397,7 +2400,7 @@ badhostcheck()
 				!stralloc_0(&curregex))
 			die_nomem();
 		if ((x = do_match(qregex, remotehost, curregex.s, NULL)) == -1)
-			die_regex();
+			die_regex(NULL);
 		if (negate)
 			x = !x;
 		if (x)

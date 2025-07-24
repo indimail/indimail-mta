@@ -9109,11 +9109,18 @@ add_alternatives()
 			init_script=""
 		fi
 		cmd="$alternatives_cmd"
+		if [ -L /usr/sbin ] ; then
+		cmd="$cmd --install /usr/lib/sendmail   mta            $QmailBinPrefix/bin/sendmail 120"
+		cmd="$cmd --slave   /usr/bin/mailq      mta-mailq      $QmailBinPrefix/bin/qmail-qread"
+		cmd="$cmd --slave   /usr/bin/rmail      mta-rmail      $QmailBinPrefix/bin/irmail"
+		cmd="$cmd --slave   /usr/bin/newaliases mta-newaliases $QmailBinPrefix/bin/inewaliases"
+		else
 		cmd="$cmd --install /usr/sbin/sendmail  mta            $QmailBinPrefix/bin/sendmail 120"
 		cmd="$cmd --slave   /usr/bin/mailq      mta-mailq      $QmailBinPrefix/bin/qmail-qread"
 		cmd="$cmd --slave   /usr/bin/rmail      mta-rmail      $QmailBinPrefix/bin/irmail"
 		cmd="$cmd --slave   /usr/bin/newaliases mta-newaliases $QmailBinPrefix/bin/inewaliases"
 		cmd="$cmd --slave   /usr/lib/sendmail   mta-sendmail   $QmailBinPrefix/bin/sendmail"
+		fi
 		if [ -f $mandir/man1/inewaliases.1.gz ] ; then
 			cmd="$cmd --slave $mandir/man1/newaliases.1.gz mta-newaliasesman $mandir/man1/inewaliases.1.gz"
 		fi

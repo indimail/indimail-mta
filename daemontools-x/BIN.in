@@ -26,3 +26,10 @@ f:::0755:/bin/:teepipe:teepipe
 f:::0755:/bin/:logselect:logselect
 f:::0755:/bin/:qlogselect:qlogselect
 f:::0755:/bin/:qmailctl:qmailctl
+f:::0751:/bin/:svscan:svscan
+f:::0755:/bin/:supervise:supervise
+f:::0755:/bin/:readproctitle:readproctitle
+f:::0755:/bin/:multilog:multilog
+f:::0755:/bin/:fghack:fghack
+f:::0755:/bin/:pgrphack:pgrphack
+f:::0755:/bin/:minisvc:minisvc
