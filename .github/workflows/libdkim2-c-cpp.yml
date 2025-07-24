@@ -30,4 +30,4 @@ jobs:
       uses: actions/checkout@v4
 
     - name: build_libdkim2
-      run: cd libdkim2-x; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.5.0/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.5.0/lib" make
+      run: cd libdkim2-x; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.5.1/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.5.1/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.5.1/lib" make
