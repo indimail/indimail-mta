@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.119 2025-05-06 22:39:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.120 2025-08-07 08:49:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -840,6 +840,7 @@ stripvdomprepend(char *recip)
 
 static stralloc bouncetext = { 0 };
 static stralloc orig_recip = { 0 };
+static int      orig_recip_len;
 
 /*
  * prepare bounce txt with the following format
@@ -862,6 +863,7 @@ addbounce(unsigned long id, char *recip, char *report)
 		nomem(argv0);
 	while (!stralloc_catb(&orig_recip, ">\n", 2))
 		nomem(argv0);
+	orig_recip_len = orig_recip.len - 1;
 	while (!stralloc_catb(&bouncetext, ">:\n", 3))
 		nomem(argv0);
 	while (!stralloc_cats(&bouncetext, report))
@@ -1115,7 +1117,8 @@ injectbounce(unsigned long id)
 		qmail_put(&qqt, newfield_date.s, newfield_date.len);
 		if (orig_recip.len) {
 			qmail_put(&qqt, "X-Bounced-Address: ", 19);
-			qmail_put(&qqt, orig_recip.s, orig_recip.len);
+			qmail_put(&qqt, orig_recip.s, orig_recip_len);
+			qmail_put(&qqt, "\n", 1);
 		}
 		qmail_put(&qqt, "From: ", 6);
 		while (!quote(&quoted, &bouncefrom))
@@ -1185,11 +1188,11 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			while (!stralloc_0(&orig_recip))
 				nomem(argv0);
 			/*-
-			 * orig_recip is of the form orig_recipient:\nbounce_recipient
+			 * orig_recip is of the form orig_recipient:\nbounce_report
 			 * remove :\nbounce_report from orig_recip to get the original
 			 * recipient
 			 */
-			for (brep = orig_recip.s; *brep != ':' && brep < orig_recip.s + orig_recip.len; brep++);
+			for (brep = orig_recip.s, orig_recip_len = 0; *brep != ':' && brep < orig_recip.s + orig_recip.len; brep++, orig_recip_len++);
 			if (*brep == ':') {
 				*brep++ = 0;
 				for (; *brep && isspace(*brep); brep++);
@@ -2724,7 +2727,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	const char     *x = "$Id: qmail-send.c,v 1.119 2025-05-06 22:39:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-send.c,v 1.120 2025-08-07 08:49:18+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2734,6 +2737,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.120  2025-08-07 08:49:18+05:30  Cprogrammer
+ * fix X-Bounce-Address
+ *
  * Revision 1.119  2025-05-06 22:39:16+05:30  Cprogrammer
  * reset tv.tv_sec on EINVAL
  *
