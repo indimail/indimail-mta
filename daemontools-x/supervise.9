@@ -28,7 +28,7 @@ usually \fI/service\fR on most systems.
 
 \fBsupervise\fR then executes \fI./init\fR if it exists. In case ./init
 exits with non-zero status, it pauses for 60 seconds before restarting
-\fI./init\fR. The pause is requiree so that \fBsupervise\fR doesn't loop
+\fI./init\fR. The pause is required so that \fBsupervise\fR doesn't loop
 too quickly consuming high usage of the CPU. \fIdir\fR has to be relative
 to the current working directory and cannot start with the dot (\fB.\fR) or
 the slash (\fB/\fR) character. \fIparent_ident\fR is passed as a command
