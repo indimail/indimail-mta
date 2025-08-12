@@ -1,5 +1,8 @@
 /*
  * $Log: sorted.c,v $
+ * Revision 1.5  2025-08-12 22:06:57+05:30  Cprogrammer
+ * converted function prototype to ansic
+ *
  * Revision 1.4  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -56,7 +59,7 @@ int sorted_insert(sorted *sl, stralloc *sa)
 void
 getversion_sorted_c()
 {
-	const char     *x = "$Id: sorted.c,v 1.4 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sorted.c,v 1.5 2025-08-12 22:06:57+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
