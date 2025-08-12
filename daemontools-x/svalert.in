@@ -1,5 +1,5 @@
 #
-# $Id: svalert.in,v 1.1 2025-02-23 13:57:38+05:30 Cprogrammer Exp mbhangui $
+# $Id: svalert.in,v 1.2 2025-08-12 22:09:43+05:30 Cprogrammer Exp mbhangui $
 #
 
 log_syslog()
@@ -109,6 +109,9 @@ esac
 
 #
 # $Log: svalert.in,v $
+# Revision 1.2  2025-08-12 22:09:43+05:30  Cprogrammer
+# set probe server using PROB_SERVER env variable
+#
 # Revision 1.1  2025-02-23 13:57:38+05:30  Cprogrammer
 # Initial revision
 #
