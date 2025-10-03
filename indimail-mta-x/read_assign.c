@@ -1,5 +1,5 @@
 /*
- * $Id: read_assign.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: read_assign.c,v 1.4 2025-10-03 16:53:20+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <ctype.h>
@@ -32,7 +32,7 @@ char *
 read_assign(const char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 {
 	int             fd;
-	uint32_t        dlen, i;
+	uint32          dlen, i;
 	char           *s, *ptr, *cdbdir, *cdbkey, *tmpbuf;
 
 	if (!domain || !*domain)
@@ -77,13 +77,13 @@ read_assign(const char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 		for (ptr = tmpbuf; *ptr; ptr++);
 		ptr++;
 		if (uid) {
-			scan_uint(ptr, &i);
+			scan_uint(ptr, (unsigned int *) &i);
 			*uid = i;
 		}
 		for (; *ptr; ptr++);
 		ptr++;
 		if (gid) {
-			scan_uint(ptr, &i);
+			scan_uint(ptr, (unsigned int *) &i);
 			*gid = i;
 		}
 		for (; *ptr; ptr++);
@@ -110,7 +110,7 @@ read_assign(const char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 void
 getversion_read_assign_c()
 {
-	const char     *x = "$Id: read_assign.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: read_assign.c,v 1.4 2025-10-03 16:53:20+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -118,6 +118,12 @@ getversion_read_assign_c()
 
 /*
  * $Log: read_assign.c,v $
+ * Revision 1.4  2025-10-03 16:53:20+05:30  Cprogrammer
+ * fixed datatype passed to scan_uint()
+ *
+ * Revision 1.3  2025-10-03 16:39:29+05:30  Cprogrammer
+ * fixed datatype for dlen
+ *
  * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
