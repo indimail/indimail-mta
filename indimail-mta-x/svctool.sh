@@ -1,5 +1,5 @@
 #
-# $Id: svctool.sh,v 2.732 2024-11-05 22:31:45+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.sh,v 2.733 2025-10-03 15:19:12+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.sh,v 2.732 2024-11-05 22:31:45+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.sh,v 2.733 2025-10-03 15:19:12+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -9882,7 +9882,7 @@ do
 			EXPIRE_IN_SECS=`date -j -f "%b %d %T %Y %Z" "$TEMP_DATE" "+%s"`
 			;;
 			*)
-			EXPIRE_IN_SECS=`date +%s --date $TEMP_DATE 2>/dev/null`
+			EXPIRE_IN_SECS=`date +%s --date "$TEMP_DATE" 2>/dev/null`
 			;;
 		esac
 		if [ "`echo $EXPIRE_IN_SECS|grep -E '^[0-9]+$'`" != "" ]; then
