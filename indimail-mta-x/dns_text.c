@@ -1,5 +1,5 @@
 /*
- * $Id: dns_text.c,v 1.15 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dns_text.c,v 1.16 2025-10-03 15:39:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include <netdb.h>
 #include <sys/types.h>
@@ -88,7 +88,7 @@ static stralloc txt = { 0 };
 static stralloc result = { 0 };
 
 static unsigned short
-getshort(unsigned char *c)
+get_short(unsigned char *c)
 {
 	unsigned short  u;
 	u = c[0];
@@ -115,8 +115,8 @@ findtxt(int wanttype)
 	if ((i = responseend - responsepos) < 4 + 3 * 2)
 		return DNS_SOFT;
 
-	rrtype = getshort(responsepos);
-	rrdlen = getshort(responsepos + 8);
+	rrtype = get_short(responsepos);
+	rrdlen = get_short(responsepos + 8);
 	responsepos += 10;
 
 	if (rrtype == wanttype) {
@@ -193,13 +193,16 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	const char     *x = "$Id: dns_text.c,v 1.15 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dns_text.c,v 1.16 2025-10-03 15:39:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 // vim: shiftwidth=2:tabstop=4:softtabstop=4
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.16  2025-10-03 15:39:15+05:30  Cprogrammer
+ * renamed getshort to get_short to fix OSX compilation error
+ *
  * Revision 1.15  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

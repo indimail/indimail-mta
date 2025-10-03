@@ -1,5 +1,5 @@
 /*
- * $Id: surblfilter.c,v 1.21 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: surblfilter.c,v 1.22 2025-10-03 15:39:22+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -190,7 +190,7 @@ die_control()
 }
 
 static unsigned short
-getshort(unsigned char *cp)
+get_short(unsigned char *cp)
 {
 	return (cp[0] << 8) | cp[1];
 }
@@ -269,8 +269,8 @@ findtxt(int wanttype)
 	if (i < 4 + 3 * 2)
 		return DNS_SOFT;
 
-	rrtype = getshort(responsepos);
-	rrdlen = getshort(responsepos + 8);
+	rrtype = get_short(responsepos);
+	rrdlen = get_short(responsepos + 8);
 	responsepos += 10;
 
 	if (rrtype == wanttype) {
@@ -971,13 +971,16 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	const char     *x = "$Id: surblfilter.c,v 1.21 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: surblfilter.c,v 1.22 2025-10-03 15:39:22+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.22  2025-10-03 15:39:22+05:30  Cprogrammer
+ * renamed getshort to get_short to fix OSX compilation error
+ *
  * Revision 1.21  2025-01-22 00:30:34+05:30  Cprogrammer
  * Fixes for gcc14
  *

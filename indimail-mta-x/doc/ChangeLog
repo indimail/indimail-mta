@@ -30,6 +30,8 @@ Release 3.1-1.1 Start 26/12/2024 End XX/XX/XXXX
 - 03/10/2025
 15. svctool: fix TEMP_DATE variable
 16. debian/Makefile: added Debian 13
+17. surblfilter.c, dns.c, dns_text.c: renamed getshort to get_short to fix OSX
+    compilation error
 
 * Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <indimail-mta@indimail.org 3.0.9-1.1%{?dist}
 Release 3.0.9-1.1 Start 08/08/2024 End 24/12/2024

@@ -1,5 +1,5 @@
 /*
- * $Id: dns.c,v 1.42 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dns.c,v 1.43 2025-10-03 15:38:36+05:30 Cprogrammer Exp mbhangui $
  * RCS log at bottom
  */
 #include <netdb.h>
@@ -74,7 +74,7 @@ static stralloc tld = {0};
 #endif
 
 static unsigned short
-getshort(unsigned char *c)
+get_short(unsigned char *c)
 {
 	unsigned short  u;
 	u = c[0];
@@ -186,8 +186,8 @@ findname(int wanttype)
 	i = responseend - responsepos;
 	if (i < 4 + 3 * 2)
 		return DNS_SOFT;
-	rrtype = getshort(responsepos);
-	rrdlen = getshort(responsepos + 8);
+	rrtype = get_short(responsepos);
+	rrdlen = get_short(responsepos + 8);
 	responsepos += 10;
 	if (rrtype == wanttype) {
 		if (dn_expand(response.buf, responseend, responsepos, name, MAXDNAME) < 0)
@@ -217,8 +217,8 @@ findip(int wanttype)
 	i = responseend - responsepos;
 	if (i < 4 + 3 * 2)
 		return DNS_SOFT;
-	rrtype = getshort(responsepos);
-	rrdlen = getshort(responsepos + 8);
+	rrtype = get_short(responsepos);
+	rrdlen = get_short(responsepos + 8);
 	responsepos += 10;
 	if (rrtype == wanttype) {
 		if (rrdlen < 4)
@@ -253,8 +253,8 @@ findip6(int wanttype)
 	i = responseend - responsepos;
 	if (i < 4 + 3 * 2)
 		return DNS_SOFT;
-	rrtype = getshort(responsepos);
-	rrdlen = getshort(responsepos + 8);
+	rrtype = get_short(responsepos);
+	rrdlen = get_short(responsepos + 8);
 	responsepos += 10;
 	if (rrtype == wanttype) {
 		if (rrdlen < 16)
@@ -285,8 +285,8 @@ findmx(int wanttype)
 	responsepos += i;
 	if ((i = responseend - responsepos) < 4 + 3 * 2)
 		return DNS_SOFT;
-	rrtype = getshort(responsepos);
-	rrdlen = getshort(responsepos + 8);
+	rrtype = get_short(responsepos);
+	rrdlen = get_short(responsepos + 8);
 	responsepos += 10;
 	if (rrtype == wanttype) {
 		if (rrdlen < 3)
@@ -415,8 +415,8 @@ findtxt(int wanttype)
 	responsepos += i;
 	if ((i = responseend - responsepos) < 4 + 3 * 2)
 		return DNS_SOFT;
-	rrtype = getshort(responsepos);
-	rrdlen = getshort(responsepos + 8);
+	rrtype = get_short(responsepos);
+	rrdlen = get_short(responsepos + 8);
 	responsepos += 10;
 	if (rrtype == wanttype) {
 		unsigned short  txtpos;
@@ -887,8 +887,8 @@ findstring(int wanttype)
 	responsepos += i;
 	if ((i = responseend - responsepos) < 4 + 3 * 2)
 		return DNS_SOFT;
-	rrtype = getshort(responsepos);
-	rrdlen = getshort(responsepos + 8);
+	rrtype = get_short(responsepos);
+	rrdlen = get_short(responsepos + 8);
 	responsepos += 10;
 	if (rrtype == wanttype) {
 		if ((i = *responsepos) > MAXDNAME - 1)
@@ -995,8 +995,8 @@ findtlsa(int wanttype)
 	responsepos += i;
 	if ((i = responseend - responsepos) < 4 + 3 * 2)
 		return DNS_SOFT;
-	rrtype = getshort(responsepos);
-	rrdlen = getshort(responsepos + 8);
+	rrtype = get_short(responsepos);
+	rrdlen = get_short(responsepos + 8);
 	responsepos += 10;
 	if (rrtype == wanttype) {
 		if (rrdlen < 4)
@@ -1066,13 +1066,16 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	const char     *x = "$Id: dns.c,v 1.42 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dns.c,v 1.43 2025-10-03 15:38:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dns.c,v $
+ * Revision 1.43  2025-10-03 15:38:36+05:30  Cprogrammer
+ * renamed getshort to get_short to fix OSX compilation error
+ *
  * Revision 1.42  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *
