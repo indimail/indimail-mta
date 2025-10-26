@@ -1,5 +1,5 @@
 #
-# $Id: svctool.sh,v 2.733 2025-10-03 15:19:12+05:30 Cprogrammer Exp mbhangui $
+# $Id: svctool.sh,v 2.734 2025-10-26 10:05:59+05:30 Cprogrammer Exp mbhangui $
 #
 
 #
@@ -27,7 +27,7 @@ host=@HOST@
 shared_objects=0
 use_dlmopen=0
 skip_sendmail_check=0
-RCSID="# \$Id: svctool.sh,v 2.733 2025-10-03 15:19:12+05:30 Cprogrammer Exp mbhangui $"
+RCSID="# \$Id: svctool.sh,v 2.734 2025-10-26 10:05:59+05:30 Cprogrammer Exp mbhangui $"
 
 #
 # End of User Configuration
@@ -6109,7 +6109,7 @@ if [ $force -eq 1 -o ! -f $sysconfdir/logrotate.mysql ] ; then
 	echo "       $mysqladmin ping &>/dev/null"
 	echo "    then"
 	echo "      $mysqladmin --defaults-file=$sysconfdir/indimail.cnf \\"
-	echo "        -u admin -p$ADMIN_PASS flush-logs"
+	echo "        -u admin -p$ADMIN_PASS flush-logs &>/dev/null"
 	echo "    fi"
 	echo "  endscript"
 	echo "}"
