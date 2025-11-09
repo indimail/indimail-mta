@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.39 2025-01-21 23:35:42+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.40 2025-11-09 08:19:46+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -94,7 +94,7 @@ kill_svc(int what)
 	char            strnum[FMT_ULONG];
 
 	for (i = 0; i < numx; ++i) {
-		if (!what) {
+		if (!what) { /*- shutdown main processes */
 			if (x[i].pid != -1 && x[i].pid && !kill(x[i].pid, 0)) {
 				if (verbose) {
 					strnum[fmt_int(strnum, x[i].pid)] = 0;
@@ -105,7 +105,7 @@ kill_svc(int what)
 					strerr_warn6(WARN, "pid ", pidstr, " kill -SIGTERM ", strnum, ": ", &strerr_sys);
 				}
 			}
-		} else {
+		} else { /*- shutdown log processes */
 			if (x[i].pidlog && x[i].pidlog != svscan_logpid)
 				close(x[i].pi[1]);
 			if (x[i].pidlog && x[i].pidlog != svscan_logpid && !kill(x[i].pidlog, 0)) {
@@ -131,7 +131,7 @@ terminate(time_t starttime, unsigned int w1, unsigned int w2, int *did_kill)
 		*did_kill = 1;
 		if (verbose)
 			strerr_warn4(INFO, "pid: ", pidstr, ": terminating svc sessions with TERM...", 0);
-		kill_svc(0);
+		kill_svc(0); /*- shutdown main processes */
 		return 1;
 	} else
 	if (*did_kill == 1) {
@@ -140,7 +140,7 @@ terminate(time_t starttime, unsigned int w1, unsigned int w2, int *did_kill)
 			*did_kill = 2;
 			if (verbose)
 				strerr_warn4(INFO, "pid: ", pidstr, ": terminating log sessions with TERM...", 0);
-			kill_svc(1);
+			kill_svc(1); /*- shutdown log processes */
 			return 2;
 		}
 	} else
@@ -172,9 +172,9 @@ init_cmd(const char *cmmd, int shutdown)
 	cpath = shutdown ? SVSCANLOG"/shutdown" : cmmd && *cmmd ? cmmd : SVSCANLOG"/run";
 	if (access(cpath, X_OK)) {
 		if (shutdown && terminate_session) {
-			kill_svc(0);
+			kill_svc(0); /*- kill main processes */
 			usleep(500);
-			kill_svc(1);
+			kill_svc(1); /*- kill log processes */
 		}
 		return;
 	}
@@ -222,9 +222,9 @@ init_cmd(const char *cmmd, int shutdown)
 	if (!do_wait)
 		return;
 	if (shutdown && svpid > 1 && !do_wait && terminate_session) {
-		kill_svc(0);
+		kill_svc(0); /*- kill main processes */
 		usleep(500);
-		kill_svc(1);
+		kill_svc(1); /*- kill log processes */
 		return;
 	}
 
@@ -1023,13 +1023,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.39 2025-01-21 23:35:42+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.40 2025-11-09 08:19:46+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.40  2025-11-09 08:19:46+05:30  Cprogrammer
+ * added comments
+ *
  * Revision 1.39  2025-01-21 23:35:42+05:30  Cprogrammer
  * Fixes for gcc14
  *
