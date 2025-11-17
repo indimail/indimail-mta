@@ -20,6 +20,8 @@ variables
 11. sorted.c: Use modern prototype for sorted_insert
 - 12/08/2025
 12. svalert.in: set probe server using PROBE_SERVER env variable
+- 17/11/2025
+13. updated supervise, svscan man pages
 
 * Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.6-1.1%{?dist}
 Release 1.1.6-1.1 Start 13/08/2024 End 24/12/2024

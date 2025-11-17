@@ -208,6 +208,9 @@ When called in \fIshutdown\fR or as \fBshutdown\fR, \fBsvalert\fR is passed
 two arguments. \fIdir\fR is passed as the first argument and the pid of the
 process that exited is passed as the second argument.
 
+\fBsupervise\fR sets \fBPPID\fR environment variable for all it's childern,
+as the process id of the supervise process.
+
 .SH EXIT VALUE
 \fBsupervise\fR is designed to run forever, however it can exit 100 during
 startup if it fails to open \fIdir/supervise/lock\fR, or exit 111 if it

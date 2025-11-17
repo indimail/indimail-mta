@@ -53,8 +53,9 @@ $ ps -ef | grep -E "svscan|supervise|COMMAND" \
 
 For every \fBsupervise\fR log process it runs, \fBsvscan\fR also sets
 \fBSV_PWD\fR=\fBs\fR as an environment variable. \fBsvscan\fR also sets
-\fBPPID\fR environment variable as the process id of the parent for
-supervise proceses and any initialization command it runs.
+\fBPPID\fR environment variable as the process id of the \fBsvscan\fR
+process, for supervise proceses and any initialization command \fBsvscan\fR
+runs.
 
 \fBsvscan\fR sets environment variable \fBSCANDIR\fR=\fIscandir\fR on
 startup. If \fIscandir\fR argument to \fBsvscan\fR is omitted than it uses
