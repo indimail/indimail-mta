@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.40 2025-11-09 08:19:46+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.41 2025-12-11 18:35:52+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -157,7 +157,7 @@ terminate(time_t starttime, unsigned int w1, unsigned int w2, int *did_kill)
 }
 
 void
-init_cmd(const char *cmmd, int shutdown)
+init_cmd(const char *cmmd, int die)
 {
 	int             child, r, wstat, did_kill = 0, do_wait, i, j;
 	unsigned int    w1, w2;
@@ -165,13 +165,13 @@ init_cmd(const char *cmmd, int shutdown)
 	char           *p, *terminate_session, *args[4];
 	time_t          starttime = 0;
 
-	if (shutdown)
+	if (die)
 		sig_block(sig_child);
 	do_wait = env_get("WAIT_INITCMD") ? 1 : 0;
-	terminate_session = shutdown ? env_get("TERMINATE_SESSION") : 0;
-	cpath = shutdown ? SVSCANLOG"/shutdown" : cmmd && *cmmd ? cmmd : SVSCANLOG"/run";
+	terminate_session = die ? env_get("TERMINATE_SESSION") : 0;
+	cpath = die ? SVSCANLOG"/shutdown" : cmmd && *cmmd ? cmmd : SVSCANLOG"/run";
 	if (access(cpath, X_OK)) {
-		if (shutdown && terminate_session) {
+		if (die && terminate_session) {
 			kill_svc(0); /*- kill main processes */
 			usleep(500);
 			kill_svc(1); /*- kill log processes */
@@ -184,7 +184,7 @@ init_cmd(const char *cmmd, int shutdown)
 		strerr_die4sys(111, FATAL, "unable to fork for init command ", cpath, ": ");
 		return;
 	case 0:
-		if (shutdown)
+		if (die)
 			sig_block(sig_term);
 		args[0] = (char *) "/bin/sh";
 		args[1] = (char *) "-c";
@@ -196,7 +196,7 @@ init_cmd(const char *cmmd, int shutdown)
 		break;
 	}
 	starttime = time((time_t *) NULL);
-	if (shutdown) {
+	if (die) {
 		if (svpid == 1 || terminate_session) {
 			if (!(p = env_get("KILLWAIT"))) {
 				if (!(p = env_get("KILLWAIT1"))) {
@@ -221,7 +221,7 @@ init_cmd(const char *cmmd, int shutdown)
 	} else
 	if (!do_wait)
 		return;
-	if (shutdown && svpid > 1 && !do_wait && terminate_session) {
+	if (die && svpid > 1 && !do_wait && terminate_session) {
 		kill_svc(0); /*- kill main processes */
 		usleep(500);
 		kill_svc(1); /*- kill log processes */
@@ -229,7 +229,7 @@ init_cmd(const char *cmmd, int shutdown)
 	}
 
 	for (i = j = 0;;) {
-		r = (shutdown && (svpid == 1 || terminate_session)) ? wait_nohang(&wstat) : wait_pid(&wstat, child);
+		r = (die && (svpid == 1 || terminate_session)) ? wait_nohang(&wstat) : wait_pid(&wstat, child);
 		if (r == -1) {
 			if (errno == error_intr)
 				continue; /*- impossible for wait_nohang */
@@ -239,11 +239,11 @@ init_cmd(const char *cmmd, int shutdown)
 			return;
 		}
 		if (r) {
-			if (shutdown && (svpid == 1 || terminate_session))
+			if (die && (svpid == 1 || terminate_session))
 				continue;
 			break;
 		}
-		if (shutdown && (svpid == 1 || terminate_session) && i != 3) {
+		if (die && (svpid == 1 || terminate_session) && i != 3) {
 			if (!(i = terminate(starttime, w1, w2, &did_kill))) {
 				if (verbose && !j++)
 					strerr_warn4(INFO, "pid: ", pidstr, ": waiting for processes to shutdown...", 0);
@@ -703,7 +703,7 @@ sigterm(int i)
 	shutdown_in_progress = 1;
 	sig_ignore(sig_term);
 	unlink(pidfile);
-	strerr_warn4(INFO, "pid: ", pidstr, ": shutdown...", 0);
+	strerr_warn4(INFO, "pid: ", pidstr, ": shutdown in progress...", 0);
 	init_cmd(0, 1); /*- run .svscan/shutdown */
 	if (svscan_logpid) {
 		strnum[fmt_ulong(strnum, svscan_logpid)] = 0;
@@ -1023,13 +1023,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.40 2025-11-09 08:19:46+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.41 2025-12-11 18:35:52+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.41  2025-12-11 18:35:52+05:30  Cprogrammer
+ * delink use of wait status as a flag
+ *
  * Revision 1.40  2025-11-09 08:19:46+05:30  Cprogrammer
  * added comments
  *

@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.51 2025-01-21 23:35:31+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.52 2025-12-11 17:46:41+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -37,20 +37,11 @@
 
 static char    *dir;
 static int      selfpipe[2];
-static int      fdlock = -1;
-static int      fdcontrolwrite = -1;
-static int      fdcontrol = -1;
-static int      fdstatus = -1;
-static int      fdok = -1;
-static int      fdup = -1;
-static int      fddn = -1;
-static int      flagexit = 0;
-static int      flagwantxx = 1;
-static int      flagwantup = 1;
+static int      fdlock = -1, fdcontrolwrite = -1, fdcontrol = -1, fdstatus = -1, fddir = -1;
+static int      fdok = -1, fdup = -1, fddn = -1;
+static int      flagshutdown = 0, flagexit = 0, flagwantxx = 1, flagwantup = 1;
+static int      logger = 0, verbose = 0, silent = 0;
 static int      flagpaused;		/*- defined if (pid) */
-static int      fddir = -1;
-static int      logger = 0;
-static int      verbose = 0, silent = 0;
 static char     flagfailed;
 static unsigned long scan_interval = 60;
 static char     is_subreaper = 0, do_setpgid = 0;
@@ -172,7 +163,7 @@ trigger(int i)
 }
 
 void
-tryaction(const char **action, pid_t cpid, int wstat)
+tryaction(const char **action, pid_t cpid, int wstat, int waitflag)
 {
 	pid_t           f;
 	int             t, i;
@@ -196,7 +187,7 @@ tryaction(const char **action, pid_t cpid, int wstat)
 		strnum1[fmt_ulong(strnum1, cpid)] = 0;
 		action[1] = dir;
 		action[2] = strnum1;
-		if (wstat) {
+		if (waitflag) {
 			if (WIFSTOPPED(wstat) || WIFSIGNALED(wstat)) {
 				strnum2[fmt_uint(strnum2, WIFSTOPPED(wstat) ? WSTOPSIG(wstat) : WTERMSIG(wstat))] = 0;
 				action[3] = strnum2;
@@ -222,7 +213,8 @@ tryaction(const char **action, pid_t cpid, int wstat)
 		execve(*action, (char **) action, environ);
 		strerr_die4sys(111, fatal.s, "unable to exec ", *action, ": ");
 	default:
-		wait_pid(&t, f);
+		if (waitflag != -1) /*- waitflag = -1 passed on SIGTERM */
+			wait_pid(&t, f);
 	}
 }
 
@@ -239,11 +231,12 @@ sigterm(int i)
 			strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 		if (!access(*shutdown, F_OK))
-			tryaction(shutdown, childpid, 0); /*- run the shutdown command */
+			tryaction(shutdown, childpid, -1, -1); /*- run the shutdown command */
 #ifdef USE_RUNFS
 		if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 			strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
+		flagshutdown = 1;
 		flagexit = 1;
 		flagwantxx = 1;
 		flagwantup = 0;
@@ -471,6 +464,17 @@ trystart(const char *how)
 	if (use_runfs && fchdir(fddir) == -1)
 		strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
+	/*-
+	 * run-type
+	 * 0 - start ./run
+	 * 1 - start ./run with environment in ./variables
+	 *     without clearing existing env variables. This
+	 *     requires ./variables to have execute permissions for
+	 *     others
+	 * 2 - start ./run with environment in ./variables
+	 *     after clearing existing env variables. This requires
+	 *     no execute permission on ./variables for others
+	 */
 	if (run_type == -1) {
 		if (lstat("./variables", &st)) {
 			if (errno != error_noent)
@@ -478,17 +482,6 @@ trystart(const char *how)
 			run_type = 0;
 		} else
 		if ((st.st_mode & S_IFMT) == S_IFDIR) {
-			/*-
-			 * run-type
-			 * 0 - start ./run
-			 * 1 - start ./run with environment in ./variables
-			 *     without clearing existing env variables. This
-			 *     requires ./variables to have execute permissions for
-			 *     others
-			 * 2 - start ./run with environment in ./variables
-			 *     after clearing existing env variables. This requires
-			 *     no execute permission on ./variables for others
-			 */
 			if (st.st_mode & S_IXOTH)
 				run_type = 1;
 			else
@@ -642,6 +635,8 @@ doit()
 		 */
 		iopause(x, 2, &deadline, &stamp);
 
+		if (flagshutdown)
+			return;
 		/*-
 		 * block sigchld till we handle
 		 * current death of a child without
@@ -721,7 +716,7 @@ doit()
 						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 					if (!access(*alert, F_OK))
-						tryaction(alert, r, wstat);
+						tryaction(alert, r, wstat, 1);
 #ifdef USE_RUNFS
 					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
@@ -750,7 +745,7 @@ doit()
 						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
-						tryaction(shutdown, childpid, 0); /*- run the shutdown command */
+						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
 #ifdef USE_RUNFS
 					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
@@ -784,7 +779,7 @@ doit()
 						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 					if (!access(*shutdown, F_OK))
-						tryaction(shutdown, childpid, 0); /*- run the shutdown command */
+						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
 					siglist[0] = SIGTERM;
 					siglist[1] = SIGCONT;
 					signame[0] = "SIGTERM";
@@ -1237,13 +1232,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.51 2025-01-21 23:35:31+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.52 2025-12-11 17:46:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.52  2025-12-11 17:46:41+05:30  Cprogrammer
+ * better shutdown handling
+ *
  * Revision 1.51  2025-01-21 23:35:31+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -22,6 +22,9 @@ variables
 12. svalert.in: set probe server using PROBE_SERVER env variable
 - 17/11/2025
 13. updated supervise, svscan man pages
+- 11/12/2025
+14. svscan.c: delink use of wait status as a flag
+15. supervise.c: better shutdown handling
 
 * Tue Dec 24 2024 20:28:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.6-1.1%{?dist}
 Release 1.1.6-1.1 Start 13/08/2024 End 24/12/2024
