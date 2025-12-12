@@ -366,12 +366,14 @@ do_wait()
 
 	/*-
 	 * supervise/up is a FIFO
+	 * This fifo is open when service is up
 	 * if the service service_name is running
 	 *   opening supervise/up with O_WRONLY should return
 	 * if the service service_name is down
 	 *   opening supervise/up with O_WRONLY should block
 	 *
 	 * supervise/dn is a FIFO
+	 * This fifo is opened when service is down
 	 * if the service service_name is running
 	 *   opening supervise/dn with O_WRONLY should block
 	 * if the service service_name is down
