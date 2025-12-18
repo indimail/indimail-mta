@@ -1,5 +1,5 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> @version@-@release@%{?dist}
-Release @version@-@release@ Start 05/09/2024 End XX/XX/XXXX
+Release @version@-@release@ Start 05/09/2024 End 18/12/2025
 - 05/09/2024
 08. tcpclient.c: added starttls capability for imap
 09. dotls.c: added starttls handler for imap

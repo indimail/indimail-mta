@@ -1,4 +1,5 @@
-* XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@version@%{?dist}
+* XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
+Release @version@-@release@ Start 27/12/2024 End 18/12/2025
 - 27/12/2024
 01. envdir.c, envuidgid.c: Ignore return value of pathexec()
 02. setuidgid.c: Set HOME, USER, LOGNAME env variable
