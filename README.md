@@ -741,7 +741,7 @@ Currently, the list of supported binary distributions for indimail-mta are
     * Arch Linux
 
     * SUSE
-          o openSUSE_Leap_15.4
+          o openSUSE_Leap_16.0
           o openSUSE_Leap_15.5
           o openSUSE_Leap_15.6
           o openSUSE_Tumbleweed
@@ -758,10 +758,11 @@ Currently, the list of supported binary distributions for indimail-mta are
           o SUSE Linux Enterprise 15 SP4
           o SUSE Linux Enterprise 15 SP5
           o SUSE Linux Enterprise 15 SP6
+          o SUSE Linux Enterprise 15 SP7
 
     * Red Hat
-          o Fedora 39
-          o Fedora 40
+          o Fedora 43
+          o Fedora 42
           o Fedora Rawhide
           o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 8 +
@@ -783,12 +784,13 @@ Currently, the list of supported binary distributions for indimail-mta are
           o AmazonLinux 2023
 
           +: Some of the above Red Hat flavoured distributions are available
-             only on copr (RHEL 8, RHEL9, EPEL9, EPEL9)
+             only on copr (RHEL 8, RHEL9, EPEL9, EPEL9, CentOS 10 Stream)
 
     * Debian
           o Debian 10.0
           o Debian 11.0
           o Debian 12.0
+          o Debian 13.0
 
     * Ubuntu
           o Ubuntu 18.04
@@ -796,6 +798,7 @@ Currently, the list of supported binary distributions for indimail-mta are
           o Ubuntu 22.04
           o Ubuntu 23.04
           o Ubuntu 24.04
+          o Ubuntu 25.04
 
     * Mageia
           o Mageia 8
