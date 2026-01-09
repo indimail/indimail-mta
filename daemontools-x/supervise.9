@@ -58,12 +58,12 @@ Setting the process Group ID is required to monitor \fI./run\fR reliably
 when \fI./run\fR has a command which forks in the background. It is also
 required in such cases to make \fBsvc\fR(8) command operate and control
 \fBsupervise\fR reliably for such forked daemon/commands in \fI./run\fR.
-\fI./run\fR is passed two command line arguments with \fIdir\fR as argv[1]
-and \fIhow\fR as argv[2] (\fIhow\fR is explained later in this document).
 You can also prefix such commands in \fI./run\fR with \fBfghack\fR(1)
 instead of setting the sticky bit on \fI./run\fR. \fBsupervise\fR uses the
 self pipe trick to handle all SIGCHLD events reliably. This requires the
-use of two file descriptors for the selfpipe.
+use of two file descriptors for the selfpipe. \fI./run\fR is passed two
+command line arguments with \fIdir\fR as argv[1] and \fIhow\fR as argv[2]
+(\fIhow\fR is explained later in this document).
 
 If the directory \fI./variables\fR exists, \fBsupervise\fR sets
 environment variables before calling \fI./run\fR using \fIenvdir\fR(8).
@@ -229,9 +229,12 @@ ID) for all it's children.
 exit 100 during startup, if it fails to open \fIdir/supervise/lock\fR, or
 exit 111, if it a encounters a system error.
 
-.SH NOTE
-The file \fIdir/supervise/lock\fR is opened in exclusive mode using
-\fBlock(fd, LOCK_EX | LOCK_NB)\fR or \fBlockf(fd, F_TLOCK, 0)\fR.
+.SH NOTES
+.EX
+1. The file \fIdir/supervise/lock\fR is opened in exclusive mode using
+   \fBlock(fd, LOCK_EX | LOCK_NB)\fR or \fBlockf(fd, F_TLOCK, 0)\fR.
+2. The Self Pipe Trick - https://cr.yp.to/docs/selfpipe.html
+.EE
 
 .SH SEE ALSO
 envdir(8),
