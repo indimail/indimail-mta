@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.52 2025-12-11 17:46:41+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.53 2026-01-09 18:13:47+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -156,7 +156,7 @@ do_kill(int prgrp, int *siglist, const char **signame)
 }
 
 void
-trigger(int i)
+trigger(int i) /*- argument needed to prevent compiler warning for use as a signal handler */
 {
 	if (write(selfpipe[1], "", 1) == -1)
 		;
@@ -215,7 +215,7 @@ tryaction(const char **action, pid_t cpid, int wstat, int waitflag)
 	default:
 		if (waitflag != -1) /*- waitflag = -1 passed on SIGTERM */
 			wait_pid(&t, f);
-	}
+	} /* switch (f = fork()) */
 }
 
 static void
@@ -396,7 +396,7 @@ do_wait()
 			close(fd_depend);
 			break;
 		}
-	}
+	} /* for (i = 0;;) */
 	t2 = time(0);
 	if (!silent && i) {
 		strnum[fmt_int(strnum, t2 - t1)] = 0;
@@ -539,7 +539,8 @@ trystart(const char *how)
 			strerr_die4sys(111, fatal.s, "unable to start ", *envdir2, ": ");
 			break;
 		}
-	}
+		break;
+	} /* switch (f = fork()) */
 	grandchild = 0;
 	flagpaused = 0;
 	if (verbose) {
@@ -767,7 +768,7 @@ doit()
 					}
 					c++;
 					usleep(100);
-				}
+				} /* while (c < 10) */
 				announce(0);
 				if (!t)
 					trystart("manual restart"); /* normal startup */
@@ -942,7 +943,7 @@ cleanup(const char *d)
 			if (rmdir(*p))
 				strerr_warn6(warn.s, "unable to remove dir ", d, "/", *p, ": ", &strerr_sys);
 		}
-	}
+	} /* for (p = sv_dirs; *p; p++) */
 }
 
 int
@@ -1060,7 +1061,6 @@ do_init()
 	case -1:
 		if (!silent)
 			strerr_warn4(warn.s, "unable to fork to run ", *init, ", sleeping 60 seconds: ", &strerr_sys);
-		deepsleep(60);
 		trigger(0);
 		flagfailed = 1;
 		return -1;
@@ -1069,7 +1069,7 @@ do_init()
 		sig_unblock(sig_child);
 		execve(*init, init, environ);
 		strerr_die4sys(111, fatal.s, "unable to start ", *init, ": ");
-	}
+	} /* switch (f = fork()) */
 	if (wait_pid(&t, f) == -1) {
 		if (!silent)
 			strerr_warn4(warn.s, "wait failed ", dir, "/init: ", &strerr_sys);
@@ -1222,7 +1222,7 @@ main(int argc, char **argv)
 				break;
 		} else
 			break;
-	}
+	} /* while (1) */
 
 	if (!flagwantxx || flagwantup)
 		trystart("auto startup"); /*- normal startup */
@@ -1234,13 +1234,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.52 2025-12-11 17:46:41+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.53 2026-01-09 18:13:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.53  2026-01-09 18:13:47+05:30  Cprogrammer
+ * removed extra sleep in do_init()
+ *
  * Revision 1.52  2025-12-11 17:46:41+05:30  Cprogrammer
  * better shutdown handling
  *

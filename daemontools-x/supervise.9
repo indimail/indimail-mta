@@ -27,13 +27,14 @@ named pipes. The status information can be read by \fBsvstat\fR(8). If
 \fIorig\fR is the directory in which \fIdir\fR is present. \fIorig\fR is
 usually \fI/service\fR on most systems. The use of \fI/run\fR tmpfs
 filesystem allows \fBsupervise\fR to be used on systems where the root
-filesystem is read-only.
+filesystem is read-only. So, \fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR is
+equivalent to \fIdir/supervise\fR when \fBrun\fR tmpfs filesystem.
 
 \fBsupervise\fR then executes \fI./init\fR if it exists. In case
 \fI./init\fR exits with non-zero status, it pauses for 60 seconds before
 restarting \fI./init\fR. The pause is required so that \fBsupervise\fR
-doesn't loop too quickly consuming high usage of the CPU. \fIdir\fR has to
-be relative to the current working directory and cannot start with the dot
+doesn't loop too quickly causing high CPU usage. \fIdir\fR has to be
+relative to the current working directory and cannot start with the dot
 (\fB.\fR) or the slash (\fB/\fR) character. \fIparent_ident\fR is passed as
 a command line argument by \fBsvscan\fR(8) when starting supervise log
 process when \fIdir/log\fR exists. This is useful when listing supervised
@@ -58,23 +59,23 @@ when \fI./run\fR has a command which forks in the background. It is also
 required in such cases to make \fBsvc\fR(8) command operate and control
 \fBsupervise\fR reliably for such forked daemon/commands in \fI./run\fR.
 \fI./run\fR is passed two command line arguments with \fIdir\fR as argv[1]
-and \fIhow\fR as argv[2]. You can also prefix such commands in \fI./run\fR
-with \fBfghack\fR(1) instead of setting the sticky bit on \fI./run\fR.
-\fBsupervise\fR uses the self pipe trick to handle all SIGCHLD events
-reliably. This requires the use of two file descriptors for the selfpipe.
+and \fIhow\fR as argv[2] (\fIhow\fR is explained later in this document).
+You can also prefix such commands in \fI./run\fR with \fBfghack\fR(1)
+instead of setting the sticky bit on \fI./run\fR. \fBsupervise\fR uses the
+self pipe trick to handle all SIGCHLD events reliably. This requires the
+use of two file descriptors for the selfpipe.
 
-If the directory \fI./variables\fR exists, \fBsupervise\fR can set
-environment variables for \fI./run\fR using \fIenvdir\fR(8). Files in
-\fI./variables\fR directory must be compatible as environment variables for
+If the directory \fI./variables\fR exists, \fBsupervise\fR sets
+environment variables before calling \fI./run\fR using \fIenvdir\fR(8).
+Files in \fI./variables\fR directory must be compatible for
 \fBenvdir\fR(8). If the directory \fI./variables\fR doesn't have execute
 permissions for \fBothers\fR group, all existing environment variables will
 be cleared before setting environment variables for \fI./run\fR.
 
-If the file \fIdir\fR/down exists, \fBsupervise\fR(8) does not start
-\fI./run\fR immediately. You can use \fBsvc\fR(8) to start \fI./run\fR or
-to give other commands to \fBsupervise\fR(8). \fBsupervise\fR uses
-\fI/run/svscan\fR/\fIdir\fR/\fIsupervise/control\fR fifo to read these
-commands.
+\fBsupervise\fR uses \fI/run/svscan\fR/\fIdir\fR/\fIsupervise/control\fR
+fifo to read commands from \fBsvc\fR(8). You can use \fBsvc\fR(8) give
+commands to \fBsupervise\fR(8). You can give commands to \fBsupervise\fR
+even if the file \fIdir\fR/down exists.
 
 On receipt of \fBSIGTERM\fR, \fBsupervise\fR sends \fBSIGTERM\fR followed
 by \fBSIGCONT\fR to its child. If running in subreaper mode or when
@@ -82,9 +83,9 @@ by \fBSIGCONT\fR to its child. If running in subreaper mode or when
 signals, else \fBkill\fR(2) is used to send signals.
 
 if the file \fIdir\fR/shutdown exists \fBsupervise\fR(8) executes
-\fIshutdown\fR when asked to exit. \fIdir\fR is passed as the first
-argument and the pid of the process that exited is passed as the second
-argument to \fIshutdown\fR.
+\fIshutdown\fR when asked to exit or on receipt of \fBSIGTERM\fR. \fIdir\fR
+is passed as the first argument and the pid of the process that exited is
+passed as the second argument to \fIshutdown\fR.
 
 if the file \fIdir\fR/alert exists \fBsupervise\fR(8) executes \fIalert\fR
 whenever \fI./run\fR exits. \fIdir\fR is passed as the first argument, the
@@ -104,9 +105,10 @@ successfully running. You can use \fBsvscan\fR(8) to reliably start a
 collection of \fBsupervise\fR(8) processes. \fBsvscan\fR mirrors the
 service directory in \fI/run\fR or \fI/var/run\fR directory (whichever is
 found first). So \fI/run/svscan\fR/\fIdir\fR will be analogous to
-/service/\fIdir\fR. When started by \fBsvscan\fR, error messages printed by
+/service/\fIdir\fR. If started by \fBsvscan\fR, error messages printed by
 \fBsupervise\fR(8) will go the standard error output of \fBsvscan\fR(8)
-process.
+process. In such a case it will be the log file
+\fI/var/log/svc/svscan/current\fR.
 
 \fBsupervise\fR(8) can wait for another service by having a file named
 \fIdir\fR/\fIwait\fR. This file has two lines. The first line is time
@@ -123,7 +125,7 @@ just after it executes \fI./run\fR. Hence, if service \fIw\fR is up, write
 on \fI/run/svscan\fR/\fIw\fR/\fIsupervise\fR/\fIup\fR returns immediately.
 If service \fIw\fR is down, the write will block until \fIw\fR is up and
 running. If service \fIw\fR doesn't have \fBsupervise\fR running,
-\fBsupervise\fR will wait for 60 seconds before opening the file
+\fBsupervise\fR will wait for 60 seconds before attempting to open the file
 \fIw\fR/\fIsupervise\fR/\fIup\fR again in read mode. The default value of
 60 seconds gets overriden by the \fBSCANINTERVAL\fR environment variable
 used by \fBsvscan\fR(8). If service \fIw\fR doesn't exist,
@@ -192,9 +194,9 @@ link those scripts to \fI@libexecdir@/svalert\fR.
 
 where \fIdir\fR is your service directory.
 
-When called in \fIrun\fR, \fBsvalert\fR is passed two command line
-arguments with \fIdir\fR as argv[1] and \fIhow\fR as argv[2]. The value of
-\fIhow\fR is as below in the table
+When called in \fIrun\fR invoked with $@ as the argument, \fBsvalert\fR is
+passed two command line arguments with \fIdir\fR as argv[1] and \fIhow\fR
+as argv[2]. The value of \fIhow\fR is as below in the table
 
 .TS
 l l.
@@ -214,17 +216,22 @@ exit value or signal (if killed by signal) is passed as the third argument.
 The fourth argument is either of the strings \fIexited\fR, \fIstopped\fR or
 \fIsignalled\fR.
 
-When called in \fIshutdown\fR or as \fBshutdown\fR, \fBsvalert\fR is passed
-two arguments. \fIdir\fR is passed as the first argument and the pid of the
-process that exited is passed as the second argument.
+When called in \fIshutdown\fR or as \fBshutdown\fR with \fB$@\fR as the
+argmument, \fBsvalert\fR is passed two arguments. \fIdir\fR is passed as
+the first argument and the pid of the process that exited is passed as the
+second argument.
 
-\fBsupervise\fR sets \fBPPID\fR environment variable for all it's childern,
-as the process id of the supervise process.
+\fBsupervise\fR sets \fBPPID\fR environment variable as its PID (process
+ID) for all it's children.
 
 .SH EXIT VALUE
-\fBsupervise\fR is designed to run forever, however it can exit 100 during
-startup if it fails to open \fIdir/supervise/lock\fR, or exit 111 if it
-encounters system errors.
+\fBsupervise\fR is designed to run forever after startup. However, it will
+exit 100 during startup, if it fails to open \fIdir/supervise/lock\fR, or
+exit 111, if it a encounters a system error.
+
+.SH NOTE
+The file \fIdir/supervise/lock\fR is opened in exclusive mode using
+\fBlock(fd, LOCK_EX | LOCK_NB)\fR or \fBlockf(fd, F_TLOCK, 0)\fR.
 
 .SH SEE ALSO
 envdir(8),
@@ -248,3 +255,5 @@ svscanboot(8),
 svstat(8),
 tai64n(8),
 tai64nlocal(8)
+
+http://cr.yp.to/daemontools.html

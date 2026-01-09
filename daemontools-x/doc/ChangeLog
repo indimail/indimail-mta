@@ -1,5 +1,11 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 @email@ @version@-@release@%{?dist}
-Release @version@-@release@ Start 27/12/2024 End 18/12/2025
+Release @version@-@release@ Start 08/01/2026 End --/--/----
+- 08/01/2026
+01. supervise.c: Removed extra sleep in do_init
+02. svps.in: use /proc/pid/cwd to get service directory.
+
+* Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
+Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025
 - 27/12/2024
 01. envdir.c, envuidgid.c: Ignore return value of pathexec()
 02. setuidgid.c: Set HOME, USER, LOGNAME env variable

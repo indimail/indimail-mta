@@ -4,7 +4,7 @@
 svc \- controls services monitored by \fBsupervise\fR(8).
 
 .SH SYNOPSIS
-\fBsvc\fR [ \fB\-udopchaitkx\fR ] \fIservices\fR
+\fBsvc\fR [ \fB\-udropchaitqUkGwWTx12\fR ] \fIservices\fR
 
 .SH DESCRIPTION
 \fIservices\fR consists of any number of arguments, each argument naming a
@@ -86,8 +86,8 @@ Wait. \fBsvc\fR(8) will wait for \fIservice\fR to be up.
 executing \fIservice\fR/\fIrun\fR. \fBsvc\fR opens this named pipe in
 O_WRONLY mode in blocking mode, thus making \fBsvc\fR wait till the named
 pipe is opened by \fBsupervise\fR. This option can be used by any program
-to wait for a supervised service. This can also be used by \fBsupervise\fR
-to setup inter-dependencies between services.
+to wait for a supervised service to be up. This can also be used by
+\fBsupervise\fR to setup inter-dependencies between services.
 
 .TP
 .B \-W
@@ -97,12 +97,13 @@ sending TERM folowed by CONT signal to \fIservice\fR, when svc -d option is
 used. \fBsvc\fR opens this named pipe in O_WRONLY mode in blocking mode,
 thus making \fBsvc\fR wait till the named pipe is opened by
 \fBsupervise\fR. This option can be used by any program to wait for a
-supervised service.
+supervised service to go down.
 
 .TP
 .B \-T  \fItimeout
 Use \fItimeout\fR as timeout when waiting for service to be up or down (-w
-or -W options)
+or -W options). If \fItimeout\fR is not specfied, \fBsvc\fR will wait
+indefinitely.
 
 .TP
 .B \-x
@@ -114,7 +115,8 @@ you use this option on a stable system, you're doing something wrong;
 \fBsvc\fR returns 0 if all operations succeeded, 1 if it was not able to
 open \fIservice\fR/\fIsupervise\fR/\fIcontrol\fR, 2 if \fBsupervise\fR for
 service \fIservice\fR is not running and 3 for timeout. The return value
-cannot be used reliably when \fBsvc\fR is passed multiple arguments.
+cannot be used reliably when \fBsvc\fR is passed multiple directories as
+argument for multiple services.
 
 .SH SEE ALSO
 supervise(8),
@@ -136,3 +138,5 @@ envuidgid(8),
 envdir(8),
 softlimit(8),
 setlock(8)
+
+http://cr.yp.to/daemontools.html

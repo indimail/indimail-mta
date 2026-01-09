@@ -5,11 +5,12 @@ svps \- prints the status of all services started by \fBsvscan\fR
 
 .SH SYNOPSIS
 .B svps
-[--\fIall\fR | -a] [--\fImain\fR | -m] [--\fIlogs\fR | -l]
-  [--\fIhup\fR | -h | ] [--\fIterm\fR | -t | ] [--no-pager | -n]
+[--\fBall\fR | -a] [--\fBmain\fR | -m] [--\fBlogs\fR | -l]
+  [--\fBhup\fR | -h] [--\fBterm\fR | -t] [-\fB-no-pager\fR | -n]
+  [--\fBdisplay_tree\fR | -T] [--\fBservicedir\fR=\fIdir\fR]
 
 .SH DESCRIPTION
-\fBsvps\fR prints one human-readable line for all supervise services
+\fBsvps\fR prints one human-readable line for each supervise service
 started by \fIsvscan\fR(8). It prints human readable information for each
 directory where \fBsupervise\fR(8) is successfully running and reporting
 the status information maintained by \fBsupervise\fR(8).
@@ -86,9 +87,15 @@ service is down, the PID of the \fBsupervise\fR(8) process is displayed.
 
 Status can be down, wait or up. When service is in wait status, svps will
 display the number of seconds supervise will wait before starting it up.
-The process id can be of the service (pid) or the supervise process (spid)
+The process id can be pid of the service (pid) or the pid of the supervise
+process (spid).
 
 .SH OPTIONS
+.TP 2
+\-\-\fIservicedir\fR=\fIdir\fR
+
+Use \fIdir\fR as the service directory
+
 .TP
 \-\-\fIall\fR or \-a
 
@@ -140,4 +147,7 @@ svc(8),
 svok(8),
 svscan(8),
 svscanboot(8),
+ps(1),
+pgrep(1),
+pstree(1),
 indimail-services(7)

@@ -34,7 +34,7 @@ Without the \fIlog\fR subdirectory, \fBsupervise\fR inherits both
 descriptors 1 and 2 from \fBsvscan\fR and hence standard open file limit
 will suffice for supervising large number of processes. The \fIlog\fR
 supervise process additionally sets \fBargv[2]\fR=\fIs\fR to easily locate
-the process in \fBps\fR(1) output like below
+the process in the \fBps\fR(1) output like below
 
 .EX
 $ ps -ef | grep -E "svscan|supervise|COMMAND" \
@@ -60,26 +60,26 @@ runs.
 \fBsvscan\fR sets environment variable \fBSCANDIR\fR=\fIscandir\fR on
 startup. If \fIscandir\fR argument to \fBsvscan\fR is omitted than it uses
 current working directory for the value of \fBSCANDIR\fR environment
-variable. \fBsvscan\fR also sets the the environment variable \fBPWD\fR to
-\fIscandir\fR. It then writes its pid to the file \fB.svscan.pid\fR in
+variable. \fBsvscan\fR also sets the the environment variable \fBPWD\fR as
+\fIscandir\fR. It then writes it's pid to the file \fB.svscan.pid\fR in
 /\fIrun\fR/\fIsvscan\fR, /\fIvar\fR/\fIrun\fR/\fIsvscan\fR (whichever is
 found first) or the directory \fIscandir\fR if the system doesn't have a
 \fBrun\fR tmpfs filesystem or if the environment variable \fBDISABLE_RUN\fR
-is set. The pid file is created exclusively. If the \fIrun\fR filesystem is
-used, writing the pid file involves switching directories between the
-\fBrun\fR filesystem and the \fIscandir\fR directory. \fBsvscan\fR uses the
-pid file to prevent multiple copies of \fBsvscan\fR to run for the same
-directory. If \fBDISABLE_RUN\fR is set, \fBsvscan\fR will use \fIscandir\fR
-instead of /\fIrun\fR or \fI/var\fR/\fIrun\fR. If \fBDISABLE_RUN\fR is set,
-you can have an multiple invocation of \fBsvscan\fR run for different
-\fIscandir\fR passed on the command line. \fBsvscan\fR uses the /\fIproc\fR
-filesystem to verify if the pid belongs to a process named \fBsvscan\fR, by
-opening the file /\fIproc\fR/\fIpid\fR/\fIcomm\fR. \fBsvscan\fR will start
-if the file does not exist, or if any process with pid \fIpid\fR does not
-exist, or if the pid belongs to a non-svscan process. The file
-\fB.svscan.pid\fR is deleted on \fBSIGTERM\fR. The use of \fI/run\fR
-filesystem allows \fBsvscan\fR to be used on systems where the root
-filesystem is read-only.
+is set. The pid file is created exclusively using O_CREAT|O_WRONLY|O_EXCL
+in \fBopen\fR(2). If the \fIrun\fR filesystem is used, writing the pid file
+involves switching directories between the \fBrun\fR filesystem and the
+\fIscandir\fR directory. \fBsvscan\fR uses the pid file to prevent multiple
+copies of \fBsvscan\fR to run for the same directory. If \fBDISABLE_RUN\fR
+is set, \fBsvscan\fR will use \fIscandir\fR instead of /\fIrun\fR or
+\fI/var\fR/\fIrun\fR. If \fBDISABLE_RUN\fR is set, you can have an multiple
+invocation of \fBsvscan\fR run for different \fIscandir\fR passed on the
+command line. \fBsvscan\fR uses the /\fIproc\fR filesystem to verify if the
+pid belongs to a process named \fBsvscan\fR, by opening the file
+/\fIproc\fR/\fIpid\fR/\fIcomm\fR. \fBsvscan\fR will start if the file does
+not exist, or if any process with pid \fIpid\fR does not exist, or if the
+pid belongs to a non-svscan process. The file \fB.svscan.pid\fR is deleted
+on \fBSIGTERM\fR. The use of \fI/run\fR filesystem allows \fBsvscan\fR to
+be used on systems where the root filesystem is read-only.
 
 After creating the pid file, \fBsvscan\fR is designed to run forever. If it
 has trouble creating a pipe or running \fBsupervise\fR, it prints a message
@@ -93,14 +93,14 @@ so that no data is lost. The default scan interval of 60 secs can be
 changed by setting \fBSCANINTERVAL\fR environment variable. You can also
 send a \fBHUP\fR signal to \fBsvscan\fR to force a directory scan.
 
-\fBsvscan\fR can be run with a PID of 1 (init replacement) and reap child
+\fBsvscan\fR can be run as PID 1 (init replacement) and reap child
 processes. This feature is exploited in docker/podman/kubernates
 environment. The \fBINITCMD\fR environment variable can be used to do
-service management. The biggest advantage of \fBsvscan\fR is its
+service management. The biggest advantage of \fBsvscan\fR is it's
 simplicity. Unlike systemd(1), it is not complex and tied with multiple
 pieces of software to make it work. You can also use openrc from Gentoo to
-create a decent, simple service manager to start only the processes that
-you require.
+create a decent, simple service manager allowing you to start only the
+processes that you require.
 
 If running as PID 1, \fBsvscan\fR will automatically scan for new
 subdirectories when any of it's children or any orphaned process die.
@@ -131,8 +131,8 @@ missing and the earlier status of the service was down.
 \fBsvscan\fR output can be driven through \fBmultilog\fR. If a directory
 (or symlink to a directory) named \fB@servicedir@/.svscan\fR exists and the
 environment variable \fBSCANLOG\fR is defined in
-\fI@servicedir@/.svscan/variables\fR, \fBsvscan\fR will redirect its output
-on descriptors 1 and 2 to the supervised service run from the
+\fI@servicedir@/.svscan/variables\fR, \fBsvscan\fR will redirect it's
+output on descriptors 1 and 2 to the supervised service run from the
 \fB@servicedir@/.svscan/log\fR directory. This simplifies \fBsvscan\fR
 startup scripts and eliminates the use of \fBreadproctitle\fR, which does
 not work on some platforms, e.g. FreeBSD. Redirecting \fBsvscan\fR output
@@ -285,6 +285,7 @@ service(1),
 init(1),
 launchd(8),
 openrc-init(8),
-openrc-run(8)
+openrc-run(8),
+open(2)
 
 http://cr.yp.to/daemontools.html
