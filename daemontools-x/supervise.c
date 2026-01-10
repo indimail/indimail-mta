@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.53 2026-01-09 18:13:47+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.54 2026-01-10 21:56:52+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -56,7 +56,7 @@ static char     status[21];
 static char     pwdbuf[256];
 static char     pidstr[FMT_ULONG];
 static stralloc fatal, warn, info;
-static stralloc wait_sv_status;
+static stralloc service_fifo;
 #ifdef USE_RUNFS
 static stralloc run_service_dir;
 int             use_runfs;
@@ -98,11 +98,12 @@ announce(short sleep_interval)
 
 	status[16] = (childpid ? flagpaused : 0);
 	status[17] = (flagwantxx ? (flagwantup ? 'u' : 'd') : 0);
-	if (sleep_interval > 0) {
+	if (sleep_interval == -1)
+		status[18] = status[19] = 0;
+	else {
 		s = (short *) (status + 18);
 		*s = sleep_interval;
-	} else
-		status[18] = status[19] = 0;
+	}
 
 	if (seek_begin(fdstatus)) {
 		if (!silent)
@@ -321,45 +322,60 @@ do_wait()
 	unsigned long   wpid;
 	time_t          t1, t2;
 	char            wstatus[20], strnum[FMT_ULONG];
-	char           *service_name;
+	char           *wait_dir;
+	const char     *upfifo;
 
 #ifdef USE_RUNFS
 	if (use_runfs && fchdir(fddir) == -1)
 		strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
 	/* get sleep interval and the service name for which we are waiting */
-	if (!(i = get_wait_params(&sleep_interval, &service_name))) {
-		if (!stralloc_copyb(&wait_sv_status, "../", 3) ||
-				!stralloc_cats(&wait_sv_status, service_name) ||
-				!stralloc_0(&wait_sv_status)) {
-			strerr_warn2(warn.s, "out of memory", 0);
+	if (!(i = get_wait_params(&sleep_interval, &wait_dir))) {
+		if (*wait_dir == '/') {
+			if (!stralloc_copys(&service_fifo, wait_dir) ||
+					!stralloc_0(&service_fifo)) {
+				strerr_warn2(warn.s, "out of memory", 0);
 #ifdef USE_RUNFS
-			if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
-				strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
+				if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+					strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
-			return;
+				return;
+			}
+		} else {
+			if (!stralloc_copyb(&service_fifo, "../", 3) ||
+					!stralloc_cats(&service_fifo, wait_dir) ||
+					!stralloc_0(&service_fifo)) {
+				strerr_warn2(warn.s, "out of memory", 0);
+#ifdef USE_RUNFS
+				if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+					strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
+#endif
+				return;
+			}
+			service_fifo.len--;
 		}
-		wait_sv_status.len--;
 		/*-
 		 * if the service for which we are supposed to
 		 * wait doesn't exist, dont wait
 		 */
-		if (access(wait_sv_status.s, F_OK))
+		if (access(service_fifo.s, F_OK))
 			i = 1;
-	}
+	} /* if (!(i = get_wait_params(&sleep_interval, &wait_dir))) */
 #ifdef USE_RUNFS
 	if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 		strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
-	if (i)
+	if (i) /*- do not wait */
 		return;
 	pidchange(svpid, 0);
-	if (!stralloc_catb(&wait_sv_status, "/supervise/", 11)) {
+	if (!stralloc_catb(&service_fifo, "/supervise/", 11)) {
 		strerr_warn2(warn.s, "out of memory", 0);
 		return;
 	}
-	len = wait_sv_status.len;
-	if (!stralloc_catb(&wait_sv_status, "up", 2) || !stralloc_0(&wait_sv_status)) {
+	len = service_fifo.len; /*- save this to reuse variable for opening supervise/status */
+	if (!(upfifo = env_get("UPFIFO")))
+		upfifo = "up";
+	if (!stralloc_cats(&service_fifo, upfifo) || !stralloc_0(&service_fifo)) {
 		strerr_warn2(warn.s, "out of memory", 0);
 		return;
 	}
@@ -367,31 +383,33 @@ do_wait()
 	/*-
 	 * supervise/up is a FIFO
 	 * This fifo is open when service is up
-	 * if the service service_name is running
+	 * if the service in wait_dir is running
 	 *   opening supervise/up with O_WRONLY should return
-	 * if the service service_name is down
+	 * if the service in wait_dir is down
 	 *   opening supervise/up with O_WRONLY should block
 	 *
 	 * supervise/dn is a FIFO
 	 * This fifo is opened when service is down
-	 * if the service service_name is running
+	 * if the service in wait_dir is running
 	 *   opening supervise/dn with O_WRONLY should block
-	 * if the service service_name is down
+	 * if the service in wait_dir is down
 	 *   opening supervise/dn with O_WRONLY should return
 	 */
+	announce(-2);
 	t1 = time(0);
 	for (i = 0;;) {
-		if ((fd_depend = open(wait_sv_status.s, O_WRONLY)) == -1) {
-			if (errno == error_noent) {/*- supervise for service_name is not running */
+		/* this will block till some process opens it in O_RDONLY */
+		if ((fd_depend = open(service_fifo.s, O_WRONLY)) == -1) {
+			if (errno == error_noent) {/*- supervise for wait_dir is not running */
 				if (!silent)
-					strerr_warn3(warn.s, "supervise not running for service ", service_name, 0);
+					strerr_warn3(warn.s, "supervise not running for dir ", wait_dir, 0);
 				i++;
 				sleep(1); /* prevent high cpu utilization */
 				continue;
 			}
 			if (errno == error_intr)
 				continue;
-			strerr_die4sys(111, fatal.s, "unable to write ", wait_sv_status.s, ": ");
+			strerr_die4sys(111, fatal.s, "unable to write ", service_fifo.s, ": ");
 		} else {
 			close(fd_depend);
 			break;
@@ -400,20 +418,19 @@ do_wait()
 	t2 = time(0);
 	if (!silent && i) {
 		strnum[fmt_int(strnum, t2 - t1)] = 0;
-		strerr_warn6(warn.s, "service ", service_name, " up after ~", strnum, " seconds", 0);
+		strerr_warn6(warn.s, "service for ", wait_dir, " up after ~", strnum, " seconds", 0);
 	}
 
-	/*- now open the status file of service_name */
-	wait_sv_status.len = len;
-	if (!stralloc_catb(&wait_sv_status, "status", 6) || !stralloc_0(&wait_sv_status)) {
+	/*- rename file in wait_dir from "up" to "status" */
+	service_fifo.len = len;
+	if (!stralloc_catb(&service_fifo, "status", 6) || !stralloc_0(&service_fifo)) {
 		strerr_warn2(warn.s, "out of memory", 0);
 		return;
 	}
-	announce(-1);
 	for (;;) {
-		if ((fd = open_read(wait_sv_status.s)) == -1) {
+		if ((fd = open_read(service_fifo.s)) == -1) {
 			if (errno != error_noent) {
-				strerr_warn4(warn.s, "unable to open ", wait_sv_status.s, ": ", &strerr_sys);
+				strerr_warn4(warn.s, "unable to open ", service_fifo.s, ": ", &strerr_sys);
 				return;
 			}
 			sleep(1);
@@ -421,14 +438,14 @@ do_wait()
 		}
 		if ((r = read(fd, wstatus, sizeof wstatus)) == -1) {
 			if (!silent)
-				strerr_warn4(warn.s, "unable to read ", wait_sv_status.s, ": ", &strerr_sys);
+				strerr_warn4(warn.s, "unable to read ", service_fifo.s, ": ", &strerr_sys);
 			close(fd);
 			sleep(1);
 			continue;
 		} else
 		if (!r) {
 			if (!silent)
-				strerr_warn4(warn.s, "file ", wait_sv_status.s, " is of zero bytes: ", &strerr_sys);
+				strerr_warn4(warn.s, "file ", service_fifo.s, " is of zero bytes: ", &strerr_sys);
 			close(fd);
 			sleep(1);
 			continue;
@@ -1084,6 +1101,25 @@ do_init()
 }
 
 int
+check_fifo(const char *fn)
+{
+	struct stat     st;
+
+	if (stat(fn, &st) == -1) {
+		if (errno == error_noent) {
+			if (fifo_make(fn, 0600) == -1)
+				strerr_die4sys(111, fatal.s, "mkfifo: ", fn, ": ");
+			return 0;
+		}
+		strerr_die4sys(111, fatal.s, "Unable to stat ", fn, ": ");
+		return -1;
+	}
+	if ((st.st_mode & S_IFMT) == S_IFIFO)
+		return 0;
+	strerr_die3x(111, fatal.s, fn, " is not a named pipe");
+}
+
+int
 main(int argc, char **argv)
 {
 	struct stat     st;
@@ -1139,7 +1175,7 @@ main(int argc, char **argv)
 	 * allocate now so that we don't fail later
 	 * ../ + str_len(ptr) + /supervise/status\0
 	 */
-	if (!stralloc_ready(&wait_sv_status, str_len(ptr) + 21))
+	if (!stralloc_ready(&service_fifo, str_len(ptr) + 21))
 		strerr_die2x(111, fatal.s, "out of memory");
 	if (!stralloc_copys(&init_sv_path, ptr) ||
 			!stralloc_append(&init_sv_path, "/") ||
@@ -1180,7 +1216,7 @@ main(int argc, char **argv)
 		strerr_die4sys(100, fatal.s, "unable to acquire ", dir, "/supervise/lock: ");
 	coe(fdlock);
 
-	fifo_make("supervise/control", 0600);
+	check_fifo("supervise/control");
 	if ((fdcontrol = open_read("supervise/control")) == -1)
 		strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/control: ");
 	coe(fdcontrol);
@@ -1195,12 +1231,12 @@ main(int argc, char **argv)
 	coe(fdstatus);
 	announce(0);
 
-	fifo_make("supervise/ok", 0600);
+	check_fifo("supervise/ok");
 	if ((fdok = open_read("supervise/ok")) == -1)
 		strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/ok: ");
 	coe(fdok);
-	fifo_make("supervise/up", 0600);
-	fifo_make("supervise/dn", 0600);
+	check_fifo("supervise/up");
+	check_fifo("supervise/dn");
 	if (!flagwantup) {
 		if ((fddn = open_read("supervise/dn")) == -1)
 			strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/dn: ");
@@ -1234,13 +1270,18 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.53 2026-01-09 18:13:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.54 2026-01-10 21:56:52+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.54  2026-01-10 21:56:52+05:30  Cprogrammer
+ * use announce(2) to set status as waiting
+ * use check_fifo to check and create named pipes
+ * make named pipe for wait configurable using UPFIFO
+ *
  * Revision 1.53  2026-01-09 18:13:47+05:30  Cprogrammer
  * removed extra sleep in do_init()
  *

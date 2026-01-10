@@ -16,19 +16,20 @@ either \fI/run\fR or \fI/var/run\fR tmpfs filesystem (depending on your
 operating system). You can disable the creation and use of this tmpfs
 filesystem by setting \fBDISABLE_RUN\fR environment variable. From now
 onwards, we will refer to \fI/var/run\fR as \fI/run\fR. \fBsvscan\fR
-also opens \fI/run/svscan/dir/supervise/lock\fR in exclusive mode to
+also opens \fI/run/svscan/dir/supervise/lock\fR in exclusive mode (1) to
 prevent multiple copies of supervise running for the same service. It exits
 100 if it cannot open \fI/run/svscan/dir/supervise/lock\fR. The directory
 \fI/run/svscan/dir\fR must be writable for \fBsupervise\fR. This directory
 is used to maintain status information in binary format and also create few
-named pipes. The status information can be read by \fBsvstat\fR(8). If
-\fBDISABLE_RUN\fR is set, or if your system doesn't have the \fI/run\fR,
-\fIdir/supervise\fR will be created in \fIorig/dir\fR directory where
-\fIorig\fR is the directory in which \fIdir\fR is present. \fIorig\fR is
-usually \fI/service\fR on most systems. The use of \fI/run\fR tmpfs
-filesystem allows \fBsupervise\fR to be used on systems where the root
-filesystem is read-only. So, \fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR is
-equivalent to \fIdir/supervise\fR when \fBrun\fR tmpfs filesystem.
+named pipes or \fBfifo\fR(7). The status information can be read by
+\fBsvstat\fR(8). If \fBDISABLE_RUN\fR is set, or if your system doesn't
+have the \fI/run\fR, \fIdir/supervise\fR will be created in \fIorig/dir\fR
+directory where \fIorig\fR is the directory in which \fIdir\fR is present.
+\fIorig\fR is usually \fI/service\fR on most systems. The use of \fI/run\fR
+tmpfs filesystem allows \fBsupervise\fR to be used on systems where the
+root filesystem is read-only. So,
+\fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR is equivalent to
+\fIdir/supervise\fR when \fBrun\fR tmpfs filesystem is present.
 
 \fBsupervise\fR then executes \fI./init\fR if it exists. In case
 \fI./init\fR exits with non-zero status, it pauses for 60 seconds before
@@ -60,7 +61,7 @@ required in such cases to make \fBsvc\fR(8) command operate and control
 \fBsupervise\fR reliably for such forked daemon/commands in \fI./run\fR.
 You can also prefix such commands in \fI./run\fR with \fBfghack\fR(1)
 instead of setting the sticky bit on \fI./run\fR. \fBsupervise\fR uses the
-self pipe trick to handle all SIGCHLD events reliably. This requires the
+selfpipe trick (2) to handle all SIGCHLD events reliably. This requires the
 use of two file descriptors for the selfpipe. \fI./run\fR is passed two
 command line arguments with \fIdir\fR as argv[1] and \fIhow\fR as argv[2]
 (\fIhow\fR is explained later in this document).
@@ -68,13 +69,13 @@ command line arguments with \fIdir\fR as argv[1] and \fIhow\fR as argv[2]
 If the directory \fI./variables\fR exists, \fBsupervise\fR sets
 environment variables before calling \fI./run\fR using \fIenvdir\fR(8).
 Files in \fI./variables\fR directory must be compatible for
-\fBenvdir\fR(8). If the directory \fI./variables\fR doesn't have execute
+\fBenvdir\fR. If the directory \fI./variables\fR doesn't have execute
 permissions for \fBothers\fR group, all existing environment variables will
 be cleared before setting environment variables for \fI./run\fR.
 
 \fBsupervise\fR uses \fI/run/svscan\fR/\fIdir\fR/\fIsupervise/control\fR
-fifo to read commands from \fBsvc\fR(8). You can use \fBsvc\fR(8) give
-commands to \fBsupervise\fR(8). You can give commands to \fBsupervise\fR
+named pipe to read commands from \fBsvc\fR. You can use \fBsvc\fR give
+commands to \fBsupervise\fR. You can give commands to \fBsupervise\fR
 even if the file \fIdir\fR/down exists.
 
 On receipt of \fBSIGTERM\fR, \fBsupervise\fR sends \fBSIGTERM\fR followed
@@ -82,85 +83,96 @@ by \fBSIGCONT\fR to its child. If running in subreaper mode or when
 \fBSETPGID\fR is set, \fBsupervise\fR uses \fBkillpg\fR(3) to send the
 signals, else \fBkill\fR(2) is used to send signals.
 
-if the file \fIdir\fR/shutdown exists \fBsupervise\fR(8) executes
+if the file \fIdir\fR/shutdown exists \fBsupervise\fR executes
 \fIshutdown\fR when asked to exit or on receipt of \fBSIGTERM\fR. \fIdir\fR
 is passed as the first argument and the pid of the process that exited is
 passed as the second argument to \fIshutdown\fR.
 
-if the file \fIdir\fR/alert exists \fBsupervise\fR(8) executes \fIalert\fR
+if the file \fIdir\fR/alert exists \fBsupervise\fR executes \fIalert\fR
 whenever \fI./run\fR exits. \fIdir\fR is passed as the first argument, the
 pid of the process that exited is passed as the second argument, the exit
 value or signal (if killed by signal) is passed as the third argument to
 \fIalert\fR. The fourth argument is either of the strings \fIexited\fR or
 \fIstopped\fR / \fIsignalled\fR.
 
-\fBsupervise\fR(8) may exit immediately after startup if it cannot find the
-files it needs in \fIdir\fR or if another copy of \fBsupervise\fR(8) is
-already running in \fIdir\fR. Once \fBsupervise\fR(8) is successfully
-running, it will not exit unless it is killed or specifically asked to
-exit. On a successful startup \fBsupervise\fR(8) opens the fifo
+\fBsupervise\fR may exit immediately after startup if it cannot find the
+files it needs in \fIdir\fR or if another copy of \fBsupervise\fR is
+already running in \fIdir\fR. Once \fBsupervise\fR is successfully running,
+it will not exit unless it is killed or specifically asked to exit. On a
+successful startup \fBsupervise\fR opens the named pipe
 \fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR/\fIok\fR in O_RDONLY|O_NDELAY
-mode. You can use \fBsvok\fR(8) to check whether \fBsupervise\fR(8) is
-successfully running. You can use \fBsvscan\fR(8) to reliably start a
-collection of \fBsupervise\fR(8) processes. \fBsvscan\fR mirrors the
-service directory in \fI/run\fR or \fI/var/run\fR directory (whichever is
-found first). So \fI/run/svscan\fR/\fIdir\fR will be analogous to
+mode. You can use \fBsvok\fR(8) to check whether \fBsupervise\fR is
+successfully running. You can use \fBsvscan\fR to reliably start a
+collection of \fBsupervise\fR processes. \fBsvscan\fR mirrors the service
+directory in \fI/run\fR or \fI/var/run\fR directory (whichever is found
+first). So \fI/run/svscan\fR/\fIdir\fR will be analogous to
 /service/\fIdir\fR. If started by \fBsvscan\fR, error messages printed by
-\fBsupervise\fR(8) will go the standard error output of \fBsvscan\fR(8)
-process. In such a case it will be the log file
-\fI/var/log/svc/svscan/current\fR.
+\fBsupervise\fR will go the standard error output of \fBsvscan\fR process.
+In such a case it will be the log file \fI/var/log/svc/svscan/current\fR.
 
-\fBsupervise\fR(8) can wait for another service by having a file named
-\fIdir\fR/\fIwait\fR. This file has two lines. The first line is time
-\fIt\fR in seconds and the second line is a service name \fIw\fR. In such a
-case, the service in \fIdir\fR will wait \fIt\fR seconds after service
-\fIw\R starts up successfully. The amount of time \fIt\fR is limited to a
-max of 32767 secs. Any value above this value will be limited to 60 secs.
-The wait for another service is implemented by opening
-\fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR/\fIup\fR in write mode.
-
-\fIsupervise\fR(8) opens
-\fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR/\fIup\fR in read mode
-just after it executes \fI./run\fR. Hence, if service \fIw\fR is up, write
-on \fI/run/svscan\fR/\fIw\fR/\fIsupervise\fR/\fIup\fR returns immediately.
-If service \fIw\fR is down, the write will block until \fIw\fR is up and
-running. If service \fIw\fR doesn't have \fBsupervise\fR running,
-\fBsupervise\fR will wait for 60 seconds before attempting to open the file
-\fIw\fR/\fIsupervise\fR/\fIup\fR again in read mode. The default value of
-60 seconds gets overriden by the \fBSCANINTERVAL\fR environment variable
-used by \fBsvscan\fR(8). If service \fIw\fR doesn't exist,
-\fIdir\fR/\fIwait\fR will be ignored.
-
-\fIsupervise\fR(8) opens
-\fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR/\fIdn\fR fifo in read mode,
-when asked to bring down a service, using \fBsvc\fR (-d or -r option). It
-opens this named pipe after issuing the TERM, CONT signal to the service.
-Hence, if service\fIw\fR is down, write on \fIw\fR/\fIsupervise\fR/\fIdn\fR
-returns immediately. if service \fIw\fR is up, the write will block until
-\fIw\fR is down.
-
-\fBsupervise\fR(8) creates and opens the following FIFOs with
-O_RDONLY|O_NDELAY mode. See open(2) for description of O_RDONLY, O_NDELAY
+\fBsupervise\fR creates and opens the following named pipes / FIFOs with
+\fBO_RDONLY|O_NDELAY\fR mode. \fBsupervise\fR will exit if it has trouble
+creating and opening these named pipes. See \fBopen\fR(2) for description
+of \fBO_RDONLY\fR, \fBO_WRONLY\fR, \fBO_NDELAY\fR.
 
 .IP \[bu] 2
 \fIdir\fR/\fIsupervise\fR/\fIcontrol\fR - for reading commands from clients
-like \fBsvc\fR(8).
+like \fBsvc\fR.
 .IP \[bu] 2
 \fIdir\fR/\fIsupervise\fR/\fIok\fR - clients can open this in write mode
-(O_WRONLY) to test if \fBsupervise\fR(8) is running in \fIdir\fR. If write
-returns, it means \fBsupervise\fR(8) is running.
+(O_WRONLY) to test if \fBsupervise\fR is running in \fIdir\fR. If write
+returns, it means \fBsupervise\fR is running.
 .IP \[bu] 2
 \fIdir\fR/\fIsupervise\fR/\fIup\fR - clients can open this in write mode
 (O_WRONLY) to test if service \fIdir\fR is up. Any client that opens this
-fifo in O_WRONLY mode, will block until the service \fIdir\fR is up. If
-write returns, it means service \fIdir\fR has executed \fIdir\fR/\fIrun\fR.
-\fBsvc\fR(8) is one such client (-w option) that can be used to check if a
-service is up.
+named pipe in O_WRONLY mode, will block until the service \fIdir\fR is up.
+If write returns, it means service \fIdir\fR has executed
+\fIdir\fR/\fIrun\fR.  \fBsvc\fR is one such client (-w option) that can
+be used to check if a service is up.
 .IP \[bu] 2
 \fIdir\fR/\fIsupervise\fR/\fIdn\fR - clients can open this in write mode to
 test if service \fIdir\fR is down. This works like exactly like
-\fIdir\fR/\fIsupervise\fR/\fIup\fR. \fBsvc\fR(8) (-W option) can be used to
+\fIdir\fR/\fIsupervise\fR/\fIup\fR. \fBsvc\fR (-W option) can be used to
 check if a service is down.
+
+\fIsupervise\fR opens \fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR/\fIup\fR
+in read mode just after it executes \fI./run\fR. Hence, if service \fIw\fR
+is up, write on \fI/run/svscan\fR/\fIw\fR/\fIsupervise\fR/\fIup\fR returns
+immediately. If service \fIw\fR is down, the write will block until \fIw\fR
+is up and running. If service \fIw\fR doesn't have \fBsupervise\fR running,
+\fBsupervise\fR will wait for 60 seconds before attempting to open the file
+\fIw\fR/\fIsupervise\fR/\fIup\fR again in read mode. The default value of
+60 seconds gets overriden by the \fBSCANINTERVAL\fR environment variable
+used by \fBsvscan\fR. If service \fIw\fR doesn't exist,
+\fIdir\fR/\fIwait\fR will be ignored.
+
+\fIsupervise\fR opens \fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR/\fIdn\fR
+named pipe in read mode, when asked to bring down a service, using
+\fBsvc\fR (-d or -r option). It opens this named pipe after issuing the
+TERM, CONT signal to the service. Hence, if service\fIw\fR is down, write
+on \fIw\fR/\fIsupervise\fR/\fIdn\fR returns immediately. if service \fIw\fR is
+up, the write will block until \fIw\fR is down.
+
+\fBsupervise\fR can wait for another service by having a file named
+\fIdir\fR/\fIwait\fR. This file has two lines. The first line is time
+\fIt\fR in seconds and the second line is a directory \fIw\fR for another
+supervise service. If \fIw\fR does not begin with '/', then it is assumed
+that the service for which supervise needs to wait is represented by
+\fI..\fR/\fIw\fR. If \fIw\fR begins with '/', then it represents a
+supervise service in a different base directory, probably being managed by
+another \fBsvscan\fR process. By having \fIdir\fR/\fIwait\fR file, the
+supervise service for \fIdir\fR will wait \fIt\fR seconds after supervise
+service for \fIw\fR starts up successfully. The amount of time \fIt\fR is
+limited to a max of 32767 secs. Any value above this value will be limited
+to 60 secs. When \fIw\fR doesn't start with '/', the wait for another
+service is implemented by opening the named pipe
+\fI..\fR/\fIw\fR/\fIsupervise\fR/\fIup\fR in \fBO_WRONLY\fR mode. When
+\fIw\fR starts with '/', then supervise will open the named pipe
+\fIw\fR/\fIsupervise\fR/\fIup\fR in \fBO_WRONLY\fR mode. When using the
+wait feature, you can make supervise use a named pipe other than \fIup\fR
+by setting the environment variable \fBUPFIFO\fR. This allows supervise to
+wait for a non-supervise service, where the named fifo is opened by an
+external application.
 
 .PP
 \fBsupervise\fR logs informational, warning and error messages to
@@ -243,6 +255,9 @@ fghack(8),
 minisvc(8),
 multilog(8),
 open(2),
+mkfifo(3),
+fifo(7),
+pipe(7),
 pgrphack(8),
 readproctitle(8),
 setlock(8),
