@@ -10,9 +10,9 @@ svalert \- handle service alerts
 
 .SH DESCRIPTION
 \fBsvalert\fR(8) is a script that can be used to send alerts for services
-supervised by \fBsupervise\fR(8). It can be called in \fIsv\fR/\fI/run\fR,
-\fIsv\fR/\fIalert\fR, \fIsv\fR/shutdown, where \fIsv\fR is the service
-name (usually a service in \fI/service/sv\fR. If you don't have an
+started by \fBsupervise\fR(8). It can be called in \fIsv\fR/\fIrun\fR,
+\fIsv\fR/\fIalert\fR, \fIsv\fR/\fIshutdown\fR, where \fIsv\fR is the
+service name (usually a service in \fI/service\fR. If you don't have an
 \fIalert\fR script or a \fIshutdown\fR script, you can link these scripts
 to svalert. e.g.
 
@@ -37,10 +37,9 @@ explanation of the arguments passed to \fBrun\fR, \fBalert\fR and the
 variable \fBPROBE_SERVER\fR to an IP address or hostname to override
 \fI/etc/hosts\fR. \fBsvalert\fR will then use the arguments passed to it,
 to send alerts on port \fB3001\fR as default using \fBudpclient\fR(1). You
-can send \fBSV_ALERT_PORT\fR to use a custom port. You can also set
-\fBUSE_SYSLOG\fR environment variable to send messages to system journal
-using the \fBlogger\fR(1) command.
-
+can use another port by setting \fBSV_ALERT_PORT\fR to a custom port. You
+can also set \fBUSE_SYSLOG\fR environment variable to send messages to
+system journal using the \fBlogger\fR(1) command.
 
 .SH SEE ALSO
 supervise(8), svscan(8), udpclient(1)
