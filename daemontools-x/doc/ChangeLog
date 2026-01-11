@@ -3,6 +3,14 @@ Release @version@-@release@ Start 08/01/2026 End --/--/----
 - 08/01/2026
 01. supervise.c: Removed extra sleep in do_init
 02. svps.in: use /proc/pid/cwd to get service directory.
+- 10/01/2026
+03. use announce(2) to set status as waiting
+04. use check_fifo to check and create named pipes
+05. make named pipe for wait configurable using UPFIFO
+- 11/01/2026
+06. supervise: clear sleep interval in status
+07. svstat: Report status uptime in seconds.nanoseconds
+08. svps: remove nanoseconds from time reported by svstat
 
 * Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
 Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025

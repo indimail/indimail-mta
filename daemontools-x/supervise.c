@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.54 2026-01-10 21:56:52+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.55 2026-01-11 20:34:48+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -46,6 +46,8 @@ static char     flagfailed;
 static unsigned long scan_interval = 60;
 static char     is_subreaper = 0, do_setpgid = 0;
 /*-
+ * STATUS information for svstat
+ * status[0-11]  - TAI64N label
  * status[12-15] - pid
  * status[16]    - paused
  * status[17]    - wants up/down
@@ -98,9 +100,7 @@ announce(short sleep_interval)
 
 	status[16] = (childpid ? flagpaused : 0);
 	status[17] = (flagwantxx ? (flagwantup ? 'u' : 'd') : 0);
-	if (sleep_interval == -1)
-		status[18] = status[19] = 0;
-	else {
+	if (sleep_interval) {
 		s = (short *) (status + 18);
 		*s = sleep_interval;
 	}
@@ -253,7 +253,7 @@ sigterm(int i)
 }
 
 int
-get_wait_params(unsigned short *interval, char **sv_name)
+get_wait_params(unsigned short *interval, char **wait_dir)
 {
 	int             fd, match, i;
 	static ushort   sleep_interval = 60;
@@ -263,11 +263,11 @@ get_wait_params(unsigned short *interval, char **sv_name)
 	char            inbuf[256], strnum[FMT_ULONG];
 
 	if (tline.len) {
-		*sv_name = tline.s;
+		*wait_dir = tline.s;
 		*interval = sleep_interval;
 	}
 	*interval = 0;
-	*sv_name = (char *) 0;
+	*wait_dir = (char *) 0;
 	/*-
 	 * first line is the sleep interval
 	 * second line is the service to wait for
@@ -306,11 +306,9 @@ get_wait_params(unsigned short *interval, char **sv_name)
 	close(fd);
 	if (i < 2 || !tline.len)
 		return 1;
-	*sv_name = tline.s;
+	*wait_dir = tline.s;
 	*interval = sleep_interval;
 	strnum[fmt_int(strnum, sleep_interval)] = 0;
-	if (verbose)
-		strerr_warn5(info.s, "wait ", strnum, " seconds for service ", *sv_name, 0);
 	return 0;
 }
 
@@ -367,7 +365,6 @@ do_wait()
 #endif
 	if (i) /*- do not wait */
 		return;
-	pidchange(svpid, 0);
 	if (!stralloc_catb(&service_fifo, "/supervise/", 11)) {
 		strerr_warn2(warn.s, "out of memory", 0);
 		return;
@@ -395,6 +392,8 @@ do_wait()
 	 * if the service in wait_dir is down
 	 *   opening supervise/dn with O_WRONLY should return
 	 */
+	pidchange(svpid, 0);
+	/*- set negative sleep interval for svstat to indicate service waits for another service */
 	announce(-2);
 	t1 = time(0);
 	for (i = 0;;) {
@@ -421,7 +420,7 @@ do_wait()
 		strerr_warn6(warn.s, "service for ", wait_dir, " up after ~", strnum, " seconds", 0);
 	}
 
-	/*- rename file in wait_dir from "up" to "status" */
+	/*- rename file in service from "wait_dir/supervise/up" to "dir/supervise/status" */
 	service_fifo.len = len;
 	if (!stralloc_catb(&service_fifo, "status", 6) || !stralloc_0(&service_fifo)) {
 		strerr_warn2(warn.s, "out of memory", 0);
@@ -464,8 +463,12 @@ do_wait()
 	} /*- for (;;) */
 	pidchange(svpid, 0); /*- update start time */
 	announce(sleep_interval);
+	strnum[fmt_int(strnum, sleep_interval)] = 0;
+	if (verbose)
+		strerr_warn5(info.s, "wait ", strnum, " seconds for service ", wait_dir, 0);
 	deepsleep(sleep_interval);
 	childpid = 0;
+	status[18] = status[19] = 0; /*- clear sleep interval in status */
 	announce(0);
 	return;
 }
@@ -1270,14 +1273,17 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.54 2026-01-10 21:56:52+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.55 2026-01-11 20:34:48+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
- * Revision 1.54  2026-01-10 21:56:52+05:30  Cprogrammer
+ * Revision 1.55  2026-01-11 20:34:48+05:30  Cprogrammer
+ * clear sleep interval in status
+ *
+ * Revision 1.54  2026-01-11 10:28:40+05:30  Cprogrammer
  * use announce(2) to set status as waiting
  * use check_fifo to check and create named pipes
  * make named pipe for wait configurable using UPFIFO

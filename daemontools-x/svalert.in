@@ -1,5 +1,5 @@
 #
-# $Id: svalert.in,v 1.2 2025-08-12 22:09:43+05:30 Cprogrammer Exp mbhangui $
+# $Id: svalert.in,v 1.3 2026-01-11 21:16:00+05:30 Cprogrammer Exp mbhangui $
 #
 
 log_syslog()
@@ -19,6 +19,10 @@ log_syslog()
 tmval=$(date +%s)
 [ -n "SV_ALERT_PORT" ] && port=$SV_ALERT_PORT || port=3001
 [ -n "PROBE_SERVER" ] && probe_server=$PROBE_SERVER || probe_server="probe-server"
+/usr/bin/getent ahosts $probe_server | /usr/bin/grep DGRAM > /dev/null
+if [ $? -ne 0 ] ; then
+	exit 0
+fi
 
 case "$#" in
 	2) # run/shutdown script arguments
@@ -71,8 +75,8 @@ case "$#" in
 	# $1 - service directory
 	# #2 - startup type (1st word)
 	# #3 - startup type (2nd word)
-	if [ -f @prefix@/etc/svalerts.filter ] ; then
-		echo "$2"-"$3" | /usr/bin/grep -q -w -f @prefix@/etc/svalerts.filter
+	if [ -f @sysconfdir@/svalerts.filter ] ; then
+		echo "$2"-"$3" | /usr/bin/grep -q -w -f @sysconfdir@/svalerts.filter
 		if [ $? -eq 0 ] ; then
 			exit 0
 		fi
@@ -91,8 +95,8 @@ case "$#" in
 	# $2 - pid of process that died
 	# $3 - exit status of process that died / signal that killed the process
 	# $4 - exited/stopped/signalled
-	if [ -f @prefix@/etc/svalerts.filter ] ; then
-		/usr/bin/grep -q -w "abnormal shutdown" @prefix@/etc/svalerts.filter
+	if [ -f @sysconfdir@/svalerts.filter ] ; then
+		/usr/bin/grep -q -w "abnormal shutdown" @sysconfdir@/svalerts.filter
 		if [ $? -eq 0 ] ; then
 			exit 0
 		fi
@@ -109,6 +113,9 @@ esac
 
 #
 # $Log: svalert.in,v $
+# Revision 1.3  2026-01-11 21:16:00+05:30  Cprogrammer
+# fix svalerts.filter path
+#
 # Revision 1.2  2025-08-12 22:09:43+05:30  Cprogrammer
 # set probe server using PROB_SERVER env variable
 #

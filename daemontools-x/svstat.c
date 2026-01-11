@@ -1,5 +1,5 @@
 /*
- * $Id: svstat.c,v 1.13 2025-01-21 23:35:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svstat.c,v 1.14 2026-01-11 20:36:24+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -8,7 +8,7 @@
 #include "error.h"
 #include "open.h"
 #include "fmt.h"
-#include "tai.h"
+#include "taia.h"
 #include "substdio.h"
 #ifdef USE_RUNFS
 #include "run_init.h"
@@ -21,7 +21,7 @@ char            outbuf[256], errbuf[256];
 substdio        o = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, outbuf, sizeof outbuf);
 
 char            status[21];
-char            strnum[FMT_ULONG];
+char            strnum[FMT_DOUBLE];
 
 unsigned long   pid;
 unsigned char   normallyup, want, paused;
@@ -34,7 +34,7 @@ doit(char *dir, int *retval)
 	int             r, fd = -1;
 	short          *s;
 	const char     *x;
-	struct tai      when, now;
+	struct taia     when, now;
 
 	*retval = 111;
 	if (chdir(dir) == -1) {
@@ -122,11 +122,11 @@ doit(char *dir, int *retval)
 	want = status[17];
 	s = (short *) (status + 18);
 	waiting = *s;
-	tai_unpack(status, &when);
-	tai_now(&now);
-	if (tai_less(&now, &when))
+	taia_unpack(status, &when);
+	taia_now(&now);
+	if (taia_less(&now, &when))
 		when = now;
-	tai_sub(&when, &now, &when);
+	taia_sub(&when, &now, &when);
 	substdio_puts(&o, dir);
 	substdio_puts(&o, ": ");
 	if (waiting)
@@ -136,7 +136,8 @@ doit(char *dir, int *retval)
 		substdio_puts(&o, "up ");
 	else
 		substdio_puts(&o, "down ");
-	substdio_put(&o, strnum, fmt_ulong(strnum, tai_approx(&when)));
+	substdio_put(&o, strnum, fmt_double(strnum, when.sec.x, 0));
+	substdio_put(&o, strnum, fmt_ulong(strnum, when.nano));
 	substdio_puts(&o, " seconds");
 
 	if (status[20] && !normallyup)
@@ -168,10 +169,10 @@ doit(char *dir, int *retval)
 		substdio_puts(&o, " ");
 	} else
 		*retval = 1;
-	if (waiting > 0 && (waiting - when.x) > 0) {
+	if (waiting > 0 && (waiting - when.sec.x) > 0) {
 		substdio_puts(&o, "remaining ");
-		when.x = waiting - when.x;
-		substdio_put(&o, strnum, fmt_ulong(strnum, tai_approx(&when)));
+		when.sec.x = waiting - when.sec.x;
+		substdio_put(&o, strnum, fmt_ulong(strnum, tai_approx(&when.sec)));
 		substdio_puts(&o, " seconds");
 	}
 	substdio_puts(&o, "\n");
@@ -210,13 +211,16 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	const char     *x = "$Id: svstat.c,v 1.13 2025-01-21 23:35:45+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svstat.c,v 1.14 2026-01-11 20:36:24+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: svstat.c,v $
+ * Revision 1.14  2026-01-11 20:36:24+05:30  Cprogrammer
+ * report uptime in seconds.nanoseconds
+ *
  * Revision 1.13  2025-01-21 23:35:45+05:30  Cprogrammer
  * Fixes for gcc14
  *

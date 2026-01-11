@@ -1,11 +1,11 @@
 # 
-# $Id: svps.in,v 1.24 2026-01-09 18:12:44+05:30 Cprogrammer Exp mbhangui $
+# $Id: svps.in,v 1.25 2026-01-11 20:35:53+05:30 Cprogrammer Exp mbhangui $
 #
 
 # sets time string (tstr)
 do_days()
 {
-	secs=$1
+	secs=$(echo $1|cut -d. -f1)
 	if [ $mday -eq 1 ] ; then
 		tstr=$(printf '%2d days, %02d hrs, %02d mins, %02d secs\n' $((secs/86400)) $((secs%86400/3600)) $((secs%3600/60)) $((secs%60)))
 	else
@@ -458,6 +458,9 @@ fi
 /bin/rm -f /tmp/svps.$$ /tmp/svpserr.$$
 #
 # $Log: svps.in,v $
+# Revision 1.25  2026-01-11 20:35:53+05:30  Cprogrammer
+# remove nanoseconds from uptime reported by svstat
+#
 # Revision 1.24  2026-01-09 18:12:44+05:30  Cprogrammer
 # use /proc/pid/cwd to get service directory
 #

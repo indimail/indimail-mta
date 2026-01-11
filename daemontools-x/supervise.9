@@ -22,7 +22,8 @@ prevent multiple copies of supervise running for the same service. It exits
 \fI/run/svscan/dir\fR must be writable for \fBsupervise\fR. This directory
 is used to maintain status information in binary format and also create few
 named pipes or \fBfifo\fR(7). The status information can be read by
-\fBsvstat\fR(8). If \fBDISABLE_RUN\fR is set, or if your system doesn't
+\fBsvstat\fR(8). The format of the status file is described in another
+section below. If \fBDISABLE_RUN\fR is set, or if your system doesn't
 have the \fI/run\fR, \fIdir/supervise\fR will be created in \fIorig/dir\fR
 directory where \fIorig\fR is the directory in which \fIdir\fR is present.
 \fIorig\fR is usually \fI/service\fR on most systems. The use of \fI/run\fR
@@ -124,14 +125,14 @@ like \fBsvc\fR.
 returns, it means \fBsupervise\fR is running.
 .IP \[bu] 2
 \fIdir\fR/\fIsupervise\fR/\fIup\fR - clients can open this in write mode
-(O_WRONLY) to test if service \fIdir\fR is up. Any client that opens this
-named pipe in O_WRONLY mode, will block until the service \fIdir\fR is up.
-If write returns, it means service \fIdir\fR has executed
-\fIdir\fR/\fIrun\fR.  \fBsvc\fR is one such client (-w option) that can
-be used to check if a service is up.
+(O_WRONLY) to test if service in \fIdir\fR is up. Any client that opens
+this named pipe in O_WRONLY mode, will block until the service \fIdir\fR is
+up. If write returns, it means service in \fIdir\fR has executed
+\fIdir\fR/\fIrun\fR. \fBsvc\fR is one such client (-w option) that can be
+used to check if a service is up.
 .IP \[bu] 2
 \fIdir\fR/\fIsupervise\fR/\fIdn\fR - clients can open this in write mode to
-test if service \fIdir\fR is down. This works like exactly like
+test if service in \fIdir\fR is down. This works like exactly like
 \fIdir\fR/\fIsupervise\fR/\fIup\fR. \fBsvc\fR (-W option) can be used to
 check if a service is down.
 
@@ -235,6 +236,26 @@ second argument.
 
 \fBsupervise\fR sets \fBPPID\fR environment variable as its PID (process
 ID) for all it's children.
+
+.SH STATUS FILE FORMAT
+
+The file \fIsupervise/status\fR is used by \fBsupervise\fR to write it's
+PID and status information. This file can be read by \fBsvstat\fR to
+display a human readable status of \fBsupervise\fR and the service it is
+running.
+
+.TS
+l l.
+Byte             Description
+_
+0-12  TAI64N label
+12-15 PID of the supervise or service
+16    If service is paused (1 - paused, 0 - not paused)
+17    Wants to be up or down ('u' - up, 'd' - down)
+18-19 Short integer for wait interval when waiting for another service.
+      (> 0 - wait interval, < -1 - wait indefinitely)
+20    Up or Down (0 - down, 1 - up)
+.TE
 
 .SH EXIT VALUE
 \fBsupervise\fR is designed to run forever after startup. However, it will
