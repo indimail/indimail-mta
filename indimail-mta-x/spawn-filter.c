@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.91 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.92 2026-01-12 11:12:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -105,7 +105,7 @@ log_spam(const char *arg1, const char *arg2, const char *size, stralloc *line)
 		close(255);
 		if (!stralloc_0(line))
 			report(111, "spawn-filter: out of memory", ". (#4.3.0)", 0, 0, 0, 0);
-		if (line->len) {
+		if (line->len - 1) {
 			if (substdio_puts(&spamout, line->s) == -1)
 				report(111, "spawn-filter: write: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 		}
@@ -689,7 +689,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	const char     *x = "$Id: spawn-filter.c,v 1.91 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spawn-filter.c,v 1.92 2026-01-12 11:12:25+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -700,6 +700,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.92  2026-01-12 11:12:25+05:30  Cprogrammer
+ * corrected line length
+ *
  * Revision 1.91  2025-01-22 00:30:34+05:30  Cprogrammer
  * Fixes for gcc14
  *

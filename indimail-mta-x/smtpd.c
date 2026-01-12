@@ -1,5 +1,5 @@
 /*
- * $Id: smtpd.c,v 1.332 2025-07-24 10:29:14+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.333 2026-01-12 11:12:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -160,7 +160,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.332 $";
+static c_char  *revision = "$Revision: 1.333 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -976,6 +976,7 @@ log_fifo(const char *arg1, const char *arg2, unsigned long size, stralloc *line)
 		close(logfd);
 		if (!stralloc_0(line))
 			die_nomem();
+		line->len--;
 		if (line->len) {
 			if (substdio_puts(&logfifo_out, line->s) == -1) {
 				logerr(1, "write error: ", error_str(errno), "\n", NULL);
@@ -7528,6 +7529,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.333  2026-01-12 11:12:15+05:30  Cprogrammer
+ * corrected line length
+ *
  * Revision 1.332  2025-07-24 10:29:14+05:30  Cprogrammer
  * fixed function prototype for die_regex() used in mail_acl.c
  *
@@ -7984,7 +7988,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.332 2025-07-24 10:29:14+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.333 2026-01-12 11:12:15+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	return revision + 11;
