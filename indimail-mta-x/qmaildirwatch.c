@@ -1,8 +1,7 @@
 /*
- * $Id: qmaildirwatch.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmaildirwatch.c,v 1.12 2026-01-12 11:11:45+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
-#include <getln.h>
 #include <substdio.h>
 #include <subfd.h>
 #include <stralloc.h>
@@ -148,12 +147,15 @@ main()
 void
 getversion_qmaildirwatch_c()
 {
-	const char     *x = "$Id: qmaildirwatch.c,v 1.11 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmaildirwatch.c,v 1.12 2026-01-12 11:11:45+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 /*
  * $Log: qmaildirwatch.c,v $
+ * Revision 1.12  2026-01-12 11:11:45+05:30  Cprogrammer
+ * removed unused include file
+ *
  * Revision 1.11  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

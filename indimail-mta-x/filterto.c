@@ -1,5 +1,5 @@
 /*
- * $Id: filterto.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: filterto.c,v 1.16 2026-01-12 11:11:31+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -12,7 +12,6 @@
 #include "strerr.h"
 #include "substdio.h"
 #include "fmt.h"
-#include "getln.h"
 #include "mess822.h"
 #include "fd.h"
 #include "pathexec.h"
@@ -107,13 +106,16 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	const char     *x = "$Id: filterto.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: filterto.c,v 1.16 2026-01-12 11:11:31+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: filterto.c,v $
+ * Revision 1.16  2026-01-12 11:11:31+05:30  Cprogrammer
+ * removed unused include file
+ *
  * Revision 1.15  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: qreceipt.c,v $
+ * Revision 1.17  2026-01-12 11:12:07+05:30  Cprogrammer
+ * removed unused include file
+ *
  * Revision 1.16  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -50,7 +53,6 @@
 #include <substdio.h>
 #include <stralloc.h>
 #include <subfd.h>
-#include <getln.h>
 #include <alloc.h>
 #include <str.h>
 #include <token822.h>
@@ -257,7 +259,7 @@ main(int argc, char **argv)
 void
 getversion_qreceipt_c()
 {
-	const char     *x = "$Id: qreceipt.c,v 1.16 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qreceipt.c,v 1.17 2026-01-12 11:12:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
