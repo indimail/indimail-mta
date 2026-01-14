@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# $Id: rsvc.in,v 1.1 2026-01-14 18:50:21+05:30 Cprogrammer Exp mbhangui $
+#
+# © 2024 Manvendra Bhangui
+# All intellectual property developed during the term of this agreement, including but not limited
+# to rsvc, shall be and remain the sole and exclusive property of Manvendra Bhangui
+#
+if [ $# -ne 2 -a $# -ne 4 ] ; then
+	echo "USAGE: rsvc servicedir service [docker|podman container_id]" 1>&2
+	exit 1
+fi
+if [ $# -eq 2 ] ; then
+	echo "$1 $2" 1>&7
+elif [ $# -eq 4 ] ; then
+	echo "$1 $2 $3 $4" 1>&7
+else
+	echo "rsvc: Invalid number of arguments" 1>&2
+	exit 1
+fi
+read line 0<&6
+echo $line | grep -q ": up"
+if [ $? -eq 0 ] ; then
+	exit 0
+fi
+echo $line | grep -q ": down"
+if [ $? -eq 0 ] ; then
+	exit 1
+fi
+echo "$line" 1>&2
+exit 111
+
+#
+# $Log: rsvc.in,v $
+# Revision 1.1  2026-01-14 18:50:21+05:30  Cprogrammer
+# Initial revision
+#
+#

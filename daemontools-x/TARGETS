@@ -74,5 +74,8 @@ openrc
 INPUT
 set-network-wait
 svalert
+svstatd
+svstatd.o
+rsvc
 svalert.8
 supervise.8

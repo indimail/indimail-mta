@@ -243,6 +243,7 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 
 %attr(0755,root,root)                    %{_prefix}/bin/envdir
 %attr(0755,root,root)                    %{_prefix}/bin/envuidgid
+%attr(0755,root,root)                    %{_prefix}/bin/rsvc
 %attr(0755,root,root)                    %{_prefix}/bin/setlock
 %attr(0755,root,root)                    %{_prefix}/bin/setuidgid
 %attr(0755,root,root)                    %{_prefix}/bin/softlimit
@@ -272,6 +273,7 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %attr(0755,root,root)                    %{_prefix}/sbin/docker-entrypoint
 %attr(0755,root,root)                    %{_prefix}/sbin/minisvc
 %attr(0755,root,root)                    %{_prefix}/sbin/runpod
+%attr(0755,root,root)                    %{_prefix}/sbin/svstatd
 
 %attr(0755,root,root)                    %{libexecdir}/svscanboot
 %attr(0755,root,root)                    %{libexecdir}/installer
@@ -305,6 +307,7 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %attr(0644,root,root)                    %{mandir}/man1/svps.1.*
 %attr(0644,root,root)                    %{mandir}/man1/inotify.1.*
 %attr(0644,root,root)                    %{mandir}/man1/runpod.1.*
+%attr(0644,root,root)                    %{mandir}/man1/rsvc.1.*
 %attr(0644,root,root)                    %{mandir}/man8/envdir.8.*
 %attr(0644,root,root)                    %{mandir}/man8/envuidgid.8.*
 %attr(0644,root,root)                    %{mandir}/man8/fghack.8.*
@@ -320,6 +323,7 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %attr(0644,root,root)                    %{mandir}/man8/svok.8.*
 %attr(0644,root,root)                    %{mandir}/man8/svscan.8.*
 %attr(0644,root,root)                    %{mandir}/man8/svstat.8.*
+%attr(0644,root,root)                    %{mandir}/man8/svstatd.8.*
 %attr(0644,root,root)                    %{mandir}/man8/tai64n.8.*
 %attr(0644,root,root)                    %{mandir}/man8/tai64nlocal.8.*
 %attr(0644,root,root)                    %{mandir}/man8/tai64nunix.8.*

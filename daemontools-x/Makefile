@@ -21,12 +21,13 @@ edit = sed \
 	-e 's,@email\@,$(email),g' \
 	-e 's,@DATE\@,$(DATE),g'
 
-it = envdir envuidgid setlock setuidgid softlimit svc svok \
+it = envdir envuidgid rsvc setlock setuidgid softlimit svc svok \
 	svstat tai64n tai64nlocal tai64nunix tai2tai64n tai64n2tai \
 	spipe qfilelog multipipe teepipe logselect svscan qlogselect \
 	supervise readproctitle multilog docker-entrypoint fghack \
-	pgrphack svalert svps svscanboot upstart systemd qmailctl openrc \
-	minisvc instcheck installer daemontools.perms daemontools.changes
+	pgrphack svalert svps svscanboot svstatd upstart systemd \
+	qmailctl openrc minisvc instcheck installer \
+	daemontools.perms daemontools.changes
 
 man = spipe.1 qfilelog.1 multipipe.1 teepipe.1 tai2tai64n.1 \
 	tai64n2tai.1 envdir.8 envuidgid.8 fghack.8 installer.1 \
@@ -246,6 +247,16 @@ svstat: load svstat.o run_init.o
 
 svstat.o: compile svstat.c conf-runfs
 	./compile `grep -v "^#" conf-runfs` svstat.c
+	
+rsvc: rsvc.in conf-prefix conf-servicedir
+	cat warn-auto.sh $@.in  | $(edit) > $@
+	chmod +x $@
+
+svstatd: load svstatd.o
+	./load svstatd -lqmail
+
+svstatd.o: compile svstatd.c
+	./compile svstatd.c
 
 tai64n: load tai64n.o
 	./load tai64n -lqmail

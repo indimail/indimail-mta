@@ -5,3 +5,4 @@ f:::0755:/sbin/:multilog:multilog
 f:::0755:/sbin/:fghack:fghack
 f:::0755:/sbin/:pgrphack:pgrphack
 f:::0755:/sbin/:minisvc:minisvc
+f:::0755:/sbin/:svstatd:svstatd

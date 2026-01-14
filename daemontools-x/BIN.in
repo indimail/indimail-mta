@@ -7,6 +7,7 @@
 #
 f:::0755:/bin/:envdir:envdir
 f:::0755:/bin/:envuidgid:envuidgid
+f:::0755:/bin/:rsvc:rsvc
 f:::0755:/bin/:setlock:setlock
 f:::0755:/bin/:setuidgid:setuidgid
 f:::0755:/bin/:softlimit:softlimit

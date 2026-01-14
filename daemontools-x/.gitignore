@@ -90,3 +90,6 @@ installer.1
 supervise.8
 svalert.8
 svalert
+rsvc
+svstatd
+svstatd.o

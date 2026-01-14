@@ -1,0 +1,65 @@
+.\" vim: tw=75
+.TH SVSTATD "1" "Jan 2026" "daemontools" "administration and privileged commands"
+
+.SH NAME
+.PP
+svstatd \- remote supervise service status server
+.PP
+rsvc \- connect to remote svstatd server to get status of a supervised
+service
+
+.SH SYNOPSYS
+.PP
+\fBsvstatd\fR
+.PP
+\fBtcpclient\fR -a \fIwait_time\fR \fIIP\fR \fIport\fR \fBrsvc\fR \fIdir\fR
+\fIs\fR [\fIcmd\fR \fIcontainer_id\fR]
+
+.SH DESCRIPTION
+\fBsvstatd\fR reads the standard input and expects the service directory
+\fIdir\fR and service name \fIs\fR. It then execs \fBsvstat\fR(8) to get
+the status of the \fBsupervise\fR(8) service \fIs\fR running in \fIdir\fR.
+The service can also be running inside a \fBdocker\fR(1) or \fBpodman\fR(1)
+container on the host. You can use the \fBtcpclient\fR(8) script
+\fBrsvc\fR(1) to query the status of any service where \fBsvstated\fR is
+running. Here \fIwait_time\fR refers to \fBtcpclient\fR(8) data timeout.
+The script returns 0 if service is up, 1 if service is down. Any other exit
+value means a system/network error.
+
+\fBsvstatd\fR can be run under \fBtcpserver\fR(1) to implement, a remote
+service status for supervise services, by \fBrsvc\fR clients running on a
+different host.
+
+The following example creates this service on port 3002.
+
+.EX
+  /bin/tcpserver -hPR 0 3002 /usr/sbin/svstatd
+.EE
+
+One can use \fBrsvc\fR to get the status of any remote supervise service on
+host with IP address \fI192.168.2.100\fR as shown below
+
+.EX
+  /bin/tcpclient -a 5 192.168.2.100 3002 /usr/bin/rsvc /service qmail-smtpd.25
+.EE
+
+If you have supverise running in a docker container with ID
+\fIcontainer_id\fR, then you can use the following command to check the
+status of any supervise service \fs\fR in directory \fIservice\fR like
+this
+
+.EX
+  # docker
+  /bin/tcpclient -a 5 192.168.2.100 3002 /usr/sbin/rsvc /service
+  \fIs\fR \fIdocker\fR \fIcontainer_id\fR
+
+  or
+
+  # podman
+  /bin/tcpclient -a 5 192.168.2.100 3002 /usr/sbin/rsvc /service
+  \fIs\fR \fIpodman\fR \fIcontainer_id\fR
+.EE
+
+.SH SEE ALSO
+rsvc(1), tcpclient(1), tcpserver(1), supervise(8), svstat(8), docker(1),
+podman(1)

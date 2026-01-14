@@ -11,6 +11,8 @@ Release @version@-@release@ Start 08/01/2026 End --/--/----
 06. supervise: clear sleep interval in status
 07. svstat: Report status uptime in seconds.nanoseconds
 08. svps: remove nanoseconds from time reported by svstat
+- 14/01/2026
+09. added svstatd, rsvc programs
 
 * Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
 Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025
