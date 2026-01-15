@@ -346,7 +346,7 @@ do
 	if [ -z "$sv_dirs" ] ; then
 		sv_dirs="$t"
 	else
-		sv_dirs=$sv_dirs "$t"
+		sv_dirs="$sv_dirs $t"
 	fi
 done < /tmp/svps.$$
 
