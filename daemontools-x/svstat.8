@@ -17,6 +17,12 @@ service status is \fIup\fR, \fBpid\fR is the process id of the service. In
 case the status is either \fIdown\fR or \fIwait\fR, \fBpid\fR will be the
 process id of the \fBsupervise\fR process.
 
+When \fBsupervise\fR is monitoring a process that forks in the background,
+the pid that is shown may be actually no longer exist. In such a case
+\fBsvstat\fR will show pid label as '?pid'. As stated in the
+\fBsupervise\fR man page, you can have \fBsupervise\fR monitor such errant
+processes by using \fBfghack\fR(8) or by having sticky bit on the run file.
+
 .EX
 # this service is up. here the pid of qmail-qmtpd is 762703
 $ svstat /service/qmail-qmtpd.209

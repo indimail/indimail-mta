@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.41 2025-12-11 18:35:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.42 2026-01-26 20:26:17+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -975,6 +975,10 @@ main(int argc, char **argv)
 	sig_catch(sig_term, sigterm);
 	sig_catch(sig_usr1, siguser1);
 	sig_catch(sig_usr2, siguser2);
+#if defined(linux)
+	if (svpid == 1) /*- podman, docker */
+		sig_catch(SIGRTMIN + 3, sigterm);
+#endif
 	if ((s = env_get("SCANINTERVAL")))
 		scan_ulong(s, &scan_interval);
 	if (env_get("SCANLOG"))
@@ -1023,13 +1027,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.41 2025-12-11 18:35:52+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.42 2026-01-26 20:26:17+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.42  2026-01-26 20:26:17+05:30  Cprogrammer
+ * treat SIGRTMIN equivalent to SIGTERM for linux
+ *
  * Revision 1.41  2025-12-11 18:35:52+05:30  Cprogrammer
  * delink use of wait status as a flag
  *

@@ -1,7 +1,8 @@
 /*
- * $Id: svstat.c,v 1.14 2026-01-11 20:36:24+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svstat.c,v 1.15 2026-01-26 20:13:41+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "strerr.h"
@@ -158,7 +159,10 @@ doit(char *dir, int *retval)
 	if (pid && status[20]) {
 		if (*retval != 3 && *retval != 5)
 			*retval = 0;
-		substdio_puts(&o, " pid ");
+		if (kill(pid, 0))
+			substdio_puts(&o, " ?pid ");
+		else
+			substdio_puts(&o, "  pid ");
 		substdio_put(&o, strnum, fmt_ulong(strnum, pid));
 		substdio_puts(&o, " ");
 	} else
@@ -211,13 +215,16 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	const char     *x = "$Id: svstat.c,v 1.14 2026-01-11 20:36:24+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svstat.c,v 1.15 2026-01-26 20:13:41+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: svstat.c,v $
+ * Revision 1.15  2026-01-26 20:13:41+05:30  Cprogrammer
+ * display ?pid when process being supervised forks into background
+ *
  * Revision 1.14  2026-01-11 20:36:24+05:30  Cprogrammer
  * report uptime in seconds.nanoseconds
  *
