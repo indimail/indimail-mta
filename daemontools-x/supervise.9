@@ -154,6 +154,7 @@ TERM, CONT signal to the service. Hence, if service\fIw\fR is down, write
 on \fIw\fR/\fIsupervise\fR/\fIdn\fR returns immediately. if service \fIw\fR is
 up, the write will block until \fIw\fR is down.
 
+.PP
 \fBsupervise\fR can wait for another service by having a file named
 \fIdir\fR/\fIwait\fR. This file has two lines. The first line is time
 \fIt\fR in seconds and the second line is a directory \fIw\fR for another
@@ -175,7 +176,6 @@ by setting the environment variable \fBUPFIFO\fR. This allows supervise to
 wait for a non-supervise service, where the named fifo is opened by an
 external application.
 
-.PP
 \fBsupervise\fR logs informational, warning and error messages to
 descriptor 2. Informational messages can be turned on by setting the
 environment variable \fBVERBOSE\fR. Warning messages can be turned off by

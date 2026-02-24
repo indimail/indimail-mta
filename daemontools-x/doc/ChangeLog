@@ -17,6 +17,8 @@ Release @version@-@release@ Start 08/01/2026 End --/--/----
 10. svscan.c: treat SIGRTMIN equivalent to SIGTERM
 11. svstat.c: display ?pid when process being supervised forks
     into background
+- 24/02/2026
+12. svscan.c: set SV_PWD for main process
 
 * Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
 Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025

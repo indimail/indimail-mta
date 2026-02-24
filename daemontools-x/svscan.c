@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.42 2026-01-26 20:26:17+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.43 2026-02-24 21:06:09+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -444,6 +444,8 @@ start(const char *fn, const char *sdir)
 			if (x[i].flaglog)
 				if (fd_move(1, x[i].pi[1]) == -1)
 					strerr_die4sys(111, WARN, "unable to set up descriptors for ", fn, ": ");
+			if (!env_put2("SV_PWD", fn))
+				strerr_die4x(111, WARN, "out of memory for ", fn, "/log");
 			args[0] = (char *) "supervise";
 			args[1] = (char *) fn;
 			args[2] = 0;
@@ -1027,13 +1029,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.42 2026-01-26 20:26:17+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.43 2026-02-24 21:06:09+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.43  2026-02-24 21:06:09+05:30  Cprogrammer
+ * set SV_PWD for the main process
+ *
  * Revision 1.42  2026-01-26 20:26:17+05:30  Cprogrammer
  * treat SIGRTMIN equivalent to SIGTERM for linux
  *
