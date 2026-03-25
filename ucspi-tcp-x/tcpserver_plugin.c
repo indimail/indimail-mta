@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.18  2026-03-25 22:47:57+05:30  Cprogrammer
+ *  fix for Solaris
+ *
  *  Revision 1.17  2024-05-09 22:55:54+05:30  mbhangui
  *  fix discarded-qualifier compiler warnings
  *
@@ -62,6 +65,9 @@
 #include "dlnamespace.h"
 #endif
 #include <dlfcn.h>
+#ifdef SUNOS
+#include <link.h>
+#endif
 #include <unistd.h>
 #include "stralloc.h"
 #include <strerr.h>
@@ -203,6 +209,6 @@ tcpserver_plugin(char **envp)
 void
 getversion_tcpserver_plugin_c()
 {
-	const char    *x = "$Id: tcpserver_plugin.c,v 1.17 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+	const char    *x = "$Id: tcpserver_plugin.c,v 1.18 2026-03-25 22:47:57+05:30 Cprogrammer Exp mbhangui $";
 	x++;
 }

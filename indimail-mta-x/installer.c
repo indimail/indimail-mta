@@ -1,8 +1,11 @@
 /*
- * $Id: installer.c,v 1.30 2025-02-23 13:17:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: installer.c,v 1.31 2026-03-25 22:32:16+05:30 Cprogrammer Exp mbhangui $
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
+#ifdef SUNOS
+#include <sys/mkdev.h>
+#endif
 #if defined(linux)
 #include <sys/sysmacros.h>
 #endif
@@ -703,7 +706,7 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.30 2025-02-23 13:17:10+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.31 2026-03-25 22:32:16+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -711,6 +714,9 @@ getversion_installer_c()
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.31  2026-03-25 22:32:16+05:30  Cprogrammer
+ * fix compilation on Solaris
+ *
  * Revision 1.30  2025-02-23 13:17:10+05:30  Cprogrammer
  * fix SIGSEGV
  *

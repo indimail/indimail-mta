@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.21  2026-03-25 22:47:48+05:30  Cprogrammer
+ * fix for Solaris
+ *
  * Revision 1.20  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -68,6 +71,9 @@
 #include "dlnamespace.h"
 #endif
 #include <dlfcn.h>
+#ifdef SUNOS
+#include <link.h>
+#endif
 #include <unistd.h>
 #include <strerr.h>
 #include <str.h>
@@ -194,7 +200,7 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	const char     *x = "$Id: load_shared.c,v 1.20 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: load_shared.c,v 1.21 2026-03-25 22:47:48+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }
