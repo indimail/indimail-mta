@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.43 2026-02-24 21:06:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.44 2026-04-12 22:56:51+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -304,7 +304,7 @@ start(const char *fn, const char *sdir)
 	struct stat     st;
 	int             child, i, fdsource;
 	char           *s;
-	char           *args[4];
+	char           *args[6];
 
 #ifdef USE_RUNFS
 	/*-
@@ -444,11 +444,23 @@ start(const char *fn, const char *sdir)
 			if (x[i].flaglog)
 				if (fd_move(1, x[i].pi[1]) == -1)
 					strerr_die4sys(111, WARN, "unable to set up descriptors for ", fn, ": ");
-			if (!env_put2("SV_PWD", fn))
+			if (!env_put2("MAIN_SV", fn))
 				strerr_die4x(111, WARN, "out of memory for ", fn, "/log");
-			args[0] = (char *) "supervise";
-			args[1] = (char *) fn;
-			args[2] = 0;
+			if (!stralloc_copys(&tmp, fn) ||
+					!stralloc_catb(&tmp, "/.svars", 7) ||
+					!stralloc_0(&tmp))
+				strerr_die2x(111, FATAL, "out of memory");
+			if (!access(tmp.s, X_OK)) {
+				args[0] = (char *) "envdir";
+				args[1] = (char *) tmp.s;
+				args[2] = (char *) "supervise";
+				args[3] = (char *) fn;
+				args[4] = 0;
+			} else {
+				args[0] = (char *) "supervise";
+				args[1] = (char *) fn;
+				args[2] = 0;
+			}
 			pathexec_run(*args, args, environ);
 			strerr_die4sys(111, WARN, "unable to start supervise ", fn, ": ");
 		default:
@@ -551,10 +563,19 @@ start(const char *fn, const char *sdir)
 				strerr_die4sys(111, WARN, "unable to switch to ", fn, ": ");
 			if (!env_put2("SV_PWD", fn))
 				strerr_die4x(111, WARN, "out of memory for ", fn, "/log");
-			args[0] = (char *) "supervise";
-			args[1] = (char *) "log";
-			args[2] = (char *) fn;
-			args[3] = 0;
+			if (!access("log/.svars", X_OK)) {
+				args[0] = (char *) "envdir";
+				args[1] = (char *) "log./svars";
+				args[2] = (char *) "supervise";
+				args[3] = (char *) "log";
+				args[4] = (char *) fn;
+				args[5] = 0;
+			} else {
+				args[0] = (char *) "supervise";
+				args[1] = (char *) "log";
+				args[2] = (char *) fn;
+				args[3] = 0;
+			}
 			pathexec_run(*args, args, environ);
 			strerr_die4sys(111, FATAL, "unable to start supervise ", fn, "/log: ");
 		default:
@@ -1029,13 +1050,17 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.43 2026-02-24 21:06:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.44 2026-04-12 22:56:51+05:30 Cprogrammer Exp mbhangui $";
 
 	y++;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.44  2026-04-12 22:56:51+05:30  Cprogrammer
+ * use MAIN_SV environment variable for main supervise process
+ * use .svars directory to set environment variables for supervise
+ *
  * Revision 1.43  2026-02-24 21:06:09+05:30  Cprogrammer
  * set SV_PWD for the main process
  *

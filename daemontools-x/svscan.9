@@ -51,11 +51,12 @@ $ ps -ef | grep -E "svscan|supervise|COMMAND" \
  980749  980727 ?        root     root     supervise log qmail-smtpd.366
 .EE
 
-For every \fBsupervise\fR process it runs, \fBsvscan\fR also sets
-\fBSV_PWD\fR=\fBs\fR as an environment variable. \fBsvscan\fR also sets
-\fBPPID\fR environment variable as the process id of the \fBsvscan\fR
-process, for supervise proceses and any initialization command \fBsvscan\fR
-runs.
+For every \fBsupervise\fR main process it runs, \fBsvscan\fR also sets
+\fBMAIN_SV\fR=\fBs\fR as an environment variable. For every \fBsupervise\fR
+log process it runs, \fBsvscan\fR also sets \fBSV_PWD\fR=\fBs\fR as an
+environment variable. \fBsvscan\fR also sets \fBPPID\fR environment
+variable as the process id of the \fBsvscan\fR process, for supervise
+proceses and any initialization command \fBsvscan\fR runs.
 
 \fBsvscan\fR sets environment variable \fBSCANDIR\fR=\fIscandir\fR on
 startup. If \fIscandir\fR argument to \fBsvscan\fR is omitted than it uses
@@ -228,6 +229,15 @@ sudo qmailctl start/stop
 In a container environment, \fBsvscan\fR is started through an
 entrypoint for docker/podman and starts as PID 1. This entrypoint is
 implemented using the \fBdocker-entrypoint\fR(8) script in \fI/usr/sbin\fR.
+
+.SH Setting ENVIRONMENT variables for supervise
+\fBsvscan\fR can set environment variables for the \fBsupervise\fR process
+if the directory \fI.svars\fR exist in the service directory. It uses
+\fBenvdir\fR(8) to set the environment variables. Similarly, environment
+variables for the log process can also bet set by having \fIlog/.svars\fR
+directory. You can use \fI/service/.svscan/variables\fR directory to set
+environment variables for all services. The \fI.svars\fR directory can be
+used for setting service specific environment variables.
 
 .SH OPTIONS
 .TP 3

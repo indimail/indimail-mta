@@ -82,7 +82,9 @@ even if the file \fIdir\fR/down exists.
 On receipt of \fBSIGTERM\fR, \fBsupervise\fR sends \fBSIGTERM\fR followed
 by \fBSIGCONT\fR to its child. If running in subreaper mode or when
 \fBSETPGID\fR is set, \fBsupervise\fR uses \fBkillpg\fR(3) to send the
-signals, else \fBkill\fR(2) is used to send signals.
+signals, else \fBkill\fR(2) is used to send signals. If the environment
+variable \fBSHUTDOWN_SIGNAL\fR is set, \fBsupervise\fR will use the value
+of \fBSHUTDOWN_SIGNAL\fR instead of \fBSIGTERM\fR.
 
 if the file \fIdir\fR/shutdown exists \fBsupervise\fR executes
 \fIshutdown\fR when asked to exit or on receipt of \fBSIGTERM\fR. \fIdir\fR
@@ -150,9 +152,12 @@ used by \fBsvscan\fR. If service \fIw\fR doesn't exist,
 \fIsupervise\fR opens \fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR/\fIdn\fR
 named pipe in read mode, when asked to bring down a service, using
 \fBsvc\fR (-d or -r option). It opens this named pipe after issuing the
-TERM, CONT signal to the service. Hence, if service\fIw\fR is down, write
-on \fIw\fR/\fIsupervise\fR/\fIdn\fR returns immediately. if service \fIw\fR is
-up, the write will block until \fIw\fR is down.
+SIGTERM, SIGCONT signal to the service. Hence, if service\fIw\fR is down,
+write on \fIw\fR/\fIsupervise\fR/\fIdn\fR returns immediately. if service
+\fIw\fR is up, the write will block until \fIw\fR is down. If the
+environment variable \fBSHUTDOWN_SIGNAL\fR is set, \fBsupervise\fR will use
+the value of \fBSHUTDOWN_SIGNAL\fR instead of \fBSIGTERM\fR when \fBsvc\fR
+command is passed -d or -r option.
 
 .PP
 \fBsupervise\fR can wait for another service by having a file named
@@ -182,7 +187,8 @@ environment variable \fBVERBOSE\fR. Warning messages can be turned off by
 setting the environment variable \fBSILENT\fR. If you are using
 \fBsvscan\fR for service startup (as setup for indimail-mta), you can set
 environment variables for \fBsupervise\fR in
-\fI/service/.svscan/variables\fR directory.
+\fI/service/.svscan/variables\fR directory. You can use \fIdir/.svars\fR
+for setting enviroment variables specific to service \fIdir\fR.
 
 \fBsupervise\fR passes arguments to the \fIrun\fR, \fIalert\fR and the
 \fIshutdown\fR scripts. This allows you to handle various events in the

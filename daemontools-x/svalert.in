@@ -1,5 +1,5 @@
 #
-# $Id: svalert.in,v 1.3 2026-01-11 21:16:00+05:30 Cprogrammer Exp mbhangui $
+# $Id: svalert.in,v 1.4 2026-04-12 22:56:25+05:30 Cprogrammer Exp mbhangui $
 #
 
 log_syslog()
@@ -25,11 +25,11 @@ if [ $? -ne 0 ] ; then
 fi
 
 case "$#" in
-	2) # run/shutdown script arguments
+	2) # dir/run or dir/shutdown script arguments
 	# when used in run two arguments are passed
 	# run script arguments
 	# $1 - service directory
-	# #2 - startup type
+	# $2 - startup type
 	# "abnormal startup" When ./run exits on its own
 	# "system failure"   When supervise is unable to fork to execute ./run
 	# "manual restart"   When svc -u or -r is used to start the service
@@ -44,7 +44,7 @@ case "$#" in
 	# $2 - pid of process that was shutdown
 	#
 	if [ -f @sysconfdir@/svalerts.filter ] ; then
-		t=$(echo $2 | sed -e 's/ /-/g')
+		t=$(echo $2 | sed -e 's/ /-/g') # convert "abnormal startup" to "abnormal-startup", etc
 		echo $t | /usr/bin/grep -q -w -f @sysconfdir@/svalerts.filter
 		if [ $? -eq 0 ] ; then
 			exit 0
@@ -71,10 +71,10 @@ case "$#" in
 	fi
 	;;
 
-	3) # run script arguments when svalert gets called as svalert $* instead of svalert "$@"
+	3) # run script arguments when svalert gets called as svalert $* instead of svalert "$@" in ./run
 	# $1 - service directory
-	# #2 - startup type (1st word)
-	# #3 - startup type (2nd word)
+	# $2 - startup type (1st word)
+	# $3 - startup type (2nd word)
 	if [ -f @sysconfdir@/svalerts.filter ] ; then
 		echo "$2"-"$3" | /usr/bin/grep -q -w -f @sysconfdir@/svalerts.filter
 		if [ $? -eq 0 ] ; then
@@ -90,13 +90,13 @@ case "$#" in
 	fi
 	;;
 
-	4) # alert script arguments
+	4) # svalert script arguments when ./alert exists or gets called as svalert "$@" in ./run
 	# $1 - service directory
 	# $2 - pid of process that died
 	# $3 - exit status of process that died / signal that killed the process
 	# $4 - exited/stopped/signalled
 	if [ -f @sysconfdir@/svalerts.filter ] ; then
-		/usr/bin/grep -q -w "abnormal shutdown" @sysconfdir@/svalerts.filter
+		/usr/bin/grep -q -w "abnormal-shutdown" @sysconfdir@/svalerts.filter
 		if [ $? -eq 0 ] ; then
 			exit 0
 		fi
@@ -113,6 +113,9 @@ esac
 
 #
 # $Log: svalert.in,v $
+# Revision 1.4  2026-04-12 22:56:25+05:30  Cprogrammer
+# updated inline comments
+#
 # Revision 1.3  2026-01-11 21:16:00+05:30  Cprogrammer
 # fix svalerts.filter path
 #

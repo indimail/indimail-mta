@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.55 2026-01-11 20:34:48+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.56 2026-04-12 23:00:55+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -208,7 +208,7 @@ tryaction(const char **action, pid_t cpid, int wstat, int waitflag)
 				action[4] = "unknown";
 			}
 		} else {
-			action[2] = dir;
+			action[2] = strnum1;
 			action[3] = NULL;
 		}
 		execve(*action, (char **) action, environ);
@@ -219,11 +219,85 @@ tryaction(const char **action, pid_t cpid, int wstat, int waitflag)
 	} /* switch (f = fork()) */
 }
 
+const char *
+signal_name(int signal)
+{
+	switch (signal)
+	{
+		case SIGHUP:
+			return("SIGHUP");
+		case SIGINT:
+			return("SIGINT");
+		case SIGQUIT:
+			return("SIGQUIT");
+		case SIGILL:
+			return("SIGILL");
+		case SIGTRAP:
+			return("SIGTRAP");
+		case SIGABRT:
+			return("SIGABRT");
+		case SIGBUS:
+			return("SIGBUS");
+		case SIGFPE:
+			return("SIGFPE");
+		case SIGKILL:
+			return("SIGKILL");
+		case SIGUSR1:
+			return("SIGUSR1");
+		case SIGSEGV:
+			return("SIGSEGV");
+		case SIGUSR2:
+			return("SIGUSR2");
+		case SIGPIPE:
+			return("SIGPIPE");
+		case SIGALRM:
+			return("SIGALRM");
+		case SIGTERM:
+			return("SIGTERM");
+		case SIGSTKFLT:
+			return("SIGSTKFLT");
+		case SIGCHLD:
+			return("SIGCHLD");
+		case SIGCONT:
+			return("SIGCONT");
+		case SIGSTOP:
+			return("SIGSTOP");
+		case SIGTSTP:
+			return("SIGTSTP");
+		case SIGTTIN:
+			return("SIGTTIN");
+		case SIGTTOU:
+			return("SIGTTOU");
+		case SIGURG:
+			return("SIGURG");
+		case SIGXCPU:
+			return("SIGXCPU");
+		case SIGXFSZ:
+			return("SIGXFSZ");
+		case SIGVTALRM:
+			return("SIGVTALRM");
+		case SIGPROF:
+			return("SIGPROF");
+		case SIGWINCH:
+			return("SIGWINCH");
+		case SIGIO:
+			return("SIGIO");
+		case SIGPWR:
+			return("SIGPWR");
+		case SIGSYS:
+			return("SIGSYS");
+		default:
+			return("UNKNOWN");
+	}
+}
+
 static void
 sigterm(int i)
 {
 	int             siglist[] = {-1, -1, -1};
+	int             shutdown_signal;
 	const char     *signame[] = {0, 0};
+	const char     *p;
 
 	if (childpid) {
 		sig_block(sig_term);
@@ -242,9 +316,16 @@ sigterm(int i)
 		flagwantxx = 1;
 		flagwantup = 0;
 		flagpaused = 0;
-		siglist[0] = SIGTERM;
+		if (!(p = env_get("SHUTDOWN_SIGNAL"))) {
+			shutdown_signal = SIGTERM;
+			p = "SIGTERM";
+		} else {
+			scan_int(p, &shutdown_signal);
+			p = signal_name(shutdown_signal);
+		}
+		siglist[0] = shutdown_signal;
 		siglist[1] = SIGCONT;
-		signame[0] = "SIGTERM";
+		signame[0] = p;
 		signame[1] = "SIGCONT";
 		do_kill(1, siglist, signame);
 		sig_unblock(sig_term);
@@ -620,9 +701,10 @@ doit()
 	struct taia     stamp;
 	static int      double_fork_flag;
 	pid_t           r;
-	int             wstat, wstat_reap, t, g = 0, do_break;
+	int             wstat, wstat_reap, t, g = 0, do_break, shutdown_signal;
 	char            ch, c = 0;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
+	const char     *p;
 
 	announce(0);
 
@@ -773,9 +855,16 @@ doit()
 					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
-					siglist[0] = SIGTERM;
+					if (!(p = env_get("SHUTDOWN_SIGNAL"))) {
+						shutdown_signal = SIGTERM;
+						p = "SIGTERM";
+					} else {
+						scan_int(p, &shutdown_signal);
+						p = signal_name(shutdown_signal);
+					}
+					siglist[0] = shutdown_signal;
 					siglist[1] = SIGCONT;
-					signame[0] = "SIGTERM";
+					signame[0] = p;
 					signame[1] = "SIGCONT";
 					do_kill(g, siglist, signame);
 					g = flagpaused = 0;
@@ -803,9 +892,16 @@ doit()
 #endif
 					if (!access(*shutdown, F_OK))
 						tryaction(shutdown, childpid, 0, 0); /*- run the shutdown command */
-					siglist[0] = SIGTERM;
+					if (!(p = env_get("SHUTDOWN_SIGNAL"))) {
+						shutdown_signal = SIGTERM;
+						p = "SIGTERM";
+					} else {
+						scan_int(p, &shutdown_signal);
+						p = signal_name(shutdown_signal);
+					}
+					siglist[0] = shutdown_signal;
 					siglist[1] = SIGCONT;
-					signame[0] = "SIGTERM";
+					signame[0] = p;
 					signame[1] = "SIGCONT";
 					do_kill(g, siglist, signame);
 					g = flagpaused = 0;
@@ -1273,13 +1369,17 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.55 2026-01-11 20:34:48+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.56 2026-04-12 23:00:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.56  2026-04-12 23:00:55+05:30  Cprogrammer
+ * fixed argument passed to shutdown script for -d -r option of svc
+ * use configurable shutdown signal using SHUTDOWN_SIGNAL for -d -r option of svc
+ *
  * Revision 1.55  2026-01-11 20:34:48+05:30  Cprogrammer
  * clear sleep interval in status
  *
