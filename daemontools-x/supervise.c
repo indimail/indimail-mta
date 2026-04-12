@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.56 2026-04-12 23:00:55+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.57 2026-04-12 23:09:07+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -254,8 +254,10 @@ signal_name(int signal)
 			return("SIGALRM");
 		case SIGTERM:
 			return("SIGTERM");
+#ifdef SIGSTKFLT
 		case SIGSTKFLT:
 			return("SIGSTKFLT");
+#endif
 		case SIGCHLD:
 			return("SIGCHLD");
 		case SIGCONT:
@@ -282,8 +284,10 @@ signal_name(int signal)
 			return("SIGWINCH");
 		case SIGIO:
 			return("SIGIO");
+#ifdef SIGPWR
 		case SIGPWR:
 			return("SIGPWR");
+#endif
 		case SIGSYS:
 			return("SIGSYS");
 		default:
@@ -1369,13 +1373,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.56 2026-04-12 23:00:55+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.57 2026-04-12 23:09:07+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.57  2026-04-12 23:09:07+05:30  Cprogrammer
+ * fix for OSX
+ *
  * Revision 1.56  2026-04-12 23:00:55+05:30  Cprogrammer
  * fixed argument passed to shutdown script for -d -r option of svc
  * use configurable shutdown signal using SHUTDOWN_SIGNAL for -d -r option of svc

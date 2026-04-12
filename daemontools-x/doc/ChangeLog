@@ -21,6 +21,13 @@ Release @version@-@release@ Start 08/01/2026 End --/--/----
 12. svscan.c: set SV_PWD for main process
 - 25/03/2026
 13. Fixes for Solaris
+- 12/04/2026
+14. supervise.c:fixed argument passed to shutdown script for -d -r option of
+    svc
+15. supervise.c: use configurable shutdown signal using SHUTDOWN_SIGNAL for -d
+    -r option of svc
+16. svscan.c: use MAIN_SV environment variable for main supervise process
+17. svscan.c: use .svars directory to set environment variables for supervise
 
 * Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
 Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025
