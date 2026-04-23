@@ -1,5 +1,5 @@
 #
-# $Id: svalert.in,v 1.4 2026-04-12 22:56:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: svalert.in,v 1.5 2026-04-23 10:46:36+05:30 Cprogrammer Exp mbhangui $
 #
 
 log_syslog()
@@ -17,8 +17,8 @@ log_syslog()
 }
 
 tmval=$(date +%s)
-[ -n "SV_ALERT_PORT" ] && port=$SV_ALERT_PORT || port=3001
-[ -n "PROBE_SERVER" ] && probe_server=$PROBE_SERVER || probe_server="probe-server"
+[ -n "$SV_ALERT_PORT" ] && port=$SV_ALERT_PORT || port=3001
+[ -n "$PROBE_SERVER" ] && probe_server=$PROBE_SERVER || probe_server="probe-server"
 /usr/bin/getent ahosts $probe_server | /usr/bin/grep DGRAM > /dev/null
 if [ $? -ne 0 ] ; then
 	exit 0
@@ -53,7 +53,7 @@ case "$#" in
 	word_count=$(echo "$2" | wc -w)
 	if [ $word_count -eq 2 ] ; then # we are being called in ./run
 		t=$(echo $2 | sed -e 's/ /-/g')
-		if [ -n "USE_SYSLOG" -a -x /usr/bin/logger ] ; then
+		if [ -n "$USE_SYSLOG" -a -x /usr/bin/logger ] ; then
 			log_syslog "$2" $hostname $PWD $1 "$t" - - $tmval
 		elif [ -x /usr/bin/udpclient ] ; then
 			exec /usr/bin/udpclient -h $probe_server -p $port svalert $hostname $PWD $1 "$t" - - $tmval
@@ -61,7 +61,7 @@ case "$#" in
 			echo svalert $hostname $PWD $1 $t - - $tmval | nc $probe_server -u $port
 		fi
 	else # we are being called in ./shutdown and $2 is PID
-		if [ -n "USE_SYSLOG" -a -x /usr/bin/logger ] ; then
+		if [ -n "$USE_SYSLOG" -a -x /usr/bin/logger ] ; then
 			log_syslog "normal shutdown" $1 "normal shutdown" PID "$t" $tmval
 		elif [ -x /usr/bin/udpclient ] ; then
 			exec /usr/bin/udpclient -h $probe_server -p $port svalert $hostname $PWD $1 "normal-shutdown" PID $2 $tmval
@@ -81,7 +81,7 @@ case "$#" in
 			exit 0
 		fi
 	fi
-	if [ -n "USE_SYSLOG" -a -x /usr/bin/logger ] ; then
+	if [ -n "$USE_SYSLOG" -a -x /usr/bin/logger ] ; then
 		log_syslog "$2 $3" $hostname $PWD $1 "$2-$3" - - $tmval
 	elif [ -x /usr/bin/udpclient ] ; then
 		exec /usr/bin/udpclient -h $probe_server -p $port svalert $hostname $PWD $1 "$2-$3" - - $tmval
@@ -101,7 +101,7 @@ case "$#" in
 			exit 0
 		fi
 	fi
-	if [ -n "USE_SYSLOG" -a -x /usr/bin/logger ] ; then
+	if [ -n "$USE_SYSLOG" -a -x /usr/bin/logger ] ; then
 		log_syslog "abnormal shutdown" $hostname $PWD $1 "abnormal-shutdown" $4 $3 $tmval
 	elif [ -x /usr/bin/udpclient ] ; then
 		exec /usr/bin/udpclient -h $probe_server -p $port svalert $hostname $PWD $1 "abormal-shutdown" $4 $3 $tmval
@@ -113,6 +113,9 @@ esac
 
 #
 # $Log: svalert.in,v $
+# Revision 1.5  2026-04-23 10:46:36+05:30  Cprogrammer
+# fixed variables check
+#
 # Revision 1.4  2026-04-12 22:56:25+05:30  Cprogrammer
 # updated inline comments
 #
