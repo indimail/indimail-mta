@@ -30,6 +30,7 @@ Release @version@-@release@ Start 08/01/2026 End --/--/----
 17. svscan.c: use .svars directory to set environment variables for supervise
 - 23/04/2026
 18. svalert: fixed variables check
+19. supervise.c: use normal restart as argument passed to run for svc -r
 
 * Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
 Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025

@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.57 2026-04-12 23:09:07+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.58 2026-04-23 18:46:38+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -706,7 +706,7 @@ doit()
 	static int      double_fork_flag;
 	pid_t           r;
 	int             wstat, wstat_reap, t, g = 0, do_break, shutdown_signal;
-	char            ch, c = 0;
+	char            ch, flagrestart = 0;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 	const char     *p;
 
@@ -820,17 +820,22 @@ doit()
 					return;
 				}
 				if (flagwantxx && flagwantup) {
+					if (flagrestart) {
+						flagrestart = 0;
+						trystart("manual restart"); /* restart because of normal exit (svc -r) */
+					} else {
 #ifdef USE_RUNFS
-					if (use_runfs && fchdir(fddir) == -1)
-						strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
+						if (use_runfs && fchdir(fddir) == -1)
+							strerr_die2sys(111, fatal.s, "unable to switch back to service directory: ");
 #endif
-					if (!access(*alert, F_OK))
-						tryaction(alert, r, wstat, 1);
+						if (!access(*alert, F_OK))
+							tryaction(alert, r, wstat, 1);
 #ifdef USE_RUNFS
-					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
-						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
+						if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
+							strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
-					trystart("abnormal startup"); /* restart because of abnormal exit */
+						trystart("abnormal startup"); /* restart because of abnormal exit */
+					}
 				}
 				break;
 			} /*- if (r == childpid || (r != -1 && grandchild)) */
@@ -848,6 +853,7 @@ doit()
 			case 'r': /*- restart */
 				flagwantxx = 1;
 				flagwantup = 1;
+				flagrestart = 1;
 				if (childpid) {
 #ifdef USE_RUNFS
 					if (use_runfs && fchdir(fddir) == -1)
@@ -873,18 +879,7 @@ doit()
 					do_kill(g, siglist, signame);
 					g = flagpaused = 0;
 				}
-				t = childpid;
-				while (c < 10) {
-					if (kill(childpid, 0) && errno == error_srch) {
-						t = 0;
-						break;
-					}
-					c++;
-					usleep(100);
-				} /* while (c < 10) */
 				announce(0);
-				if (!t)
-					trystart("manual restart"); /* normal startup */
 				break;
 			case 'd': /*- down */
 				flagwantxx = 1;
@@ -1373,13 +1368,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.57 2026-04-12 23:09:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.58 2026-04-23 18:46:38+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.58  2026-04-23 18:46:38+05:30  Cprogrammer
+ * use normal restart as argument passed to run for svc -r
+ *
  * Revision 1.57  2026-04-12 23:09:07+05:30  Cprogrammer
  * fix for OSX
  *

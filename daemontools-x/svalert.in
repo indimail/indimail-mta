@@ -1,5 +1,5 @@
 #
-# $Id: svalert.in,v 1.5 2026-04-23 10:46:36+05:30 Cprogrammer Exp mbhangui $
+# $Id: svalert.in,v 1.6 2026-04-23 18:47:46+05:30 Cprogrammer Exp mbhangui $
 #
 
 log_syslog()
@@ -32,7 +32,8 @@ case "$#" in
 	# $2 - startup type
 	# "abnormal startup" When ./run exits on its own
 	# "system failure"   When supervise is unable to fork to execute ./run
-	# "manual restart"   When svc -u or -r is used to start the service
+	# "manual restart"   When svc -r is used to start the service
+	# "manual startup"   When svc -u is used to start the service
 	# "one-time startup" When svc -o is used to start the service
 	# "auto startup"     Normal startup after supervise is run by svscan
 	#
@@ -90,7 +91,7 @@ case "$#" in
 	fi
 	;;
 
-	4) # svalert script arguments when ./alert exists or gets called as svalert "$@" in ./run
+	4) # svalert script arguments supervise executes ./alert or gets called as svalert "$@" in ./run
 	# $1 - service directory
 	# $2 - pid of process that died
 	# $3 - exit status of process that died / signal that killed the process
@@ -113,6 +114,9 @@ esac
 
 #
 # $Log: svalert.in,v $
+# Revision 1.6  2026-04-23 18:47:46+05:30  Cprogrammer
+# updates comments
+#
 # Revision 1.5  2026-04-23 10:46:36+05:30  Cprogrammer
 # fixed variables check
 #

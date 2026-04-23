@@ -1,5 +1,8 @@
 #!/bin/sh
 # $Log: create_rpm,v $
+# Revision 1.7  2026-04-23 18:46:09+05:30  Cprogrammer
+# updated script
+#
 # Revision 1.6  2024-05-09 23:04:25+05:30  Cprogrammer
 # use x.y for release
 #
@@ -19,7 +22,7 @@
 # Initial revision
 #
 #
-# $Id: create_rpm,v 1.6 2024-05-09 23:04:25+05:30 Cprogrammer Exp mbhangui $
+# $Id: create_rpm,v 1.7 2026-04-23 18:46:09+05:30 Cprogrammer Exp mbhangui $
 #
 version=$(head -1 conf-version)
 
@@ -175,6 +178,9 @@ if [ -z "$release" ] ; then
 			t1=$(rpm -qf /usr/sbin/svscan | cut -d- -f3 | cut -d. -f1)
 			t2=$(rpm -qf /usr/sbin/svscan | cut -d- -f3 | cut -d. -f2)
 			t2=$(expr $t2 + 1)
+			if [ -z "$t2" ] ; then
+				t2=1
+			fi
 			release="$t1.$t2"
 		else
 			release=0.1
@@ -210,6 +216,8 @@ if [ " $key" = " Y" -o " $key" = " y" ] ; then
 		/bin/rm -f /tmp/daemontools.spec
 		rpm --addsign $rpmbuild/RPMS/$build_arch/daemontools-"$version"-"$release".$dist.$build_arch.rpm
 		rpm --addsign $rpmbuild/SRPMS/daemontools-"$version"-"$release".$dist.src.rpm
+		echo $rpmbuild/RPMS/$build_arch/daemontools-"$version"-"$release".$dist.$build_arch.rpm
+		echo $rpmbuild/SRPMS/daemontools-"$version"-"$release".$dist.src.rpm
 		echo -n "RPM lint for daemontools-"$version"-"$release" (Y/N) - "
 		read key
 		if [ " $key" = " Y" -o " $key" = " y" ] ; then
