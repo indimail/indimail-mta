@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.58 2026-04-23 18:46:38+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.59 2026-06-05 09:23:30+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -819,6 +819,7 @@ doit()
 						strerr_warn4(info.s, "supervise pid ", pidstr, " exiting...", 0);
 					return;
 				}
+				/*- auto start on death */
 				if (flagwantxx && flagwantup) {
 					if (flagrestart) {
 						flagrestart = 0;
@@ -853,7 +854,6 @@ doit()
 			case 'r': /*- restart */
 				flagwantxx = 1;
 				flagwantup = 1;
-				flagrestart = 1;
 				if (childpid) {
 #ifdef USE_RUNFS
 					if (use_runfs && fchdir(fddir) == -1)
@@ -880,6 +880,15 @@ doit()
 					g = flagpaused = 0;
 				}
 				announce(0);
+				if (!childpid) {
+					/*
+					 * since there is no child there will not be any wait returning
+					 * for supervise to restart the child here. So we restart
+					 * ourself
+					 */
+					trystart("manual restart"); /* normal startup */
+				} else /*- we set flagrestart flag so that we restart program in auto start on death */
+					flagrestart = 1;
 				break;
 			case 'd': /*- down */
 				flagwantxx = 1;
@@ -1365,16 +1374,23 @@ main(int argc, char **argv)
 	_exit(0);
 }
 
+void dummy(const char *x)
+{
+}
+
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.58 2026-04-23 18:46:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.59 2026-06-05 09:23:30+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.59  2026-06-05 09:23:30+05:30  Cprogrammer
+ * fixed restart (svc -r) option
+ *
  * Revision 1.58  2026-04-23 18:46:38+05:30  Cprogrammer
  * use normal restart as argument passed to run for svc -r
  *
