@@ -1,5 +1,8 @@
 /*
  * $Log: sorted.c,v $
+ * Revision 1.6  2026-06-05 09:21:50+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.5  2025-08-12 22:06:57+05:30  Cprogrammer
  * converted function prototype to ansic
  *
@@ -56,10 +59,12 @@ int sorted_insert(sorted *sl, stralloc *sa)
 	return 1;
 }
 
+void dummy(const char *x) {}
+
 void
 getversion_sorted_c()
 {
-	const char     *x = "$Id: sorted.c,v 1.5 2025-08-12 22:06:57+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sorted.c,v 1.6 2026-06-05 09:21:50+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }

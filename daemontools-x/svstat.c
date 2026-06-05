@@ -1,5 +1,5 @@
 /*
- * $Id: svstat.c,v 1.15 2026-01-26 20:13:41+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svstat.c,v 1.16 2026-06-05 09:22:13+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -212,16 +212,21 @@ main(int argc, char **argv)
 	_exit(retval);
 }
 
+void dummy(const char *x) {}
+
 void
 getversion_svstat_c()
 {
-	const char     *x = "$Id: svstat.c,v 1.15 2026-01-26 20:13:41+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svstat.c,v 1.16 2026-06-05 09:22:13+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }
 
 /*
  * $Log: svstat.c,v $
+ * Revision 1.16  2026-06-05 09:22:13+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.15  2026-01-26 20:13:41+05:30  Cprogrammer
  * display ?pid when process being supervised forks into background
  *

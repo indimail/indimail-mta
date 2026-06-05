@@ -1,5 +1,5 @@
 /*
- * $Id: svc.c,v 1.13 2025-01-21 23:35:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svc.c,v 1.14 2026-06-05 09:22:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -174,16 +174,21 @@ main(int argc, char **argv)
 	_exit(exit_stat);
 }
 
+void dummy(const char *x){}
+
 void
 getversion_svc_c()
 {
-	const char     *x = "$Id: svc.c,v 1.13 2025-01-21 23:35:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svc.c,v 1.14 2026-06-05 09:22:36+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }
 
 /*
  * $Log: svc.c,v $
+ * Revision 1.14  2026-06-05 09:22:36+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.13  2025-01-21 23:35:34+05:30  Cprogrammer
  * Fixes for gcc14
  *

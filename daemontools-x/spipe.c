@@ -1,5 +1,5 @@
 /*
- * $Id: spipe.c,v 1.7 2025-01-21 23:35:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spipe.c,v 1.8 2026-06-05 09:21:54+05:30 Cprogrammer Exp mbhangui $
  *
  * spipe -- supervise a pipeline of programs
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -147,16 +147,21 @@ main(int argc, char **argv)
 	return 0;
 }
 
+void dummyx(const char *x) {}
+
 void
 getversion_spipe_c()
 {
-	const char     *x = "$Id: spipe.c,v 1.7 2025-01-21 23:35:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spipe.c,v 1.8 2026-06-05 09:21:54+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummyx(x);
 }
 
 /*
  * $Log: spipe.c,v $
+ * Revision 1.8  2026-06-05 09:21:54+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.7  2025-01-21 23:35:28+05:30  Cprogrammer
  * Fixes for gcc14
  *

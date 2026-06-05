@@ -1,5 +1,8 @@
 /*
  * $Log: run_init.c,v $
+ * Revision 1.9  2026-06-05 09:21:38+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.8  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -142,10 +145,12 @@ run_init(char *service_dir)
 }
 #endif
 
+void dummyr(const char *x) {}
+
 void
 getversion_svrun_c()
 {
-	const char     *x = "$Id: run_init.c,v 1.8 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: run_init.c,v 1.9 2026-06-05 09:21:38+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummyr(x);
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: fghack.c,v 1.7 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $
+ * $Id: fghack.c,v 1.8 2026-06-05 09:21:12+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -90,16 +90,21 @@ main(int argc, char **argv, char **envp)
 	_exit(wait_exitcode(wstat));
 }
 
+void dummy(const char *x){}
+
 void
 getversion_fghack_c()
 {
-	const char     *x = "$Id: fghack.c,v 1.7 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: fghack.c,v 1.8 2026-06-05 09:21:12+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }
 
 /*
  * $Log: fghack.c,v $
+ * Revision 1.8  2026-06-05 09:21:12+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.7  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

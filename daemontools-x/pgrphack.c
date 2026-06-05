@@ -1,5 +1,8 @@
 /*
  * $Log: pgrphack.c,v $
+ * Revision 1.4  2026-06-05 09:21:30+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.3  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -28,10 +31,12 @@ main(int argc, char **argv, char **envp)
 	return(1);
 }
 
+void dummy(const char *x){}
+
 void
 getversion_pgrphack_c()
 {
-	const char     *x = "$Id: pgrphack.c,v 1.3 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: pgrphack.c,v 1.4 2026-06-05 09:21:30+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }

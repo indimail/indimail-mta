@@ -1,5 +1,8 @@
 /*
  * $Log: deepsleep.c,v $
+ * Revision 1.4  2026-06-05 09:20:46+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.3  2024-05-09 22:40:04+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -33,10 +36,12 @@ deepsleep(unsigned int s)
 	}
 }
 
+void dummyx(const char *x) {}
+
 void
 getversion_deepsleep_c()
 {
-	const char     *x = "$Id: deepsleep.c,v 1.3 2024-05-09 22:40:04+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: deepsleep.c,v 1.4 2026-06-05 09:20:46+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummyx(x);
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: teepipe.c,v $
+ * Revision 1.8  2026-06-05 09:22:29+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.7  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -103,10 +106,12 @@ main(int argc, char **argv)
 	return WEXITSTATUS(status);
 }
 
+void dummy(const char *x) {}
+
 void
 getversion_teepipe_c()
 {
-	const char     *x = "$Id: teepipe.c,v 1.7 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: teepipe.c,v 1.8 2026-06-05 09:22:29+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }

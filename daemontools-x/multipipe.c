@@ -1,5 +1,5 @@
 /*
- * $Id: multipipe.c,v 1.6 2025-01-21 23:35:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: multipipe.c,v 1.7 2026-06-05 09:21:27+05:30 Cprogrammer Exp mbhangui $
  *
  * multipipe -- pipe output to multiple programs
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -386,16 +386,21 @@ main(int argc, char **argv)
 	return 0;
 }
 
+void dummyx(const char *x) {}
+
 void
 getversion_multipipe_c()
 {
-	const char     *x = "$Id: multipipe.c,v 1.6 2025-01-21 23:35:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: multipipe.c,v 1.7 2026-06-05 09:21:27+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummyx(x);
 }
 
 /*
  * $Log: multipipe.c,v $
+ * Revision 1.7  2026-06-05 09:21:27+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.6  2025-01-21 23:35:21+05:30  Cprogrammer
  * Fixes for gcc14
  *

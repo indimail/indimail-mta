@@ -1,5 +1,8 @@
 /*
  * $Log: softlimit.c,v $
+ * Revision 1.6  2026-06-05 09:21:48+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.5  2024-05-09 22:39:36+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -164,10 +167,12 @@ main(int argc, char **argv, char **envp)
 	return(1);
 }
 
+void dummy(const char *x) {}
+
 void
 getversion_softlimit_c()
 {
-	const char     *x = "$Id: softlimit.c,v 1.5 2024-05-09 22:39:36+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: softlimit.c,v 1.6 2026-06-05 09:21:48+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }

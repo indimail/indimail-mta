@@ -1,5 +1,5 @@
 /*
- * $Id: logselect.c,v 1.4 2025-01-21 23:35:10+05:30 Cprogrammer Exp mbhangui $
+ * $Id: logselect.c,v 1.5 2026-06-05 09:21:18+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -228,16 +228,21 @@ main(int argc, char **argv)
 	return(0);
 }
 
+void dummyx(const char *x) {}
+
 void
 getversion_logselect_c()
 {
-	const char     *x = "$Id: logselect.c,v 1.4 2025-01-21 23:35:10+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: logselect.c,v 1.5 2026-06-05 09:21:18+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummyx(x);
 }
 
 /*
  * $Log: logselect.c,v $
+ * Revision 1.5  2026-06-05 09:21:18+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.4  2025-01-21 23:35:10+05:30  Cprogrammer
  * Fixes for gcc14
  *

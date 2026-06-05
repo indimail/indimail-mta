@@ -1,5 +1,5 @@
 /*
- * $Id: inotify.c,v 1.13 2025-01-21 23:35:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: inotify.c,v 1.14 2026-06-05 09:21:15+05:30 Cprogrammer Exp mbhangui $
  *
  * This is the sample program to notify us for the file creation and file deletion takes place in “/tmp” directory
  */
@@ -252,16 +252,21 @@ main(int argc, char **argv)
 }
 #endif
 
+void dummy(const char *x){}
+
 void
 getversion_inotify_c()
 {
-	const char     *x = "$Id: inotify.c,v 1.13 2025-01-21 23:35:00+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: inotify.c,v 1.14 2026-06-05 09:21:15+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }
 
 /*
  * $Log: inotify.c,v $
+ * Revision 1.14  2026-06-05 09:21:15+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.13  2025-01-21 23:35:00+05:30  Cprogrammer
  * Fixes for gcc14
  *

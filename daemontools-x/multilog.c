@@ -1,5 +1,5 @@
 /*
- * $Id: multilog.c,v 1.11 2025-01-21 23:37:02+05:30 Cprogrammer Exp mbhangui $
+ * $Id: multilog.c,v 1.12 2026-06-05 09:21:23+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <time.h>
@@ -686,16 +686,21 @@ main(int argc, char **argv)
 	_exit(0);
 }
 
+void dummy(const char *x) {}
+
 void
 getversion_multilog_c()
 {
-	const char     *x = "$Id: multilog.c,v 1.11 2025-01-21 23:37:02+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: multilog.c,v 1.12 2026-06-05 09:21:23+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }
 
 /*
  * $Log: multilog.c,v $
+ * Revision 1.12  2026-06-05 09:21:23+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.11  2025-01-21 23:37:02+05:30  Cprogrammer
  * Fixes for gcc14
  *

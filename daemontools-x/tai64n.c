@@ -1,5 +1,5 @@
 /*
- * $Id: tai64n.c,v 1.6 2025-01-21 23:35:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tai64n.c,v 1.7 2026-06-05 09:22:21+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "timestamp.h"
@@ -58,16 +58,21 @@ main()
 	}
 }
 
+void dummy(const char *x){}
+
 void
 getversion_tai64n_c()
 {
-	const char     *x = "$Id: tai64n.c,v 1.6 2025-01-21 23:35:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tai64n.c,v 1.7 2026-06-05 09:22:21+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	dummy(x);
 }
 
 /*
  * $Log: tai64n.c,v $
+ * Revision 1.7  2026-06-05 09:22:21+05:30  Cprogrammer
+ * fix compiler warning for unused rcs variable
+ *
  * Revision 1.6  2025-01-21 23:35:54+05:30  Cprogrammer
  * Fixes for gcc14
  *
