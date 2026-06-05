@@ -34,8 +34,8 @@ variable. If the file \fIs\fR is completely empty (0 bytes long),
 without adding a new variable. \fBenvdir\fR reads a maximum of 256 bytes
 from \fIs\fR.
 
-If \fBenvdir\fR finds a directory named .\fIenvdir\fR or a link named
-.\fIenvdir\fR pointing to a directory, it enters that directory and
+If \fBenvdir\fR finds a directory named .\fIenvdir\fR or a link
+named .\fIenvdir\fR pointing to a directory, it enters that directory and
 modifies environment variables according to files in .\fIenvdir\fR.
 \fBenvdir\fR avoids infinite recursive loops, by storing the inode number
 of directories visited and checking against the list. Any directory already
