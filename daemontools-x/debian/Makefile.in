@@ -12,8 +12,7 @@ version=@version@
 release=@release@
 email=@email@
 
-all: rules daemontools.dsc daemontools-Debian_8.0.dsc \
-daemontools-xUbuntu_16.04.dsc debian.tar.gz
+all: rules daemontools.dsc daemontools-xUbuntu_26.04.dsc debian.tar.gz
 
 edit = sed \
 	-e 's,@version\@,$(version),g' \
@@ -57,9 +56,7 @@ copyright: copyright.in ../conf-email
 	$(edit) $@.in > $@
 daemontools.dsc: daemontools.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
-daemontools-Debian_8.0.dsc: daemontools-Debian_8.0.dsc.in Makefile ../conf-version ../conf-release
-	$(edit) $@.in > $@
-daemontools-xUbuntu_16.04.dsc: daemontools-xUbuntu_16.04.dsc.in Makefile ../conf-version ../conf-release
+daemontools-xUbuntu_26.04.dsc: daemontools-xUbuntu_26.04.dsc.in Makefile ../conf-version ../conf-release
 	$(edit) $@.in > $@
 prerm: prerm.in
 	$(edit) $@.in > $@

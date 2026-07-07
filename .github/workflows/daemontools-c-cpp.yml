@@ -25,7 +25,10 @@ jobs:
 
     steps:
     - name: extra_packages
-      run: if [ "${OS}" = "macos-latest" ]; then brew install automake autoconf libtool pkgconfig openssl; fi
+      run: |
+        if [ "${OS}" = "macos-latest" ]; then
+          brew install automake autoconf libtool pkgconfig openssl
+        fi
       env:
         OS: ${{ matrix.host }}
 
@@ -41,6 +44,42 @@ jobs:
         path: libqmail
 
     - name: install_qmail
-      run: cd libqmail;env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.6.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.6.2/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.6.2/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.6.2/lib" make; sudo make install-strip
+      run: |
+        if [ "${OS}" = "macos-latest" ] ; then
+          # Dynamically fetch base paths for Homebrew dependencies
+          OPENSSL_PREFIX=$(brew --prefix openssl@3)
+
+          # Combine both paths cleanly into your compilation flags
+          export CPPFLAGS="-I${OPENSSL_PREFIX}/include"
+          export LDFLAGS="-L${OPENSSL_PREFIX}/lib"
+        else
+          # Standard flags for Ubuntu environment
+          export CPPFLAGS="-I/usr/include/tirpc"
+          export LDFLAGS=""
+        fi
+        cd libqmail
+        ./default.configure
+        make
+        sudo make install-strip
+      env:
+        OS: ${{ matrix.host }}
+
     - name: build_daemontools
-      run: cd main/daemontools-x; ./default.configure; ./qmake
+      run: |
+        if [ "${OS}" = "macos-latest" ] ; then
+          # Dynamically fetch base paths for Homebrew dependencies
+          OPENSSL_PREFIX=$(brew --prefix openssl@3)
+
+          # Combine both paths cleanly into your compilation flags
+          export CPPFLAGS="-I${OPENSSL_PREFIX}/include"
+          export LDFLAGS="-L${OPENSSL_PREFIX}/lib"
+        else
+          # Standard flags for Ubuntu environment
+          export CPPFLAGS=""
+          export LDFLAGS=""
+        fi
+        cd main/daemontools-x
+        ./default.configure
+        ./qmake
+      env:
+        OS: ${{ matrix.host }}

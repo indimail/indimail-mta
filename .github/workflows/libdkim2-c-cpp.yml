@@ -30,4 +30,21 @@ jobs:
       uses: actions/checkout@v4
 
     - name: build_libdkim2
-      run: cd libdkim2-x; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.6.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.6.0/lib" ./default.configure; env CPPFLAGS="-I/opt/homebrew/Cellar/openssl@3/3.6.0/include" LDFLAGS="-L/opt/homebrew/Cellar/openssl@3/3.6.0/lib" make
+      run: |
+        if [ "${OS}" = "macos-latest" ] ; then
+          # Dynamically fetch base paths for Homebrew dependencies
+          OPENSSL_PREFIX=$(brew --prefix openssl@3)
+
+          # Combine both paths cleanly into your compilation flags
+          export CPPFLAGS="-I${OPENSSL_PREFIX}/include"
+          export LDFLAGS="-L${OPENSSL_PREFIX}/lib"
+        else
+          # Standard flags for Ubuntu environment
+          export CPPFLAGS="-I/usr/include/tirpc"
+          export LDFLAGS=""
+        fi
+        cd libdkim2-x
+        ./default.configure
+        make
+      env:
+        OS: ${{ matrix.host }}

@@ -6,6 +6,8 @@ Release 3.2-1.1 Start 12/01/2026 End --/--/----
 02. fixed line length: smtpd.c, spawn-filter.c
 - 23/04/2026
 03. indimail-mta.spec: fixed dkimkey file path
+- 07/07/2026
+04. dossl.c, smtpd.c: fix for opaque versions of openssl 1.1.0 and higher
 
 * Thu Dec 18 2025 11:42:29 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.1-1.1%{?dist}
 Release 3.1-1.1 Start 26/12/2024 End 18/12/2025

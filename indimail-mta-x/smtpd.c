@@ -1,5 +1,5 @@
 /*
- * $Id: smtpd.c,v 1.333 2026-01-12 11:12:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.334 2026-07-07 20:44:40+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -160,7 +160,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.333 $";
+static c_char  *revision = "$Revision: 1.334 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -7020,8 +7020,13 @@ tls_verify()
 			const ASN1_STRING *s = X509_NAME_get_entry(subj, n)->value;
 #endif
 			if (s) {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+				email.len = ASN1_STRING_length(s);
+				email.s = (char *)ASN1_STRING_get0_data(s);
+#else
 				email.len = s->length;
 				email.s = (char *) s->data;
+#endif
 			}
 		}
 		if (email.len <= 0)
@@ -7529,6 +7534,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.334  2026-07-07 20:44:40+05:30  Cprogrammer
+ * fix for opaque versions of openssl 1.1.0 and higher
+ *
  * Revision 1.333  2026-01-12 11:12:15+05:30  Cprogrammer
  * corrected line length
  *
@@ -7988,8 +7996,10 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.333 2026-01-12 11:12:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.334 2026-07-07 20:44:40+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
+	if (0)
+		return x;
 	return revision + 11;
 }

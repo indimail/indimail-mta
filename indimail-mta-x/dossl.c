@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.8 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dossl.c,v 1.9 2026-07-07 20:42:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -98,9 +98,20 @@ do_pkix(SSL *ssl, const char *servercert, const char *fqdn,
 	if ((gens = X509_get_ext_d2i(peercert, NID_subject_alt_name, 0, 0))) {
 		for (i = 0, r = sk_GENERAL_NAME_num(gens); i < r; ++i) {
 			const GENERAL_NAME *gn = sk_GENERAL_NAME_value(gens, i);
-			if (gn->type == GEN_DNS)
+			if (gn->type == GEN_DNS) {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+				int gtype;
+				ASN1_IA5STRING *ia5_str = GENERAL_NAME_get0_value(gn, &gtype);
+				char *ia5_data = ia5_str ? (char *)ASN1_STRING_get0_data(ia5_str) : NULL;
+				int ia5_len = ia5_str ? ASN1_STRING_length(ia5_str) : 0;
+
+				if (ia5_data && match_partner(ia5_data, ia5_len, fqdn))
+					break;
+#else
 				if (match_partner((char *) gn->d.ia5->data, gn->d.ia5->length, fqdn))
 					break;
+#endif
+			}
 		}
 		sk_GENERAL_NAME_pop_free(gens, GENERAL_NAME_free);
 	}
@@ -118,8 +129,13 @@ do_pkix(SSL *ssl, const char *servercert, const char *fqdn,
 			const ASN1_STRING *s = X509_NAME_get_entry(subj, i)->value;
 #endif
 			if (s) {
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
+				peer.len = ASN1_STRING_length(s);
+				peer.s = (char *)ASN1_STRING_get0_data(s);
+#else
 				peer.len = s->length;
 				peer.s = (char *) s->data;
+#endif
 			}
 		}
 		if (peer.len <= 0) {
@@ -727,16 +743,19 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 #endif /*- #ifdef HASTLSA */
 #endif /*- #ifdef TLS */
 
-void
+const char *
 getversion_dossl_c()
 {
-	const char     *x = "$Id: dossl.c,v 1.8 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dossl.c,v 1.9 2026-07-07 20:42:49+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	return x;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.9  2026-07-07 20:42:49+05:30  Cprogrammer
+ * fix for opaque versions of openssl 1.1.0 and higher
+ *
  * Revision 1.8  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *
