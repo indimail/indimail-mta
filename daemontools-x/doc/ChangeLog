@@ -33,6 +33,8 @@ Release @version@-@release@ Start 08/01/2026 End --/--/----
 19. supervise.c: use normal restart as argument passed to run for svc -r
 - 05/06/2026
 20. supervise.c: fixed svc -r option (bug introduced by point 19).
+- 07/07/2026
+21. svc.c: fixed incorrect assignment of errno due to typo
 
 * Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
 Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025
