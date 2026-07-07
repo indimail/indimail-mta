@@ -72,10 +72,12 @@ jobs:
 
           # Combine both paths cleanly into your compilation flags
           export CPPFLAGS="-I${OPENSSL_PREFIX}/include"
+          export CFLAGS="-I${OPENSSL_PREFIX}/include"
           export LDFLAGS="-L${OPENSSL_PREFIX}/lib"
         else
           # Standard flags for Ubuntu environment
           export CPPFLAGS=""
+          export CFLAGS=""
           export LDFLAGS=""
         fi
         cd main/daemontools-x
