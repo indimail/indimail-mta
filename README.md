@@ -762,15 +762,12 @@ Currently, the list of supported binary distributions for indimail-mta are
 
     * Red Hat
           o Fedora 43
-          o Fedora 42
+          o Fedora 44
           o Fedora Rawhide
-          o Red Hat Enterprise Linux 7
           o Red Hat Enterprise Linux 8 +
           o Red Hat Enterprise Linux 9 +
           o EPEL 8 +
           o EPEL 9 +
-          o Scientific Linux 7
-          o CentOS 7
           o CentOS 8
           o CentOS 8  Stream
           o CentOS 9  Stream
@@ -787,18 +784,14 @@ Currently, the list of supported binary distributions for indimail-mta are
              only on copr (RHEL 8, RHEL9, EPEL9, EPEL9, CentOS 10 Stream)
 
     * Debian
-          o Debian 10.0
           o Debian 11.0
           o Debian 12.0
           o Debian 13.0
 
     * Ubuntu
-          o Ubuntu 18.04
-          o Ubuntu 20.04
           o Ubuntu 22.04
-          o Ubuntu 23.04
           o Ubuntu 24.04
-          o Ubuntu 25.04
+          o Ubuntu 26.04
 
     * Mageia
           o Mageia 8
