@@ -93,3 +93,5 @@ svalert
 rsvc
 svstatd
 svstatd.o
+waitfor
+waitfor.o

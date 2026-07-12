@@ -26,7 +26,7 @@ it = envdir envuidgid rsvc setlock setuidgid softlimit svc svok \
 	spipe qfilelog multipipe teepipe logselect svscan qlogselect \
 	supervise readproctitle multilog docker-entrypoint fghack \
 	pgrphack svalert svps svscanboot svstatd upstart systemd \
-	qmailctl openrc minisvc instcheck installer \
+	qmailctl openrc minisvc instcheck installer waitfor \
 	daemontools.perms daemontools.changes
 
 man = spipe.1 qfilelog.1 multipipe.1 teepipe.1 tai2tai64n.1 \
@@ -510,6 +510,14 @@ compile installer.c
 	
 installer.1: installer.9 conf-libexec conf-sysconfdir
 	$(edit) installer.9 > $@
+
+waitfor: \
+load waitfor.o
+	./load waitfor -lqmail
+
+waitfor.o: \
+compile waitfor.c
+	./compile waitfor.c
 
 INPUT: INPUT.in \
 conf-prefix conf-libexec conf-qmail \

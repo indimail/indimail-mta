@@ -1,0 +1,44 @@
+.\" vim: tw=75
+.TH WAITFOR "8" "Jun 2026" "daemontools" "General Commands"
+
+.SH NAME
+.PP
+waitfor \- wait for unrelated process
+
+.SH SYNOPSYS
+\fBwaitfor\fR [-v] pid
+
+.SH DESCRIPTION
+\fBwaitfor\fR(1) waits for an unrelated process using \fBpidfd_open\fR(2)
+on Linux, \fBkqueue\fR(2) on OpenBSD, FreeBSD, \fBstat\fR(2) and
+\fBusleep\fR(3) in a loop on Solaris, \fBkill\fR(2) and usleep in a loop
+for rest. It waits for the process to terminate before it exits with 0
+return status. If there is an error waiting for the process, it exits 1. It
+can be used in \fBsupervise\fR(8) run script to monitor a process started
+outside \fBsupervise\fR, restarting it if needed. This can be important if
+the manually started application cannot be terminated if the downtime has a
+cost to business.
+
+.EX
+This example below starts up jboss under supervise after a clueless
+application support person starts up jboss manually using the nohup
+command.
+
+#!/bin/sh
+#
+# supervise run script for jboss
+#
+exec 2>&1
+
+# wait for manually started jboss application to terminate
+
+pid=$(pgrep -f "java.*standalone.sh")
+[ -n "$pid" ] && waitfor $pid
+
+[ -x /usr/bin/svalert ] && /usr/bin/svalert "$@"
+echo "Starting jboss"
+exec setuidgid -es jboss /opt/jboss/bin/standalone.sh -b 0.0.0.0
+.EE
+
+.SH SEE ALSO
+pidfd_open(2), pidof(1), pgrep(1), pidwait(1)

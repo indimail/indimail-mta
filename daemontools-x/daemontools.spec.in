@@ -264,6 +264,7 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %attr(0755,root,root)                    %{_prefix}/bin/qlogselect
 %attr(0755,root,root)                    %{_prefix}/bin/qmailctl
 %attr(0755,root,root)                    %{_prefix}/bin/inotify
+%attr(0755,root,root)                    %{_prefix}/bin/waitfor
 %attr(0751,root,root)                    %{_prefix}/sbin/svscan
 %attr(0755,root,root)                    %{_prefix}/sbin/supervise
 %attr(0755,root,root)                    %{_prefix}/sbin/readproctitle
@@ -332,6 +333,7 @@ install -m 0644 ChangeLog        %{buildroot}%{shareddir}/doc/ChangeLog-daemonto
 %attr(0644,root,root)                    %{mandir}/man8/qmailctl.8.*
 %attr(0644,root,root)                    %{mandir}/man8/minisvc.8.*
 %attr(0644,root,root)                    %{mandir}/man8/docker-entrypoint.8.*
+%attr(0644,root,root)                    %{mandir}/man8/waitfor.8.*
 
 ### SCRIPTLET ###############################################################################
 %pretrans

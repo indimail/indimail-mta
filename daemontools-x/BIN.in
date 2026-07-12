@@ -27,3 +27,4 @@ f:::0755:/bin/:teepipe:teepipe
 f:::0755:/bin/:logselect:logselect
 f:::0755:/bin/:qlogselect:qlogselect
 f:::0755:/bin/:qmailctl:qmailctl
+f:::0755:/bin/:waitfor:waitfor

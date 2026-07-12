@@ -41,3 +41,4 @@ f:::0644:/man8/:logselect.8:logselect.8
 f:::0644:/man8/:svscanboot.8:svscanboot.8
 f:::0644:/man8/:qmailctl.8:qmailctl.8
 f:::0644:/man8/:minisvc.8:minisvc.8
+f:::0644:/man8/:waitfor.8:waitfor.8
