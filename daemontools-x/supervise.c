@@ -70,7 +70,8 @@ const char     *run[4] = { "./run", 0 , 0, 0};
 const char     *envdir1[6] = { "envdir", "./variables", "./run", 0, 0, 0};
 const char     *envdir2[7] = { "envdir", "-c" , "./variables", "./run", 0, 0, 0};
 const char     *shutdown[4] = { "./shutdown", 0, 0, 0}; /*- ./shutdown, pid, dir, parent_id, NULL */
-const char     *alert[6] = { "./alert", 0, 0, 0, 0, 0 }; /*- ./alert, alert pid, child_exit_value, signal_value, dir, parent_id, NULL */
+const char     *alert[6] = { "./alert", 0, 0, 0, 0, 0 }; /*- ./alert, child pid, child_exit_value, signal_value, dir, parent_id, NULL */
+const char     *post[6] = { "./post", 0, 0, 0, 0, 0 }; /*- ./post, child pid, child_exit_value, signal_value, dir, parent_id, NULL */
 
 void
 pidchange(pid_t pid, char up)
@@ -214,8 +215,10 @@ tryaction(const char **action, pid_t cpid, int wstat, int waitflag)
 		execve(*action, (char **) action, environ);
 		strerr_die4sys(111, fatal.s, "unable to exec ", *action, ": ");
 	default:
-		if (waitflag != -1) /*- waitflag = -1 passed on SIGTERM */
+		if (waitflag > 0) /*- waitflag = -1 passed on SIGTERM */
 			wait_pid(&t, f);
+		else
+			wait_nohang(&t); /*- do not create zombies */
 	} /* switch (f = fork()) */
 }
 
@@ -692,6 +695,8 @@ postmortem(pid_t pid, int wstat)
 		strnum2[fmt_ulong(strnum2, t)] = 0;
 		strerr_warn5(warn.s, "pid ", strnum1, " exited with status=", strnum2, 0);
 	}
+	if (!access(*post, F_OK))
+		tryaction(post, pid, wstat, -1);
 	return;
 }
 

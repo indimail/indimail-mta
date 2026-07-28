@@ -37,6 +37,8 @@ Release @version@-@release@ Start 08/01/2026 End --/--/----
 21. svc.c: fixed incorrect assignment of errno due to typo
 - 12/07/2026
 22. added waitfor.c, waitfor.8
+- 28/07/2026
+23. run ./post on exit
 
 * Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
 Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025

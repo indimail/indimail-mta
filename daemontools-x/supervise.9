@@ -91,12 +91,21 @@ if the file \fIdir\fR/shutdown exists \fBsupervise\fR executes
 is passed as the first argument and the pid of the process that exited is
 passed as the second argument to \fIshutdown\fR.
 
-if the file \fIdir\fR/alert exists \fBsupervise\fR executes \fIalert\fR
+if the file \fIdir\fR/\fIalert\fR exists \fBsupervise\fR executes
+\fIalert\fR whenever \fI./run\fR exits. \fIdir\fR is passed as the first
+argument, the pid of the process that exited is passed as the second
+argument, the exit value or signal (if killed by signal) is passed as the
+third argument to \fIalert\fR. The fourth argument is either of the strings
+\fIexited\fR or \fIstopped\fR / \fIsignalled\fR.
+
+if the file \fIdir\fR/\fIpost\fR exists \fBsupervise\fR executes \fIpost\fR
 whenever \fI./run\fR exits. \fIdir\fR is passed as the first argument, the
 pid of the process that exited is passed as the second argument, the exit
 value or signal (if killed by signal) is passed as the third argument to
 \fIalert\fR. The fourth argument is either of the strings \fIexited\fR or
-\fIstopped\fR / \fIsignalled\fR.
+\fIstopped\fR / \fIsignalled\fR. Unlike running \fIdir\fR/alert,
+\fIdir\fR/\fIpost\fR is run in the background, so that restart doesn't
+block for completion of \fIpost\fR.
 
 \fBsupervise\fR may exit immediately after startup if it cannot find the
 files it needs in \fIdir\fR or if another copy of \fBsupervise\fR is
