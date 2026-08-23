@@ -1,5 +1,5 @@
 /*
- * $Id: inotify.c,v 1.14 2026-06-05 09:21:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: inotify.c,v 1.15 2026-08-23 23:36:59+05:30 Cprogrammer Exp mbhangui $
  *
  * This is the sample program to notify us for the file creation and file deletion takes place in “/tmp” directory
  */
@@ -102,7 +102,7 @@ main(int argc, char **argv)
 			strerr_die3sys(111, FATAL, argv[optind], ": ");
 		/*- adding a directory into watch list.  */
 		wd[optind - _soptind].name = argv[optind];
-		if ((wd[optind - _soptind].wd = inotify_add_watch(ifd, argv[optind], IN_CREATE | IN_OPEN| IN_CLOSE_WRITE| IN_DELETE|IN_MOVE_SELF|IN_MOVED_FROM|IN_MOVED_TO)) == -1)
+		if ((wd[optind - _soptind].wd = inotify_add_watch(ifd, argv[optind], IN_CREATE|IN_OPEN|IN_CLOSE_WRITE|IN_DELETE|IN_DELETE_SELF|IN_MOVE_SELF|IN_MOVED_FROM|IN_MOVED_TO|IN_MODIFY)) == -1)
 			strerr_die4sys(111, FATAL, "inotify_add_watch: ", argv[optind], ": ");
 	}
 	if (substdio_flush(subfdout) == -1)
@@ -199,14 +199,17 @@ main(int argc, char **argv)
 				if (event->mask & IN_DELETE)
 					out(" deleted\n");
 				else
+				if (event->mask & IN_DELETE_SELF)
+					out(" deleted self\n");
+				else
 				if (event->mask & IN_OPEN)
 					out(" opened\n");
 				else
-				if (event->mask & IN_DELETE)
-					out(" deleted\n");
-				else
 				if (event->mask & IN_CLOSE_WRITE)
 					out(" closed\n");
+				else
+				if (event->mask & IN_MODIFY)
+					out(" modified\n");
 				else
 				if (event->mask & IN_MOVE_SELF) {
 					strnum[fmt_ulong(strnum, event->cookie)] = 0;
@@ -257,13 +260,16 @@ void dummy(const char *x){}
 void
 getversion_inotify_c()
 {
-	const char     *x = "$Id: inotify.c,v 1.14 2026-06-05 09:21:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: inotify.c,v 1.15 2026-08-23 23:36:59+05:30 Cprogrammer Exp mbhangui $";
 
 	dummy(x);
 }
 
 /*
  * $Log: inotify.c,v $
+ * Revision 1.15  2026-08-23 23:36:59+05:30  Cprogrammer
+ * added IN_DELETE_SELF and IN_MODIFY events
+ *
  * Revision 1.14  2026-06-05 09:21:15+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *
