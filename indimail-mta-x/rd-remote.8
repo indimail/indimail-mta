@@ -32,7 +32,7 @@ optional. The control file format is discussed below.
 Here \fIaddr\fR is destination domain when \fItype\fR is the
 letter '\fBd\fR'. \fIaddr\fR is the recipient address when \fItype\fR is
 the letter '\fBr\fR'. \fIaddr\fR is the sender address when \fItype\fR is
-the -letter '\fBs\fR'.
+the letter '\fBs\fR'.
 
 \fIdest\fR can be an email address or a Maildir. When \fIdest\fR is an
 email address, the mail is delivered to the address using
@@ -41,7 +41,7 @@ delivered to the Maildir \fIdest\fR using \fBmaildirdeliver\fR(1).
 \fIaddr\fR can be an exact match, wildcard or a regular expression (if
 \fBQREGEX\fR environment variable is defined and is non-zero). So if
 \fIaddr\fR is .*@example.com, it will match all addresses belonging to
-examplecom (for type 'r' or 's'). When type is 'd', you can use the
+example.com (for type 'r' or 's'). When type is 'd', you can use the
 regex .*example.com for \fIaddr\fR to match all address with example.com as
 the domain name.
 
@@ -50,20 +50,52 @@ value for the \fBDelivered-To\fR header. If not given, sender-recip is used
 as the value for the \fBDelivered-To\fR header.
 
 You can set \fBQREMOTE=/usr/sbin/rd-remote\fR for \fBspawn-filter\fR(8) to
-make it use \fBrd-remote\fR for remote deliveries and deliver the mail
-locally.
+make it use \fBrd-remote\fR instead of \fBqmail-remote\fR for remote
+deliveries and deliver the mail to \fIdest\fR instead of the original
+recipient.
 
-\fBrd-remote\fR is useful when you want to tempararily redirect mails for a
-busy/ratelimited remote mailserver to a Maildir and use \fBmaildirsmtp\fR(1) or
-\fBmaildirserial\fR(1) and \fBserialsmtp\fR(1) to do the remote delivery
-later with  low concurrency.
+\fBrd-remote\fR can be used to tempararily redirect mails for a
+busy/ratelimited remote mailserver to a Maildir and later use
+\fBmaildirsmtp\fR(1) or \fBmaildirserial\fR(1) and \fBserialsmtp\fR(1) to
+do the remote delivery with a lower concurrency.
+
+.SH EXAMPLES
+
+.EX
+Redirect remote mails to the domain indimail.org to the address
+reservoir@xxyyyzz.com
+
+in control file \fIredirectremote\fR
+\fBindimail.org:d:reservoir@xxyyyzz.com\fR
+
+Redirect remote mails addressed to xxyyyzz@indimail.org to the address
+reservoir@xxyyzz.com
+
+in control file \fIredirectremote\fR
+\fBxxyyyzz@indimail.org:r:reservoir@xxyyyzz.com\fR
+
+Redirect mails from sender xxyyyzz@indimail.org to the address
+reservoir@xxyyzz.com
+
+in control file \fIredirectremote\fR
+\fBxxxyyyzz@indimail.org:s:reservoir@xxyyyzz.com\fR
+
+Redirect mails from sender xxyyyzz@indimail.org to the Maildir
+/home/mail/reservoir/
+(NOTE. Maildir should be owned by user \fIqmailr\fR)
+
+in control file \fIredirectremote\fR
+\fBxxxyyyzz@indimail.org:s:/home/mail/reservoir\fR
+.EX
+
 
 .SH LIMITATIONS
 Unlike \fBqmail-remote\fR, \fBrd-remote\fR cannot handle more than one
 recipient. But that is OK when used with indimail-mta as \fBqmail-rspawn\fR
 never invokes \fBqmail-remote\fR with more than one recipient. If used in
 scripts to send an email to multiple recipients, you cannot use
-\fBrd-remote\fR.
+\fBrd-remote\fR. Instead you will have to loop it for each recipient and
+call \fBrd-remote\fR for each of the addresses.
 
 .SH SEE ALSO
 qmail-remote(8),
