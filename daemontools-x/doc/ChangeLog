@@ -39,6 +39,8 @@ Release @version@-@release@ Start 08/01/2026 End --/--/----
 22. added waitfor.c, waitfor.8
 - 28/07/2026
 23. run ./post on exit
+- 23/08/2026
+24. inotify.c: added IN_DELETE_SELF and IN_MODIFY events
 
 * Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
 Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025
