@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.59 2026-06-05 09:23:30+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.60 2026-08-23 23:31:21+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -1386,13 +1386,16 @@ void dummy(const char *x)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.59 2026-06-05 09:23:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.60 2026-08-23 23:31:21+05:30 Cprogrammer Exp mbhangui $";
 
 	dummy(x);
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.60  2026-08-23 23:31:21+05:30  Cprogrammer
+ * run post script after executing ./run
+ *
  * Revision 1.59  2026-06-05 09:23:30+05:30  Cprogrammer
  * fixed restart (svc -r) option
  *
