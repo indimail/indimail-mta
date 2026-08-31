@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: rsvc.in,v 1.1 2026-01-14 18:50:21+05:30 Cprogrammer Exp mbhangui $
+# $Id: rsvc.in,v 1.2 2026-08-31 13:19:15+05:30 Cprogrammer Exp mbhangui $
 #
 # © 2024 Manvendra Bhangui
 # All intellectual property developed during the term of this agreement, including but not limited
@@ -10,6 +10,7 @@ if [ $# -ne 2 -a $# -ne 4 ] ; then
 	echo "USAGE: rsvc servicedir service [docker|podman container_id]" 1>&2
 	exit 1
 fi
+three=$(echo "$1" | cut -c1-3)
 if [ $# -eq 2 ] ; then
 	echo "$1 $2" 1>&7
 elif [ $# -eq 4 ] ; then
@@ -21,17 +22,20 @@ fi
 read line 0<&6
 echo $line | grep -q ": up"
 if [ $? -eq 0 ] ; then
-	exit 0
+	[ "$three" = "dn|" ] && exit 1 || exit 0
 fi
 echo $line | grep -q ": down"
 if [ $? -eq 0 ] ; then
-	exit 1
+	[ "$three" = "dn|" ] && exit 0 || exit 1
 fi
-echo "$line" 1>&2
+echo "rsvc: command[$line] failed" 1>&2
 exit 111
 
 #
 # $Log: rsvc.in,v $
+# Revision 1.2  2026-08-31 13:19:15+05:30  Cprogrammer
+# changes for stop/start of service
+#
 # Revision 1.1  2026-01-14 18:50:21+05:30  Cprogrammer
 # Initial revision
 #
