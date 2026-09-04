@@ -1,22 +1,28 @@
 * XXX XXX XX XXXX XX:XX:XX +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> @version@-@release@%{?dist}
-Release @version@-@release@ Start 05/09/2024 End 18/12/2025
+Release @version@-@release@ Start 04/09/2026 End --/--/----
+- 04/09/2026
+01. Fix compiler warnings for GCC16
+02. Updated tcpclient man page for -4, -6 options
+
+* Thu Dec 18 2025 XX:XX:XX +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> @version@-@release@%{?dist}
+Release 1.1.4-1.2 Start 05/09/2024 End 18/12/2025
 - 05/09/2024
-08. tcpclient.c: added starttls capability for imap
-09. dotls.c: added starttls handler for imap
+01. tcpclient.c: added starttls capability for imap
+02. dotls.c: added starttls handler for imap
 - 04/10/2024
-10. tcpclient.c: added -e option to get remote host address from /etc/hosts
-11. getip.c: new function getip() which uses getaddrinfo() to get remote host
+03. tcpclient.c: added -e option to get remote host address from /etc/hosts
+04. getip.c: new function getip() which uses getaddrinfo() to get remote host
     address
 - 05/10/2024
-12. tcpserver.c: use INET6_ADDRLENSTRLEN for AF_INET6
+05. tcpserver.c: use INET6_ADDRLENSTRLEN for AF_INET6
 - 04/01/2025
-13. Fixes for installer from daemontools package
+06. Fixes for installer from daemontools package
 - 22/01/2025
-14. Fix errors when using GCC14
+07. Fix errors when using GCC14
 - 23/02/2025
-15. installer.c: Fix SEGSEGV
+08. installer.c: Fix SEGSEGV
 - 25/03/2025
-16. Fixes for Solaris
+09. Fixes for Solaris
 
 * Tue Aug 06 2024 12:44:32 +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> 1.1.4-1.1%{?dist}
 Release 1.1.4-1.1 Start 08/02/2024 End 06/08/2024
