@@ -1,5 +1,8 @@
 /*
  * $Log: fixcrio.c,v $
+ * Revision 1.6  2026-09-04 07:55:40+05:30  Cprogrammer
+ * fix compiler warning for GCC16
+ *
  * Revision 1.5  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -173,7 +176,8 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fixcrio_c()
 {
-	const char     *x = "$Id: fixcrio.c,v 1.5 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: fixcrio.c,v 1.6 2026-09-04 07:55:40+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x)
+		x++;
 }

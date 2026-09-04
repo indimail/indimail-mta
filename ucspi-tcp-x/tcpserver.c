@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.96 2025-01-21 23:53:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.97 2026-09-04 07:56:00+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -2009,13 +2009,17 @@ do_socket:
 void
 getversion_tcpserver_c()
 {
-	const char    *x = "$Id: tcpserver.c,v 1.96 2025-01-21 23:53:43+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpserver.c,v 1.97 2026-09-04 07:56:00+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x)
+		x++;
 }
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.97  2026-09-04 07:56:00+05:30  Cprogrammer
+ * fix compiler warning for GCC16
+ *
  * Revision 1.96  2025-01-21 23:53:43+05:30  Cprogrammer
  * Fixes for gcc14 errors
  *

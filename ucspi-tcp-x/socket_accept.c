@@ -1,5 +1,8 @@
 /*
  * $Log: socket_accept.c,v $
+ * Revision 1.6  2026-09-04 07:55:52+05:30  Cprogrammer
+ * fix compiler warning for GCC16
+ *
  * Revision 1.5  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -42,7 +45,8 @@ socket_accept4(int s, char ip[4], uint16 * port)
 void
 getversion_socket_accept4_c()
 {
-	const char     *x = "$Id: socket_accept.c,v 1.5 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
-	x++;
+	const char     *x = "$Id: socket_accept.c,v 1.6 2026-09-04 07:55:52+05:30 Cprogrammer Exp mbhangui $";
+	if (x)
+		x++;
 	return;
 }

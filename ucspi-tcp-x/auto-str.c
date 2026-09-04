@@ -1,5 +1,5 @@
 /*
- * $Id: auto-str.c,v 1.5 2025-01-21 23:53:01+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auto-str.c,v 1.6 2026-09-04 07:55:32+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -24,7 +24,7 @@ is_legible(unsigned char ch)
 }
 
 void
-my_puts(char *s)
+my_puts(const char *s)
 {
 	if (substdio_puts(&ss1, s) == -1)
 		_exit(111);
@@ -70,6 +70,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: auto-str.c,v $
+ * Revision 1.6  2026-09-04 07:55:32+05:30  Cprogrammer
+ * fix compiler warning for GCC16
+ *
  * Revision 1.5  2025-01-21 23:53:01+05:30  Cprogrammer
  * Fixes for gcc14 errors
  *

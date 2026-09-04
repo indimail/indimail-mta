@@ -1,5 +1,5 @@
 /*
- * $Id: recordio.c,v 1.6 2025-01-21 23:53:33+05:30 Cprogrammer Exp mbhangui $
+ * $Id: recordio.c,v 1.7 2026-09-04 07:55:49+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -198,13 +198,17 @@ main(int argc, char **argv, char **envp)
 void
 getversion_recordio_c()
 {
-	const char     *x = "$Id: recordio.c,v 1.6 2025-01-21 23:53:33+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: recordio.c,v 1.7 2026-09-04 07:55:49+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x)
+		x++;
 }
 
 /*
  * $Log: recordio.c,v $
+ * Revision 1.7  2026-09-04 07:55:49+05:30  Cprogrammer
+ * fix compiler warning for GCC16
+ *
  * Revision 1.6  2025-01-21 23:53:33+05:30  Cprogrammer
  * Fixes for gcc14 errors
  *

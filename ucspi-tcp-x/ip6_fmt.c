@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_fmt.c,v $
+ * Revision 1.6  2026-09-04 07:55:44+05:30  Cprogrammer
+ * fix compiler warning for GCC16
+ *
  * Revision 1.5  2020-10-08 20:03:07+05:30  Cprogrammer
  * fixed bug in ip6_fmt() - Erwin Hoffman
  *
@@ -95,11 +98,11 @@ ip6_fmt_flat(char *s, char ip[16])
 unsigned int
 ip6_fmt_exp(char *s, char ip[16])
 {
-	int             i, j;
+	int             i;
 
 	if (!s)
 		return 39;
-	for (i = 0, j = 1; i < 16; i++, j++) {
+	for (i = 0; i < 16; i++) {
 		*s++ = tohex((unsigned char) ip[i] >> 4);
 		*s++ = tohex((unsigned char) ip[i] & 15);
 		if (!((i + 1) % 2) && (i + 1) < 16)

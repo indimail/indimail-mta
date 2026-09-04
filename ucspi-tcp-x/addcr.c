@@ -1,5 +1,8 @@
 /*
  * $Log: addcr.c,v $
+ * Revision 1.4  2026-09-04 07:55:10+05:30  Cprogrammer
+ * fix compiler warning for GCC16
+ *
  * Revision 1.3  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -45,7 +48,8 @@ main()
 void
 getversion_addcr_c()
 {
-	const char     *x = "$Id: addcr.c,v 1.3 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: addcr.c,v 1.4 2026-09-04 07:55:10+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x)
+		x++;
 }
