@@ -67,6 +67,21 @@ Verbose. Print error messages and status messages.
 .B Connection options:
 
 .TP
+.B \-4
+Fall back to IPv4 sockets. This is necessary for terminally broken
+systems like OpenBSD which will not let IPv6 sockets connect to
+V4-mapped IPv6 addresses. Please note that this also applies to DNS
+lookups, so you will have to use an DNS resolver with an IPv6 address to
+accept IPv6 connections. Use \fBDNSCACHEIP\fR to set the DNS resolver
+IP dynamically. This option is ignored for UNIX sockets.
+
+.TP
+.B \-6
+Force IPv6 mode in \fBUCSPI\fR environment variables, even for
+IPv4 connections. This will set $\fBPROTO\fR to \fBTCP6\fR. This option is
+ignored for UNIX sockets.
+
+.TP
 .B \-T \fIx\fR+\fIy
 Timeout on the connection attempt after
 .I x\fR+\fIy
