@@ -3,7 +3,7 @@
 
 .SH NAME
 .PP
-svstatd \- remote supervise service status server
+svstatd \- remote supervise service control server
 .PP
 rsvc \- connect to remote svstatd server to get status of a supervised
 service
@@ -12,8 +12,8 @@ service
 .PP
 \fBsvstatd\fR
 .PP
-\fBtcpclient\fR -a \fIwait_time\fR \fIIP\fR \fIport\fR \fBrsvc\fR \fIdir\fR
-\fIs\fR [\fIcmd\fR \fIcontainer_id\fR]
+\fBtcpclient\fR -a \fIdtimeout\fR \fIIP\fR \fIport\fR \fBrsvc\fR \fIdir\fR
+\fIs\fR [\fIpodman\fR|\fIdocker\fR \fIcontainer_id\fR]
 
 .SH DESCRIPTION
 \fBsvstatd\fR reads the standard input and expects the service directory
@@ -22,42 +22,66 @@ the status of the \fBsupervise\fR(8) service \fIs\fR running in \fIdir\fR.
 The service can also be running inside a \fBdocker\fR(1) or \fBpodman\fR(1)
 container on the host. You can use the \fBtcpclient\fR(8) script
 \fBrsvc\fR(1) to query the status of any service where \fBsvstated\fR is
-running. Here \fIwait_time\fR refers to \fBtcpclient\fR(8) data timeout.
+running. Here \fIdtimeout\fR refers to \fBtcpclient\fR(8) data timeout.
 The script returns 0 if service is up, 1 if service is down. Any other exit
 value means a system/network error.
 
-\fBsvstatd\fR can be run under \fBtcpserver\fR(1) to implement, a remote
-service status for supervise services, by \fBrsvc\fR clients running on a
-different host.
+.TP 3
+.B service status
+You can use the \fBtcpclient\fR(8) script \fBrsvc\fR(1) to query the status
+of any service where \fBsvstatd\fR is running. Here \fIdtimeout\fR refers
+to \fBtcpclient\fR(8) data timeout. The script returns 0 if service is up,
+1 if service is down. Any other exit value means a system/network error.
 
-The following example creates this service on port 3002.
+.TP
+.B start/stop service
+You need to prefix \fIdir\fR with \fBup|\fR or \fBdn|\fR to bring up or
+bring down a service.
 
+.PP
+\fBsvstatd\fR can be run under \fBtcpserver\fR(1) or \fBnetcat\fR(1) to
+implement a remote service status for supervise services, by \fBrsvc\fR tcp
+clients running on a different host.
+
+.SH EXAMPLES
 .EX
-  /bin/tcpserver -hPR 0 3002 /usr/sbin/svstatd
-.EE
+The following examples runs this service on port 3002. The first example
+uses \fBtcpserver\fR while the second example uses the \fBnetcat\fR
+command.
 
-One can use \fBrsvc\fR to get the status of any remote supervise service on
-host with IP address \fI192.168.2.100\fR as shown below
+# /usr/bin/tcpserver -hPR -l 0 0 3002 /usr/sbin/svstatd
+or
+# nc -klp 3002 /usr/sbin/svstatd
 
-.EX
-  /bin/tcpclient -a 5 192.168.2.100 3002 /usr/bin/rsvc /service qmail-smtpd.25
-.EE
+One can use the tcpclient script - \fBrsvc\fR to get the status of any
+remote supervise service on host with IP address \fI192.168.2.100\fR as
+shown below
 
-If you have supverise running in a docker container with ID
+$ /usr/bin/tcpclient -DHR -l 0 -a 5 192.168.2.100 3002 /usr/bin/rsvc /service qmail-smtpd.25
+
+If you have supervise running in a docker container with ID
 \fIcontainer_id\fR, then you can use the following command to check the
 status of any supervise service \fs\fR in directory \fIservice\fR like
 this
 
-.EX
-  # docker
-  /bin/tcpclient -a 5 192.168.2.100 3002 /usr/sbin/rsvc /service
-  \fIs\fR \fIdocker\fR \fIcontainer_id\fR
+docker
+$ /usr/bin/tcpclient -DHR -l 0 -a 5 192.168.2.100 3002 /usr/bin/rsvc /service \fIs\fR \fIdocker\fR \fIcontainer_id\fR
 
-  or
+or
 
-  # podman
-  /bin/tcpclient -a 5 192.168.2.100 3002 /usr/sbin/rsvc /service
-  \fIs\fR \fIpodman\fR \fIcontainer_id\fR
+podman
+$ /usr/bin/tcpclient -DHR -l 0 -a 5 192.168.2.100 3002 /usr/bin/rsvc /service \fIs\fR \fIpodman\fR \fIcontainer_id\fR
+
+Start qmail-smtpd.587 service
+$ /usr/bin/tcpclient -DHR -l 0 -a 5 192.168.2.100 3002 /usr/bin/rsvc 'up|/service' qmail-smtpd.587
+
+Stop qmail-smtpd.587 service
+$ /usr/bin/tcpclient -DHR -l 0 -a 5 192.168.2.100 3002 /usr/bin/rsvc 'dn|/service' qmail-smtpd.587
+
+Check if qmail-smtpd is up or down
+$ /usr/bin/tcpclient -DHR -l 0 -a 5 192.168.2.100 3002 /usr/bin/rsvc '/service' qmail-smtpd.587
+$ echo $?
+0
 .EE
 
 .SH SEE ALSO
