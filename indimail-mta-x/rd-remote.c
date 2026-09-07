@@ -1,5 +1,5 @@
 /*
- * $Id: rd-remote.c,v 1.6 2025-02-02 11:50:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rd-remote.c,v 1.7 2026-09-08 00:30:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -214,9 +214,15 @@ main(int argc, char **argv)
 			addr = argv[1];
 		} else
 		if (cptr[1] == 'r') { /*- match on recipient */
+			if (!stralloc_0(&recip))
+				temp_nomem();
+			recip.len--;
 			addr = recip.s;
 		} else
 		if (cptr[1] == 's') { /*- match on sender */
+			if (!stralloc_0(&sender))
+				temp_nomem();
+			sender.len--;
 			addr = sender.s;
 		} else {
 			lcount++;
@@ -380,6 +386,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: rd-remote.c,v $
+ * Revision 1.7  2026-09-08 00:30:44+05:30  Cprogrammer
+ * null terminate sender, recipient for do_match
+ *
  * Revision 1.6  2025-02-02 11:50:57+05:30  Cprogrammer
  * initialize use_regex
  *
