@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.60 2026-08-23 23:31:21+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.61 2026-09-27 11:11:30+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -39,7 +39,7 @@ static char    *dir;
 static int      selfpipe[2];
 static int      fdlock = -1, fdcontrolwrite = -1, fdcontrol = -1, fdstatus = -1, fddir = -1;
 static int      fdok = -1, fdup = -1, fddn = -1;
-static int      flagshutdown = 0, flagexit = 0, flagwantxx = 1, flagwantup = 1;
+static int      flagshutdown = 0, flagexit = 0, flagwantxx = 1, flagwantup = 1, flagoneshot = 0;
 static int      logger = 0, verbose = 0, silent = 0;
 static int      flagpaused;		/*- defined if (pid) */
 static char     flagfailed;
@@ -661,12 +661,16 @@ trystart(const char *how)
 	}
 	pidchange((childpid = f), 1);
 	announce(0);
-	if ((fdup = open_read("supervise/up")) == -1) /*- open O_RDONLY|O_NDELAY */
-		strerr_die2sys(111, fatal.s, "read: supervise/up: ");
-	coe(fdup);
-	if (fddn != -1) {
-		close(fddn);
-		fddn = -1;
+	if (fdup == -1) {
+		if ((fdup = open_read("supervise/up")) == -1) /*- open O_RDONLY|O_NDELAY */
+			strerr_die2sys(111, fatal.s, "read: supervise/up: ");
+		coe(fdup);
+	}
+	if (!flagoneshot || !flagwantup) {
+		if (fddn != -1) {
+			close(fddn);
+			fddn = -1;
+		}
 	}
 	deepsleep(1);
 }
@@ -922,9 +926,11 @@ doit()
 					if (use_runfs && chdir(dir) == -1) /*- switch back to /run/svscan */
 						strerr_die4sys(111, fatal.s, "unable to switch back to ", dir, ": ");
 #endif
-					if ((fddn = open_read("supervise/dn")) == -1)
-						strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/dn: ");
-					coe(fddn);
+					if (fddn == -1) {
+						if ((fddn = open_read("supervise/dn")) == -1)
+							strerr_die4sys(111, fatal.s, "unable to read ", dir, "/supervise/dn: ");
+						coe(fddn);
+					}
 				}
 				announce(0);
 				break;
@@ -1309,7 +1315,14 @@ main(int argc, char **argv)
 	if (errno != error_noent)
 		strerr_die4sys(111, fatal.s, "unable to stat ", dir, "/down: ");
 
-	if ((fddir = open_read(".")) == -1) /*- save dir for /service */
+	if (stat("oneshot", &st) != -1) {
+		flagwantup = 0;
+		flagoneshot = 1;
+	} else
+	if (errno != error_noent)
+		strerr_die4sys(111, fatal.s, "unable to stat ", dir, "/down: ");
+
+	if ((fddir = open_read(".")) == -1) /*- save dir for /service/service_name */
 		strerr_die2sys(111, fatal.s, "unable to open current directory: ");
 	if (stat("run", &st) == -1)
 		strerr_die4sys(111, fatal.s, "unable to stat ", dir, "/run: ");
@@ -1372,7 +1385,7 @@ main(int argc, char **argv)
 			break;
 	} /* while (1) */
 
-	if (!flagwantxx || flagwantup)
+	if (!flagwantxx || flagwantup || flagoneshot)
 		trystart("auto startup"); /*- normal startup */
 	doit();
 	announce(0);
@@ -1386,13 +1399,16 @@ void dummy(const char *x)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.60 2026-08-23 23:31:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.61 2026-09-27 11:11:30+05:30 Cprogrammer Exp mbhangui $";
 
 	dummy(x);
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.61  2026-09-27 11:11:30+05:30  Cprogrammer
+ * Added oneshot service that executes once if dir/oneshot exists
+ *
  * Revision 1.60  2026-08-23 23:31:21+05:30  Cprogrammer
  * run post script after executing ./run
  *

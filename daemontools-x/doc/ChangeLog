@@ -43,6 +43,9 @@ Release @version@-@release@ Start 08/01/2026 End --/--/----
 24. inotify.c: added IN_DELETE_SELF and IN_MODIFY events
 - 31/08/2026
 25. svstatd.c, rsvc.in: Added feature to stop/start service
+- 27/09/2026
+26. supervise.c: Added oneshot service that executes once if dir/oneshot
+    exists
 
 * Thu Dec 18 2025 11:46:14 +0000 Manvendra Bhangui <daemontools@indimail.org 1.1.7-1.1%{?dist}
 Release 1.1.7-1.1 Start 27/12/2024 End 18/12/2025

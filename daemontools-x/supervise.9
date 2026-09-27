@@ -44,15 +44,15 @@ log processes using the \fBps\fR(1) command (See also the \fBsvps\fR(1)
 command).
 
 After \fI./init\fR exits with zero exit status, \fBsupervise\fR starts
-\fI./run\fR. It restarts \fI./run\fR if \fI./run\fR exits. In case
-\fI./run\fR exits with non-zero status, it pauses for a second after
-restarting \fI./run\fR. The sleep avoids supervise from looping quickly
-when \fI./run\fR has a problem. \fBsupervise\fR expects \fI./run\fR to
-remain in the foreground. Sometimes daemon fork themselves into background,
-which some consider bad software design. If you want to monitor
-such a daemon, set the sticky bit on \fI./run\fR. This makes
-\fBsupervise\fR go into \fBsubreaper\fR mode using \fBprctl\fR(2)
-\fBPR_SET_CHILD_SUBREAPER\fR on Linux or \fBprocctl\fR(2)
+\fI./run\fR. If the file \fIoneshot\fR doesn't exist, it restarts
+\fI./run\fR if \fI./run\fR exits. In case \fI./run\fR exits with non-zero
+status, it pauses for a second after restarting \fI./run\fR. The sleep
+avoids supervise from looping quickly when \fI./run\fR has a problem.
+\fBsupervise\fR expects \fI./run\fR to remain in the foreground. Sometimes
+daemon fork themselves into background, which some consider bad software
+design. If you want to monitor such a daemon, set the sticky bit on
+\fI./run\fR. This makes \fBsupervise\fR go into \fBsubreaper\fR mode using
+\fBprctl\fR(2) \fBPR_SET_CHILD_SUBREAPER\fR on Linux or \fBprocctl\fR(2)
 \fBPROC_REAP_ACQUIRE\fR on FreeBSD. In subpreaper mode or when the
 environment variable \fBSETPGID\fR is set, the command started by
 \fI./run\fR will have it's process Group ID set to the value of it's PID.
@@ -61,11 +61,13 @@ when \fI./run\fR has a command which forks in the background. It is also
 required in such cases to make \fBsvc\fR(8) command operate and control
 \fBsupervise\fR reliably for such forked daemon/commands in \fI./run\fR.
 You can also prefix such commands in \fI./run\fR with \fBfghack\fR(1)
-instead of setting the sticky bit on \fI./run\fR. \fBsupervise\fR uses the
-selfpipe trick (2) to handle all SIGCHLD events reliably. This requires the
-use of two file descriptors for the selfpipe. \fI./run\fR is passed two
-command line arguments with \fIdir\fR as argv[1] and \fIhow\fR as argv[2]
-(\fIhow\fR is explained later in this document).
+instead of setting the sticky bit on \fI./run\fR. If the file \fIoneshot\fR
+exists, \fBsupervise\fR doesn't restart \fI./run\fR when it exits.
+\fBsupervise\fR uses the selfpipe trick (2) to handle all SIGCHLD
+events reliably. This requires the use of two file descriptors for the
+selfpipe. \fI./run\fR is passed two command line arguments with \fIdir\fR
+as argv[1] and \fIhow\fR as argv[2) (\fIhow\fR is explained later in this
+document).
 
 If the directory \fI./variables\fR exists, \fBsupervise\fR sets
 environment variables before calling \fI./run\fR using \fIenvdir\fR(8).
@@ -140,12 +142,17 @@ returns, it means \fBsupervise\fR is running.
 this named pipe in O_WRONLY mode, will block until the service \fIdir\fR is
 up. If write returns, it means service in \fIdir\fR has executed
 \fIdir\fR/\fIrun\fR. \fBsvc\fR is one such client (-w option) that can be
-used to check if a service is up.
+used to check if a service is up. If \fIdir\fR/\fIdown\fR exists, opening
+this in write mode will not block if the service \fIdir\fR has been started
+at least once (by doing svc -o \fIdir\fR). If \fIdir\fR/\fIoneshot\fR
+exists, opening this in write mode will not block when \fIdir\fR/\fIrun\fR
+has got executed.
 .IP \[bu] 2
 \fIdir\fR/\fIsupervise\fR/\fIdn\fR - clients can open this in write mode to
 test if service in \fIdir\fR is down. This works like exactly like
 \fIdir\fR/\fIsupervise\fR/\fIup\fR. \fBsvc\fR (-W option) can be used to
-check if a service is down.
+check if a service is down. Opening this in write mode will always succeed
+if \fIdir\fR/\fIoneshot\fR exists.
 
 \fIsupervise\fR opens \fI/run/svscan\fR/\fIdir\fR/\fIsupervise\fR/\fIup\fR
 in read mode just after it executes \fI./run\fR. Hence, if service \fIw\fR
