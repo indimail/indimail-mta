@@ -259,7 +259,7 @@ srs_timestamp_check(srs_t *srs, const char *stamp)
 	/* We had better go around this loop exactly twice! */
 	then = 0;
 	for (sp = stamp; *sp; sp++) {
-		bp = strchr(SRS_TIME_BASECHARS, toupper(*sp));
+		bp = (char *) strchr(SRS_TIME_BASECHARS, toupper(*sp));
 		if (bp == NULL)
 			return SRS_EBADTIMESTAMPCHAR;
 		off = bp - SRS_TIME_BASECHARS;
@@ -614,10 +614,10 @@ srs_forward(srs_t *srs, char *buf, int buflen,
 		return SRS_ENOTREWRITTEN;
 
 	/* This is allowed to be a plain domain */
-	while ((tmp = strchr(alias, '@')) != NULL)
+	while ((tmp = (char *) strchr(alias, '@')) != NULL)
 		alias = tmp + 1;
 
-	tmp = strchr(sender, '@');
+	tmp = (char *) strchr(sender, '@');
 	if (tmp == NULL)
 		return SRS_ENOSENDERATSIGN;
 	sendhost = tmp + 1;
