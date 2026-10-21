@@ -1001,13 +1001,16 @@ CDKIMSign::AssembleReturnedSig(const char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.31 2025-02-08 23:23:42+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.32 2026-10-21 21:47:22+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x++) x--;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.32  2026-10-21 21:47:22+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.31  2025-02-08 23:23:42+05:30  Cprogrammer
  * make DKIM-Signature header name configurable
  *

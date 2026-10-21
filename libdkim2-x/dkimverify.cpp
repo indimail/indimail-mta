@@ -408,8 +408,6 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 {
 	ProcessFinal();
 	unsigned int    SuccessCount = 0;
-	int             TestingFailures = 0;
-	int             RealFailures = 0;
 	int             r;
 	char           *p, *q;
 	list <string>   SuccessfulDomains;	/* can contain duplicates */
@@ -427,13 +425,10 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 #endif
 				if (!res || len != i->BodyHashData.length() || memcmp(i->BodyHashData.data(), md, len) != 0) {
 					/* body hash mismatch */
-					if (i->m_pSelector->Testing) { /* if the selector is in testing mode... */
+					if (i->m_pSelector->Testing) /* if the selector is in testing mode... */
 						i->Status = DKIM_SIGNATURE_BAD_BUT_TESTING;	/* todo: make a new error code for this? */
-						TestingFailures++;
-					} else {
+					else
 						i->Status = DKIM_BODY_HASH_MISMATCH;
-						RealFailures++;
-					}
 					continue;
 				}
 			} else /* hash CRLF separating the body from the signature */
@@ -462,10 +457,6 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 					if (!(q = strdup(p))) {
 						if (verbose == true)
 							fprintf(stderr, "strdup: out of memory\n");
-						if (i->m_pSelector->Testing)
-							TestingFailures++;
-						else
-							RealFailures++;
 						continue;
 					}
 					q[siglen - 2] = '\0';
@@ -528,13 +519,10 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 				SuccessfulDomains.push_back(i->Domain);
 			} else {
 				/* if the selector is in testing mode... */
-				if (i->m_pSelector->Testing) {
+				if (i->m_pSelector->Testing)
 					i->Status = DKIM_SIGNATURE_BAD_BUT_TESTING;
-					TestingFailures++;
-				} else {
+				else
 					i->Status = DKIM_SIGNATURE_BAD;
-					RealFailures++;
-				}
 			}
 		} else
 		if (i->Status == DKIM_SELECTOR_GRANULARITY_MISMATCH
@@ -542,7 +530,6 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 			|| i->Status == DKIM_SELECTOR_KEY_REVOKED) {
 			/*- treat these as failures -*/
 			/*- todo: maybe see if the selector is in testing mode? -*/
-			RealFailures++;
 		}
 	} /* for (list < SignatureInfo >::iterator i = Signatures.begin(); i != Signatures.end(); ++i) */
 	if (SuccessCount > 0 || m_CheckPractices) {
@@ -1328,13 +1315,16 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.36 2025-02-08 23:23:51+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.37 2026-10-21 21:47:32+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x++) x--;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.37  2026-10-21 21:47:32+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.36  2025-02-08 23:23:51+05:30  Cprogrammer
  * make DKIM-Signature header name configurable
  *

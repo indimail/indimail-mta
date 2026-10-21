@@ -915,13 +915,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.38 2025-02-08 23:23:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.cpp,v 1.39 2026-10-21 21:47:10+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x++) x--;
 }
 
 /*
  * $Log: dkim.cpp,v $
+ * Revision 1.39  2026-10-21 21:47:10+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.38  2025-02-08 23:23:12+05:30  Cprogrammer
  * make DKIM-Signature header name configurable
  *

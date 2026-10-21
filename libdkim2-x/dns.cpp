@@ -1,5 +1,8 @@
 /*
  * $Log: dns.cpp,v $
+ * Revision 1.15  2026-10-21 21:47:38+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.14  2024-05-07 12:56:24+05:30  Cprogrammer
  * use const char * instead of char *
  *
@@ -340,7 +343,7 @@ DNSGetTXT(const char *domain, char *buffer, int maxlen)
 void
 getversion_dkimdns_cpp()
 {
-	static char    *x = (char *) "$Id: dns.cpp,v 1.14 2024-05-07 12:56:24+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dns.cpp,v 1.15 2026-10-21 21:47:38+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x++) x--;
 }

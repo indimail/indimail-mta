@@ -290,13 +290,16 @@ string CDKIMBase::RelaxHeader(const string &sHeader)
 void
 getversion_dkimbase_cpp()
 {
-	static char    *x = (char *) "$Id: dkimbase.cpp,v 1.6 2023-02-04 07:55:12+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimbase.cpp,v 1.7 2026-10-21 21:47:01+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x++) x--;
 }
 
 /*
  * $Log: dkimbase.cpp,v $
+ * Revision 1.7  2026-10-21 21:47:01+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.6  2023-02-04 07:55:12+05:30  Cprogrammer
  * converted comments to traditional C style comments
  *

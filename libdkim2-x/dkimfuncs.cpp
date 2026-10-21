@@ -1,5 +1,8 @@
 /*
  * $Log: dkimfuncs.cpp,v $
+ * Revision 1.8  2026-10-21 21:47:16+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.7  2024-05-07 12:55:50+05:30  Cprogrammer
  * use const char * instead of char *
  *
@@ -259,7 +262,7 @@ DKIMGetErrorString(int ErrorCode)
 void
 getversion_dkimfuncs_cpp()
 {
-	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.7 2024-05-07 12:55:50+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimfuncs.cpp,v 1.8 2026-10-21 21:47:16+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x++) x--;
 }
