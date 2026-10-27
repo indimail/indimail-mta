@@ -74,7 +74,6 @@ f:::0755:/bin/:inewaliases:inewaliases
 f:::0755:/bin/:printmaillist:printmaillist
 f:::0755:/bin/:setmaillist:setmaillist
 f:::0755:/bin/:newinclude:newinclude
-f:::0755:/bin/:udpclient:udpclient
 f:::0755:/bin/:serialcmd:serialcmd
 f:::0755:/bin/:serialqmtp:serialqmtp
 f:::0755:/bin/:serialsmtp:serialsmtp
