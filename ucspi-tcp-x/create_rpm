@@ -151,7 +151,8 @@ echo "Clearing stage directory"
 else
 	cd ..
 fi
-dist=`uname -r |cut -d . -f4`
+#dist=`uname -r |cut -d . -f4`
+dist=fc44
 if [ -z "$release" ] ; then
 	if [ -f /usr/bin/tcpserver ] ; then
 		uversion=$(rpm -qf /usr/bin/tcpserver|cut -d- -f3)

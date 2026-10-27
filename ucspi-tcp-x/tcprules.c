@@ -1,5 +1,8 @@
 /*
  * $Log: tcprules.c,v $
+ * Revision 1.9  2026-10-26 01:22:47+05:30  Cprogrammer
+ * fix for cygwin
+ *
  * Revision 1.8  2021-08-30 12:47:59+05:30  Cprogrammer
  * define funtions as noreturn
  *
@@ -48,7 +51,7 @@ static stralloc data = { 0 };
 static stralloc key = { 0 };
 static stralloc sanum = { 0 };
 
-#if defined(linux) || defined(DARWIN) || defined(FREEBSD)
+#if defined(linux) || defined(DARWIN) || defined(FREEBSD) || defined(__CYGWIN__)
 extern int      rename(const char *, const char *);
 #endif
 

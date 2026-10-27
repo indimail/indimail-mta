@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.39 2026-09-04 07:55:57+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.40 2026-10-26 01:46:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -37,6 +37,8 @@
 #include <env.h>
 #include <getln.h>
 #include <ndelay.h>
+#include <tls.h>
+#else
 #include <tls.h>
 #endif
 #include "ip4.h"
@@ -114,12 +116,13 @@ static char     ipstr[IP4_FMT];
 static uint16   portlocal;
 static uint16   portremote;
 static char    *forcelocal;
-static c_char  *hostname, *cn_host;
+static c_char  *hostname;
 static stralloc addresses;
 static stralloc moreaddresses;
 static stralloc tmp;
 static stralloc fqdn;
 #ifdef TLS
+static c_char  *cn_host;
 static stralloc tls_server_version, tls_client_version;
 static int      provide_data = 0;
 #endif
@@ -269,8 +272,10 @@ do_select(char **argv, int flag_tcpclient, int s)
 		fdout = pi1[1];
 	} /*- if (flag_tcpclient == 0) */
 	/* translate(int rfd, int wfd, int clearout, int clearin, unsigned int iotimeout) */
+#ifdef TLS
 	if (flagssl)
 		set_essential_fd(fdin);
+#endif
 	if ((r = translate(s, s, fdout, fdin, dtimeout)))
 		strerr_warn1("tcpclient: translate returned non-zero: ", &strerr_sys);
 #ifdef TLS
@@ -639,19 +644,28 @@ main(int argc, char **argv)
 		if (!stralloc_copys(&moreaddresses, ""))
 			nomem();
 		for (j = 0; j + 16 <= addresses.len; j += 16) {
+			if (ip6_isv4mapped(addresses.s + j)) {
+#if defined(__CYGWIN__)
+				if (verbosity >= 2)
+					strerr_warn1("tcpclient: bindok operating system detected", 0);
+				noipv6 = 1;
+#if 0 /*- alternative to setting noipv6 */
+				int no = 0;
+				setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, (char *) &no, sizeof(no));
+#endif
+#endif
+				ipstr[ip4_fmt(ipstr, addresses.s + j + 12)] = 0;
+			} else
+				ipstr[ip6_fmt(ipstr, addresses.s + j)] = 0;
 			if ((s = socket_tcp6()) == -1)
 				strerr_die2sys(111, FATAL, "unable to create AF_INET socket: ");
 			if (socket_bind6(s, iplocal, portlocal, netif) == -1)
 				strerr_die2sys(111, FATAL, "unable to bind socket: ");
-			if (ip6_isv4mapped(addresses.s + j))
-				ipstr[ip4_fmt(ipstr, addresses.s + j + 12)] = 0;
-			else
-				ipstr[ip6_fmt(ipstr, addresses.s + j)] = 0;
 			if (verbosity >= 2) {
 				if (fqdn.len)
-					strerr_warn6("tcpclient: trying  host ", fqdn.s, " ip ", ipstr, " port ", strnum, 0);
+					strerr_warn6("tcpclient: trying host ", fqdn.s, " ip ", ipstr, " port ", strnum, 0);
 				else
-					strerr_warn4("tcpclient: trying  ip ", ipstr, " port ", strnum, 0);
+					strerr_warn4("tcpclient: trying ip ", ipstr, " port ", strnum, 0);
 			}
 			if (timeoutconn6(s, addresses.s + j, portremote, ctimeout[cloop], netif) == 0)
 				goto CONNECTED;
@@ -847,7 +861,7 @@ do_data:
 			if (!stralloc_0(&saciphers))
 				strerr_die2x(111, FATAL, "out of memory");
 			for (ciphers = saciphers.s; *ciphers; ciphers++)
-				if (isspace(*ciphers)) {
+				if (isspace((unsigned char) *ciphers)) {
 					*ciphers = 0;
 					break;
 				}
@@ -909,7 +923,7 @@ do_data:
 void
 getversion_tcpclient_c()
 {
-	const char    *x = "$Id: tcpclient.c,v 1.39 2026-09-04 07:55:57+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpclient.c,v 1.40 2026-10-26 01:46:28+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -917,6 +931,9 @@ getversion_tcpclient_c()
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.40  2026-10-26 01:46:28+05:30  Cprogrammer
+ * fix for cygwin
+ *
  * Revision 1.39  2026-09-04 07:55:57+05:30  Cprogrammer
  * fix compiler warning for GCC16
  *

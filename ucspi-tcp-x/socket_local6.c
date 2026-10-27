@@ -1,5 +1,8 @@
 /*
  * $Log: socket_local6.c,v $
+ * Revision 1.4  2026-10-26 02:59:55+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.3  2020-08-03 17:26:43+05:30  Cprogrammer
  * use qmail library
  *
@@ -29,7 +32,7 @@ socket_local6(int s, char ip[16], uint16 * port, uint32 * scope_id)
 #endif
 	unsigned int    dummy = sizeof sa;
 
-	if (getsockname(s, (struct sockaddr *) &sa, &dummy) == -1)
+	if (getsockname(s, (struct sockaddr *) &sa, (socklen_t *) &dummy) == -1)
 		return -1;
 #ifdef LIBC_HAS_IP6
 	if (sa.sin6_family == AF_INET) {

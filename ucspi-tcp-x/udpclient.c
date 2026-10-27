@@ -1,5 +1,8 @@
 /*
  * $Log: udpclient.c,v $
+ * Revision 1.9  2026-10-27 11:00:00+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -117,7 +120,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	const char     *x = "$Id: udpclient.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: udpclient.c,v 1.9 2026-10-27 11:00:00+05:30 Cprogrammer Exp mbhangui $";
 
-	x++;
+	if (x) x++;
 }

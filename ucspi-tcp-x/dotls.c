@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.28 2026-09-04 07:55:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.29 2026-10-26 03:03:44+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -1117,7 +1117,7 @@ main(int argc, char **argv)
 		if (!stralloc_0(&saciphers))
 			strerr_die2x(111, FATAL, "out of memory");
 		for (ptr = saciphers.s; *ptr; ptr++)
-			if (isspace(*ptr)) {
+			if (isspace((unsigned char) *ptr)) {
 				*ptr = 0;
 				break;
 			}
@@ -1284,7 +1284,7 @@ main(int argc, char **argv)
 void
 getversion_dotls_c()
 {
-	const char     *x = "$Id: dotls.c,v 1.28 2026-09-04 07:55:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dotls.c,v 1.29 2026-10-26 03:03:44+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1300,7 +1300,7 @@ struct substdio sserr;
 int
 main(int argc, char **argv)
 {
-	substdio_fdbuf(&sserr, write, 2, sserrbuf, sizeof(sserrbuf));
+	substdio_fdbuf(&sserr, (ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 	substdio_puts(&sserr, "not compiled with -DTLS\n");
 	substdio_flush(&sserr);
 	_exit(111);
@@ -1309,6 +1309,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.29  2026-10-26 03:03:44+05:30  Cprogrammer
+ * fix compiler warning on cygwin
+ *
  * Revision 1.28  2026-09-04 07:55:38+05:30  Cprogrammer
  * fix compiler warning for GCC16
  *

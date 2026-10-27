@@ -108,6 +108,12 @@ warn-auto.sh date@.sh conf-prefix
 	> date@
 	chmod 755 date@
 
+udpclient: load udpclient.o
+	./load udpclient -lqmail
+
+udpclient.o: compile udpclient.c
+	./compile udpclient.c
+
 dns.a: \
 makelib dns_dfd.o dns_domain.o dns_dtda.o dns_ip.o dns_ipq.o \
 dns_name.o dns_nd.o dns_packet.o dns_random.o dns_rcip.o dns_rcrw.o \
@@ -256,7 +262,7 @@ compile upathexec_run.c upathexec.h conf-dlopen
 
 prog: \
 tcpserver tcprules tcprulescheck tcpclient \
-who@ date@ finger@ http@ \
+udpclient who@ date@ finger@ http@ \
 tcpcat mconnect mconnect-io rblsmtpd \
 argv0 recordio addcr delcr fixcrio rts
 
@@ -397,7 +403,7 @@ load tcpclient.o tcpremoteinfo.o timeoutconn.o \
 upathexec_run.o getip.o dns.a unix.a socket.lib
 	./load tcpclient tcpremoteinfo.o timeoutconn.o \
 	upathexec_run.o  getip.o dns.a unix.a \
-	$(SSLLIBS) `cat socket.lib` -lqmail
+	`cat socket.lib` -lqmail $(SSLLIBS)
 
 tcpclient.o: \
 compile tcpclient.c ip4.h socket.h upathexec.h \
@@ -414,7 +420,7 @@ compile getip.c getip.h haveip6.h conf-ip
 dotls: \
 load dotls.o upathexec_run.o upathexec_env.o
 	./load dotls upathexec_run.o \
-	upathexec_env.o $(SSLLIBS) -lqmail
+	upathexec_env.o -lqmail $(SSLLIBS)
 
 dotls.o: \
 compile dotls.c upathexec.h conf-tls
@@ -468,7 +474,7 @@ conf-ld-$(SYSTEM)
 	./load tcpserver rules.o tcpremoteinfo.o timeoutconn.o load_mysql.o \
 	control.o auto_home.o tcpserver_plugin.o load_shared.o \
 	dlnamespace.o tcdlmopen.o upathexec_rundl.o dns.a unix.a \
-	`cat socket.lib conf-ld-$(SYSTEM) 2>/dev/null` $(SSLLIBS) -lqmail -ldl
+	`cat socket.lib conf-ld-$(SYSTEM) 2>/dev/null` -lqmail $(SSLLIBS) -ldl
 
 mysql_inc: mysql_config
 	./mysql_config --include > mysql_inc || true

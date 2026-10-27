@@ -1,5 +1,8 @@
 /*
  * $Log: socket_accept6.c,v $
+ * Revision 1.3  2026-10-26 02:59:49+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.2  2020-08-03 17:26:00+05:30  Cprogrammer
  * use qmail library
  *
@@ -27,7 +30,7 @@ socket_accept6(int s, char ip[16], uint16 *port, uint32 *scope_id)
 	unsigned int    dummy = sizeof sa;
 	int             fd;
 
-	if ((fd = accept(s, (struct sockaddr *) &sa, &dummy)) == -1)
+	if ((fd = accept(s, (struct sockaddr *) &sa, (socklen_t *) &dummy)) == -1)
 		return -1;
 
 #ifdef LIBC_HAS_IP6

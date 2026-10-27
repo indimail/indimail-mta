@@ -1,5 +1,4 @@
 auto_shared.c
-auto_shared.o
 auto-str
 auto_home.c
 chkshsgr
@@ -35,7 +34,6 @@ uint32.h
 uint64.h
 who@
 rblsmtpd.so
-tcpserver_plugin.o
 *.o
 *.a
 *.lib
@@ -43,7 +41,6 @@ make-compile
 make-load
 auto-ccld.sh
 installer
-installer.o
 mysql_inc
 make-makelib
 Makevars.
@@ -63,9 +60,10 @@ recordio
 DIRS
 ucspi-tcp.perms
 tcpclient.1
-dotls.o
 dotls
 PKGBUILD
 archpkg*.install
 INPUT
 dotls.1
+*.exe
+udpclient

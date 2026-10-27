@@ -1,6 +1,6 @@
 #
 #
-# $Id: ucspi-tcp.spec.in,v 1.27 2025-01-03 08:36:01+05:30 Cprogrammer Exp mbhangui $
+# $Id: ucspi-tcp.spec.in,v 1.28 2026-10-27 08:35:07+05:30 Cprogrammer Exp mbhangui $
 %undefine _missing_build_ids_terminate_build
 %global _unpackaged_files_terminate_build 1
 
@@ -202,6 +202,7 @@ chmod -R 755 %{buildroot}%{plugindir}
 %attr(0755,root,root)                     %{_prefix}/bin/tcprules
 %attr(0755,root,root)                     %{_prefix}/bin/tcprulescheck
 %attr(0755,root,root)                     %{_prefix}/bin/tcpclient
+%attr(0755,root,root)                     %{_prefix}/bin/udpclient
 %attr(0755,root,root)                     %{_prefix}/bin/who@
 %attr(0755,root,root)                     %{_prefix}/bin/date@
 %attr(0755,root,root)                     %{_prefix}/bin/finger@
@@ -235,6 +236,7 @@ chmod -R 755 %{buildroot}%{plugindir}
 %attr(0644,root,root)                     %{mandir}/man1/tcprules.1.*
 %attr(0644,root,root)                     %{mandir}/man1/tcprulescheck.1.*
 %attr(0644,root,root)                     %{mandir}/man1/tcpclient.1.*
+%attr(0644,root,root)                     %{mandir}/man1/udpclient.1.*
 %attr(0644,root,root)                     %{mandir}/man1/who@.1.*
 %attr(0644,root,root)                     %{mandir}/man1/date@.1.*
 %attr(0644,root,root)                     %{mandir}/man1/finger@.1.*

@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.97 2026-09-04 07:56:00+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.98 2026-10-27 08:36:12+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -80,7 +80,9 @@ static int      flagremoteinfo = 1;
 static int      flagremotehost = 1;
 static int      flagparanoid;
 static my_ulong itimeout = 26; /* timeoutinfo -t option */
+#ifdef TLS
 static my_ulong ctimeout = 60; /* timeoutssl  -S option */
+#endif
 static my_ulong dtimeout = 300;/* timeoutdata -T option */
 static my_ulong maxperip = 20, PerHostLimit = 20;
 static my_ulong limit = 40;
@@ -977,7 +979,6 @@ usage(void)
 void
 printstatus(const char *str, pid_t pid, pid_t childpid)
 {
-	int             i;
 #ifdef IPV6
 	int             fakev4 = 0;
 #endif
@@ -994,6 +995,7 @@ printstatus(const char *str, pid_t pid, pid_t childpid)
 	cats(strnum2);
 	append(" ");
 	cats(str);
+#ifdef TLS
 	if (flagssl && ssl) {
 		strnum1[fmt_ulong(strnum1, pid)] = 0;
 		strnum2[fmt_ulong(strnum2, childpid)] = 0;
@@ -1008,8 +1010,17 @@ printstatus(const char *str, pid_t pid, pid_t childpid)
 		cats(", pid=");
 		cats(strnum1);
 	}
+#else
+	strnum1[fmt_ulong(strnum1, pid)] = 0;
+	cats(", pid=");
+	cats(strnum1);
+#endif
 	if (!str_diffn(str, "startup", 8)) {
+#ifdef TLS
 		cats(flagssl ? ", TLS=enabled" : ", TLS=disabled");
+#else
+		cats(", TLS=disabled");
+#endif
 #ifdef HAS_MYSQL
 		cats(use_sql ? ", use sql=YES\n" : ", use sql=NO\n");
 #else
@@ -1028,7 +1039,9 @@ printstatus(const char *str, pid_t pid, pid_t childpid)
 		safecats(remoteipstr);
 #endif
 	}
+#ifdef TLS
 	if (flagssl && ssl) {
+		int             i;
 		cats(", TLS Server=");
 		safecats(tls_server_version.s);
 		cats(", Client=");
@@ -1040,6 +1053,7 @@ printstatus(const char *str, pid_t pid, pid_t childpid)
 		strnum1[fmt_ulong(strnum1, i)] = 0;
 		safecats(strnum1);
 	}
+#endif
 	append("\n");
 	substdio_putflush(subfderr, tmp.s, tmp.len);
 	return;
@@ -1704,7 +1718,7 @@ do_socket:
 			if (!stralloc_0(&saciphers))
 				strerr_die2x(111, FATAL, "out of memory");
 			for (ciphers = saciphers.s; *ciphers; ciphers++)
-				if (isspace(*ciphers)) {
+				if (isspace((unsigned char) *ciphers)) {
 					*ciphers = 0;
 					break;
 				}
@@ -2009,7 +2023,7 @@ do_socket:
 void
 getversion_tcpserver_c()
 {
-	const char    *x = "$Id: tcpserver.c,v 1.97 2026-09-04 07:56:00+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpserver.c,v 1.98 2026-10-27 08:36:12+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -2017,6 +2031,9 @@ getversion_tcpserver_c()
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.98  2026-10-27 08:36:12+05:30  Cprogrammer
+ * fixes for cygwin
+ *
  * Revision 1.97  2026-09-04 07:56:00+05:30  Cprogrammer
  * fix compiler warning for GCC16
  *

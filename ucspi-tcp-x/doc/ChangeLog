@@ -3,6 +3,9 @@ Release @version@-@release@ Start 04/09/2026 End --/--/----
 - 04/09/2026
 01. Fix compiler warnings for GCC16
 02. Updated tcpclient man page for -4, -6 options
+- 27/10/2026
+03. Added udpclient
+04. Changes for cygwin
 
 * Thu Dec 18 2025 XX:XX:XX +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> @version@-@release@%{?dist}
 Release 1.1.4-1.2 Start 05/09/2024 End 18/12/2025

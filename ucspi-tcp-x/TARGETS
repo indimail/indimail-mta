@@ -158,3 +158,4 @@ socket_bindun.o
 socket_conn_un.o
 socket_unix.o
 timeoutconn_un.o
+*.exe
