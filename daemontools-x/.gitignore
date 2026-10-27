@@ -95,3 +95,4 @@ svstatd
 svstatd.o
 waitfor
 waitfor.o
+*.exe

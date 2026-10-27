@@ -79,3 +79,4 @@ svstatd.o
 rsvc
 svalert.8
 supervise.8
+*.exe

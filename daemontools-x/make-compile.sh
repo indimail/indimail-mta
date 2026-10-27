@@ -1,4 +1,4 @@
-DEFS=`uname -s | tr "[:lower:]" "[:upper:]"`
+DEFS=`uname -s | tr "[:lower:]" "[:upper:]" | cut -d- -f1`
 extra=$(cat conf-cc-$DEFS)
 set $CC
 cc_arg=$1
