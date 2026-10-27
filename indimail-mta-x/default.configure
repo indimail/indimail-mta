@@ -4,7 +4,7 @@ if [ ! -f conf-release ] ; then
 fi
 SYSTEM=$(uname -s)
 case "$SYSTEM" in
-	Linux)
+	Linux|SunOS|CYGWIN_NT*)
 	sed 's{PREFIX{/usr{'                            conf-prefix.in     > conf-prefix
 	sed 's{QMAIL{/var/indimail{'                    conf-qmail.in      > conf-qmail
 	sed 's{SYSCONFDIR{/etc/indimail{'               conf-sysconfdir.in > conf-sysconfdir
@@ -25,7 +25,7 @@ case "$SYSTEM" in
 	exit 1
 	;;
 esac
-SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]"`
+SYSTEM=`uname -s | tr "[:lower:]" "[:upper:]" | cut -d- -f1`
 if [ -f Makefile.$SYSTEM ] ; then
 	/bin/rm -f Makefile.
 	ln -s Makefile.$SYSTEM Makefile.

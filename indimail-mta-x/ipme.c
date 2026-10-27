@@ -1,5 +1,5 @@
 /*
- * $Id: ipme.c,v 1.27 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: ipme.c,v 1.28 2026-10-27 21:39:29+05:30 Cprogrammer Exp mbhangui $
  */
 #include <errno.h>
 #include <sys/types.h>
@@ -18,7 +18,7 @@
 #include <linux/if_link.h>
 #else
 #include <sys/ioctl.h>
-#ifndef SIOCGIFCONF	/*- whatever works */
+#if !defined(SIOCGIFCONF) && !defined(__CYGWIN__) /*- whatever works */
 #include <sys/sockio.h>
 #endif
 #endif
@@ -414,12 +414,15 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	const char     *x = "$Id: ipme.c,v 1.27 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ipme.c,v 1.28 2026-10-27 21:39:29+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 /*
  * $Log: ipme.c,v $
+ * Revision 1.28  2026-10-27 21:39:29+05:30  Cprogrammer
+ * fix for cygwin
+ *
  * Revision 1.27  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

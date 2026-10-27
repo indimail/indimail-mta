@@ -1,5 +1,5 @@
 /*-
- * $Id: parse_env.c,v 1.1 2023-01-13 12:14:53+05:30 Cprogrammer Exp mbhangui $
+ * $Id: parse_env.c,v 1.2 2026-10-27 21:39:57+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <env.h>
@@ -27,7 +27,7 @@ parse_env(char *envStrings)
 				if (*ptr2 && !env_unset(ptr2))
 					return (1);
 			} else { /*- envar=val, - Set the environment variable */
-				while (isspace(*ptr2))
+				while (isspace((unsigned char) *ptr2))
 					ptr2++;
 				if (*ptr2 && !env_put(ptr2))
 					return (1);
@@ -41,7 +41,7 @@ parse_env(char *envStrings)
 		if (*ptr2 && !env_unset(ptr2))
 			return (1);
 	} else { /*- envar=val, */
-		while (isspace(*ptr2))
+		while (isspace((unsigned char) *ptr2))
 			ptr2++;
 		if (*ptr2 && !env_put(ptr2))
 			return (1);
@@ -51,6 +51,9 @@ parse_env(char *envStrings)
 
 /*-
  * $Log: parse_env.c,v $
+ * Revision 1.2  2026-10-27 21:39:57+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.1  2023-01-13 12:14:53+05:30  Cprogrammer
  * Initial revision
  *

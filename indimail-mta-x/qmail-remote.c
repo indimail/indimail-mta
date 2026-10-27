@@ -1,5 +1,5 @@
 /*-
- * $Id: qmail-remote.c,v 1.177 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.178 2026-10-27 21:40:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -3269,7 +3269,7 @@ password_lookup(const char *addr, int addr_len)
 			i = str_chr(result, ' ');
 			if (result[i]) {
 				result[i] = '\0';
-				for (ptr = result + i + 1; isspace(*ptr); ptr++, i++);
+				for (ptr = result + i + 1; isspace((unsigned char) *ptr); ptr++, i++);
 				j = str_chr(result + i + 1, ' ');
 				if (result[i + j + 1]) /* envstr present */
 					result[i + j + 1] = 0;
@@ -3280,7 +3280,7 @@ password_lookup(const char *addr, int addr_len)
 					temp_nomem();
 				user.len--;
 				pass.len--;
-				for (ptr = result + i + j + 2; isspace(*ptr); ptr++, j++);
+				for (ptr = result + i + j + 2; isspace((unsigned char) *ptr); ptr++, j++);
 				if (result[i + j + 2])
 					parse_env(result + i + j + 2);
 			} else
@@ -3813,13 +3813,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	const char     *x = "$Id: qmail-remote.c,v 1.177 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-remote.c,v 1.178 2026-10-27 21:40:03+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	x++;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.178  2026-10-27 21:40:03+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.177  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

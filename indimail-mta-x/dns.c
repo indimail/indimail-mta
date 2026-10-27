@@ -1,5 +1,5 @@
 /*
- * $Id: dns.c,v 1.43 2025-10-03 15:38:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dns.c,v 1.44 2026-10-27 21:39:12+05:30 Cprogrammer Exp mbhangui $
  * RCS log at bottom
  */
 #include <netdb.h>
@@ -130,7 +130,13 @@ resolve(stralloc *domain, int type)
 	}
 	responselen = lookup(glue.s, C_IN, type, response.buf, responsebuflen);
 #ifdef HASTLSA
+#ifndef __CYGWIN__
+	/*-
+	 * Cygwin does not expose the low-level ns_initparse utility in its runtime.
+	 * We safely omit it here because our custom Cygwin loop parses raw buffers directly.
+	 */
 	ns_initparse(response.buf, responselen, &msg);
+#endif
 #endif
 	if ((responselen >= responsebuflen) || (responselen > 0 && (((HEADER *) response.buf)->tc))) {
 		if (responsebuflen < MAX_EDNS_RESPONSE_SIZE) {
@@ -143,6 +149,12 @@ resolve(stralloc *domain, int type)
 		_res.options |= RES_USEVC;
 		responselen = lookup(glue.s, C_IN, type, response.buf, responsebuflen);
 		_res.options = saveresoptions;
+#ifdef HASTLSA
+#ifndef __CYGWIN__
+		/*- Re-initialize parser state if we had to fall back to a larger EDNS TCP buffer */
+		ns_initparse(response.buf, responselen, &msg);
+#endif
+#endif
 	}
 	if (responselen <= 0) {
 		if (errno == ECONNREFUSED)
@@ -1036,10 +1048,53 @@ dns_tlsarrplus(tlsarralloc *ta, stralloc *sa)
 	while ((r = findtlsa(T_TLSA)) != 2) {
 		if (r == DNS_SOFT)
 			return DNS_SOFT;
+#ifdef __CYGWIN__ /*- Cygwin Portable Parser Workaround */
+		char            name_buf[MAXDNAME];
+		unsigned char  *msg_ptr = response.buf + NS_HFIXEDSZ;
+		int             qdcount = ntohs(((HEADER *) response.buf)->qdcount);
+		int             ancount = ntohs(((HEADER *) response.buf)->ancount);
+
+		/*- 1. Skip past question section records */
+		for (int q = 0; q < qdcount; q++) {
+			int             n = dn_expand(response.buf, response.buf + responselen, msg_ptr, name_buf, sizeof(name_buf));
+			if (n < 0)
+				return DNS_HARD;
+			msg_ptr += n + NS_QFIXEDSZ;
+		}
+
+		/*- 2. Traverse up to the target answer record index (i) */
+		if (i >= ancount)
+			return DNS_HARD;
+		for (int a = 0; a <= i; a++) {
+			int             n = dn_expand(response.buf, response.buf + responselen, msg_ptr, name_buf, sizeof(name_buf));
+			if (n < 0)
+				return DNS_HARD;
+			msg_ptr += n; /*- past owner name */
+
+			/*-
+			 * Extract fields from the resource record header structure
+			 */
+			uint16_t        rr_rdlen = (msg_ptr[8] << 8) | msg_ptr[9];
+			ttl =
+				((uint32_t) msg_ptr[4] << 24) | ((uint32_t) msg_ptr[5] << 16) | ((uint32_t) msg_ptr[6] << 8) | (uint32_t)
+				msg_ptr[7];
+
+			if (a == i) {
+				cp = name_buf;
+				break;
+			}
+			msg_ptr += 10 + rr_rdlen; /*- advance past structural fields and RDATA */
+		}
+		i++;
+#else
+		/*- Standard Linux/glibc libresolv Parser */
 		ns_parserr(&msg, ns_s_an, i++, &rr);
 		ttl = ns_rr_ttl(rr);
+#endif
 		if (r == 1) {
+#ifndef __CYGWIN__
 			cp = ns_rr_name(rr);
+#endif
 			tlsaRR.hostlen = str_len(cp);
 			tlsaRR.ttl = ttl;
 			if (!(tlsaRR.host = (char *) alloc(tlsaRR.hostlen * sizeof(char))))
@@ -1047,8 +1102,11 @@ dns_tlsarrplus(tlsarralloc *ta, stralloc *sa)
 			byte_copy(tlsaRR.host, tlsaRR.hostlen, cp);
 			if (!tlsarralloc_append(ta, &tlsaRR))
 				return DNS_MEM;
-		} else
+		}
+#ifndef __CYGWIN__
+		else
 			i++;
+#endif
 	}
 	return 0;
 }
@@ -1066,13 +1124,16 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	const char     *x = "$Id: dns.c,v 1.43 2025-10-03 15:38:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dns.c,v 1.44 2026-10-27 21:39:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: dns.c,v $
+ * Revision 1.44  2026-10-27 21:39:12+05:30  Cprogrammer
+ * cygwin port
+ *
  * Revision 1.43  2025-10-03 15:38:36+05:30  Cprogrammer
  * renamed getshort to get_short to fix OSX compilation error
  *

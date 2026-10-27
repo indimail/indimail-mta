@@ -1,5 +1,8 @@
 /*
  * $Log: syncdir.c,v $
+ * Revision 1.14  2026-10-27 21:40:56+05:30  Cprogrammer
+ * fix for cygwin
+ *
  * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -78,7 +81,7 @@ int             use_fsync = -1, use_fdatasync = -1, use_syncdir = -1;
 #include <unistd.h>
 #include "env.h"
 
-#ifdef DARWIN
+#if defined(DARWIN) || defined(__CYGWIN__)
 #define SYS_OPEN(FILE,FLAG,MODE) open(FILE,FLAG,MODE)
 #define SYS_CLOSE(FD)            close(FD)
 #define SYS_LINK(OLD,NEW)        link(OLD,NEW)
@@ -86,8 +89,8 @@ int             use_fsync = -1, use_fdatasync = -1, use_syncdir = -1;
 #define SYS_RENAME(OLD,NEW)      rename(OLD,NEW)
 #define SYS_FSYNC(FD)            fsync(FD)
 #define SYS_FDATASYNC(FD)        fsync(FD)
-int             open(char *, int, ...);
-int             rename(char *, char *);
+int             open(const char *, int, ...);
+int             rename(const char *, const char *);
 #else
 #if defined(SYS_openat) && defined(AT_FDCWD)
 #define SYS_OPEN(FILE,FLAG,MODE) syscall(SYS_openat,AT_FDCWD,FILE,FLAG,MODE)
@@ -162,7 +165,7 @@ fdirsyncfn(const char *filename)
 }
 
 int
-#ifdef DARWIN
+#if defined(DARWIN) || defined(__CYGWIN__)
 qopen(const char *file, int oflag, mode_t mode)
 #else
 open(const char *file, int oflag, mode_t mode)
@@ -184,7 +187,7 @@ open(const char *file, int oflag, mode_t mode)
 }
 
 int
-#ifdef DARWIN
+#if defined(DARWIN) || defined(__CYGWIN__)
 qlink(const char *oldpath, const char *newpath)
 #else
 link(const char *oldpath, const char *newpath)
@@ -200,7 +203,7 @@ link(const char *oldpath, const char *newpath)
 }
 
 int
-#ifdef DARWIN
+#if defined(DARWIN) || defined(__CYGWIN__)
 qunlink(const char *path)
 #else
 unlink(const char *path)
@@ -216,7 +219,7 @@ unlink(const char *path)
 }
 
 int
-#ifdef DARWIN
+#if defined(DARWIN) || defined(__CYGWIN__)
 qrename(const char *oldpath, const char *newpath)
 #else
 rename(const char *oldpath, const char *newpath)
@@ -237,7 +240,7 @@ rename(const char *oldpath, const char *newpath)
 void
 getversion_syncdir_c()
 {
-	const char     *x = "$Id: syncdir.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: syncdir.c,v 1.14 2026-10-27 21:40:56+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.120 2025-08-07 08:49:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.121 2026-10-27 21:40:12+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -1195,7 +1195,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			for (brep = orig_recip.s, orig_recip_len = 0; *brep != ':' && brep < orig_recip.s + orig_recip.len; brep++, orig_recip_len++);
 			if (*brep == ':') {
 				*brep++ = 0;
-				for (; *brep && isspace(*brep); brep++);
+				for (; *brep && isspace((unsigned char) *brep); brep++);
 			}
 			close(fd);
 			if (r == -1)
@@ -2727,7 +2727,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	const char     *x = "$Id: qmail-send.c,v 1.120 2025-08-07 08:49:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-send.c,v 1.121 2026-10-27 21:40:12+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2737,6 +2737,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.121  2026-10-27 21:40:12+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.120  2025-08-07 08:49:18+05:30  Cprogrammer
  * fix X-Bounce-Address
  *

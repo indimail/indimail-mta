@@ -10,6 +10,8 @@ Release 3.2-1.1 Start 12/01/2026 End --/--/----
 04. dossl.c, smtpd.c: fix for opaque versions of openssl 1.1.0 and higher
 - 08/09/2026
 05. rd-remote.c: null terminate sender, recipient for do_match
+- 27/10/2026
+06. fix for cygwin
 
 * Thu Dec 18 2025 11:42:29 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.1-1.1%{?dist}
 Release 3.1-1.1 Start 26/12/2024 End 18/12/2025

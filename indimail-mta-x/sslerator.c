@@ -1,5 +1,5 @@
 /*
- * $Id: sslerator.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: sslerator.c,v 1.14 2026-10-27 21:40:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -313,7 +313,7 @@ main(int argc, char **argv)
 		if (!stralloc_0(&saciphers))
 			strerr_die2x(111, FATAL, "out of memory");
 		for (ciphers = saciphers.s; *ciphers; ciphers++)
-			if (isspace(*ciphers)) {
+			if (isspace((unsigned char) *ciphers)) {
 				*ciphers = 0;
 				break;
 			}
@@ -434,13 +434,16 @@ main(int argc, char **argv)
 void
 getversion_sslerator_c()
 {
-	const char     *x = "$Id: sslerator.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sslerator.c,v 1.14 2026-10-27 21:40:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.14  2026-10-27 21:40:42+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: ctrlenv.c,v $
+ * Revision 1.7  2026-10-27 21:37:42+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -77,7 +80,7 @@ parse_env(char *envStrings)
 				if (*ptr2 && !env_unset(ptr2))
 					return (1);
 			} else { /*- envar=val, - Set the environment variable */
-				while (isspace(*ptr2))
+				while (isspace((unsigned char) *ptr2))
 					ptr2++;
 				if (*ptr2 && !env_put(ptr2))
 					return (1);
@@ -91,7 +94,7 @@ parse_env(char *envStrings)
 		if (*ptr2 && !env_unset(ptr2))
 			return (1);
 	} else { /*- envar=val, */
-		while (isspace(*ptr2))
+		while (isspace((unsigned char) *ptr2))
 			ptr2++;
 		if (*ptr2 && !env_put(ptr2))
 			return (1);
@@ -310,7 +313,7 @@ main(int argc, char **argv)
 void
 getversion_ctrlenv_c()
 {
-	const char     *x = "$Id: ctrlenv.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ctrlenv.c,v 1.7 2026-10-27 21:37:42+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

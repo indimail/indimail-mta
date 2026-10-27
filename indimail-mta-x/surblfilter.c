@@ -1,5 +1,5 @@
 /*
- * $Id: surblfilter.c,v 1.22 2025-10-03 15:39:22+05:30 Cprogrammer Exp mbhangui $
+ * $Id: surblfilter.c,v 1.23 2026-10-27 21:40:47+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -367,7 +367,7 @@ uri_decode(char *str, size_t str_len, char **strend)
 	for (i = 0; i < str_len; i++, j++) {
 		if (str[i] == '%' || (!pasthostname && str[i] == '=')) {
 			if (i + 2 < str_len) {
-				if (isxdigit(str[i + 1]) && isxdigit(str[i + 2])) {
+				if (isxdigit((unsigned char) str[i + 1]) && isxdigit((unsigned char) str[i + 2])) {
 					int             c1 = str[i + 1];
 					int             c2 = str[i + 2];
 					int             num = (	/* first character */
@@ -703,7 +703,7 @@ checkuri(char **ouri, char **text, size_t textlen)
 		return 0;
 	if (*uri == '/' || *uri == '\\')
 		uri++;
-	if (!isalpha(*uri) && !isdigit(*uri))
+	if (!isalpha((unsigned char) *uri) && !isdigit((unsigned char) *uri))
 		return 0;
 	uri_decode(uri, textlen, &uriend);
 	*ouri = uriend;
@@ -971,13 +971,16 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	const char     *x = "$Id: surblfilter.c,v 1.22 2025-10-03 15:39:22+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: surblfilter.c,v 1.23 2026-10-27 21:40:47+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.23  2026-10-27 21:40:47+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.22  2025-10-03 15:39:22+05:30  Cprogrammer
  * renamed getshort to get_short to fix OSX compilation error
  *

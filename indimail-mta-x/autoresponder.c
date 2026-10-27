@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.44 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: autoresponder.c,v 1.45 2026-10-27 21:37:10+05:30 Cprogrammer Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -65,6 +65,9 @@
 #define FATAL "autoresponder: fatal: "
 #define WARN  "autoresponder: warn: "
 
+#ifdef __CYGWIN__
+char           *strptime (const char *__restrict, const char *__restrict, struct tm *__restrict);
+#endif
 static int      opt_quiet, opt_copyinput, opt_nosend, opt_nolinks, msgfilefd, fixed_subject;
 static int      liphostok, dtline_len, opt_laxmode;
 unsigned long   opt_maxmsgs = 1;
@@ -1250,7 +1253,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	const char     *x = "$Id: autoresponder.c,v 1.44 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: autoresponder.c,v 1.45 2026-10-27 21:37:10+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmktempfileh;
@@ -1259,6 +1262,9 @@ getversion_qmail_autoresponder_c()
 
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.45  2026-10-27 21:37:10+05:30  Cprogrammer
+ * fix for CYGWIN
+ *
  * Revision 1.44  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

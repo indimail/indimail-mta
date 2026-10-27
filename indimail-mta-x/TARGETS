@@ -707,3 +707,6 @@ recipient-cdb.o
 valid_hname.o
 uenv
 uenv.1
+rd-remote
+printass
+*.exe

@@ -1,5 +1,5 @@
 /*
- * $Id: smtpd.c,v 1.334 2026-07-07 20:44:40+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.335 2026-10-27 21:40:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -160,7 +160,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.334 $";
+static c_char  *revision = "$Revision: 1.335 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -1945,7 +1945,7 @@ sigscheck(stralloc *line, const char **desc, int in_header)
 			if (sigs.s[k] == ':') {
 				sigs.s[k] = 0;
 				pos2 = k;
-				for (ptr = sigs.s + k + 1; *ptr && isspace(*ptr); ptr++);
+				for (ptr = sigs.s + k + 1; *ptr && isspace((unsigned char) *ptr); ptr++);
 				if (!str_diffn(ptr, "-headerblackhole", 16))
 					header_check = flagblackhole = 1;
 				else
@@ -4572,7 +4572,7 @@ put(const char *ch)
 		die_nomem();
 	if (*ch == '\n' && (sigsok || bodyok)) {
 		if (linespastheader == 0) {
-			if (line.len > 1 && isspace(line.s[0])) {
+			if (line.len > 1 && isspace((unsigned char) line.s[0])) {
 				if (!stralloc_cat(&pline, &line))
 					die_nomem();
 			} else
@@ -6636,11 +6636,11 @@ check_atrn_acc(const char *atrnaddr, char *domain_list)
 	char           *ptr1, *ptr2, *x;
 	int             i, c;
 
-	for (ptr2 = domain_list; isspace(*ptr2);ptr2++);
+	for (ptr2 = domain_list; isspace((unsigned char) *ptr2);ptr2++);
 	for (ptr1 = ptr2; *ptr1; ptr1++) {
 		if (*ptr1 == ',') {
 			*ptr1 = 0;
-			for (x = ptr1 - 1; x != domain_list && *x != ',' && isspace(*x); x--);
+			for (x = ptr1 - 1; x != domain_list && *x != ',' && isspace((unsigned char) *x); x--);
 			if (x != (ptr1 - 1)) {
 				c = *(x + 1);
 				*(x + 1) = 0;
@@ -6656,12 +6656,12 @@ check_atrn_acc(const char *atrnaddr, char *domain_list)
 				*(x + 1) = c;
 			*ptr1 = ',';
 			ptr2 = ptr1 + 1;
-			while (isspace(*ptr2))
+			while (isspace((unsigned char) *ptr2))
 				ptr2++;
 		}
 	}
 	i = str_len(ptr2);
-	for (x = ptr2 + i - 1; x != domain_list && *x != ',' && isspace(*x); x--);
+	for (x = ptr2 + i - 1; x != domain_list && *x != ',' && isspace((unsigned char) *x); x--);
 	if (x != (ptr2 + i - 1)) {
 		c = *(x + 1);
 		*(x + 1) = 0;
@@ -7329,7 +7329,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 		greetdelay_check(greetdelay);
 	if ((ptr = env_get("SHUTDOWN"))) {
 		if (*ptr) {
-			if (!isdigit(ptr[0]) || !isdigit(ptr[1]) || !isdigit(ptr[2]))
+			if (!isdigit((unsigned char) ptr[0]) || !isdigit((unsigned char) ptr[1]) || !isdigit((unsigned char) ptr[2]))
 				smtp_respond("421 ");
 			else {
 				str_copyb(strnum, ptr, 4);
@@ -7534,6 +7534,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.335  2026-10-27 21:40:36+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.334  2026-07-07 20:44:40+05:30  Cprogrammer
  * fix for opaque versions of openssl 1.1.0 and higher
  *
@@ -7996,7 +7999,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.334 2026-07-07 20:44:40+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.335 2026-10-27 21:40:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (0)

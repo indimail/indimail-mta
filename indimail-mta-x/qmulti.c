@@ -1,5 +1,5 @@
 /*
- * $Id: qmulti.c,v 1.68 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmulti.c,v 1.69 2026-10-27 21:40:17+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -18,7 +18,7 @@
 #elif defined(DARWIN) || defined(FREEBSD)
 #include <sys/param.h>
 #include <sys/mount.h>
-#elif defined(linux)
+#elif defined(linux) || defined(__CYGWIN__)
 #include <sys/vfs.h>
 #endif
 #include "auto_qmail.h"
@@ -240,7 +240,7 @@ rewrite_envelope(int outfd)
 void
 getversion_qmulti_c()
 {
-	const char     *x = "$Id: qmulti.c,v 1.68 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmulti.c,v 1.69 2026-10-27 21:40:17+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
@@ -248,6 +248,9 @@ getversion_qmulti_c()
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.69  2026-10-27 21:40:17+05:30  Cprogrammer
+ * fix for cygwin
+ *
  * Revision 1.68  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

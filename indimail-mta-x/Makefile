@@ -50,7 +50,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	setforward setmaillist slowq-send slowq-start smtpd-plugin.so \
 	sortedtest spawn-filter spfquery splogger srsfilter sslerator \
 	surblfilter surblqueue svctool swaks sys-checkpwd tcp-env testzero \
-	tokenize uacl udpclient udplogger uenv update_tmprsadh viruscanner whois \
+	tokenize uacl udplogger uenv update_tmprsadh viruscanner whois \
 	yearcal
 
 man = authcram.1 cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 \
@@ -350,7 +350,7 @@ binm3+df.sh conf-prefix
 	> binm3+df
 
 authcram: load authcram.o
-	./load authcram $(QMAILLIB)
+	./load authcram $(QMAILLIB) -lcrypto
 
 authcram.o: \
 compile authcram.c
@@ -576,7 +576,7 @@ socket_ip4loopback.o dns.lib socket.lib tls.lib
 	strsalloc.o socket_v4mappedprefix.o socket_v6any.o starttls.o \
 	auto_control.o socket_tcp.o socket_tcp6.o timeoutconn.o dossl.o \
 	auto_sysconfdir.o socket_v6loopback.o socket_ip4loopback.o \
-	variables.o control.o `cat dns.lib socket.lib tls.lib` $(QMAILLIB)
+	variables.o control.o $(QMAILLIB) `cat dns.lib socket.lib tls.lib`
 
 dnstlsarr.o: \
 compile dnstlsarr.c dns.h dnsdoe.h tlsarralloc.h \
@@ -3461,7 +3461,7 @@ dossl.o cdb_match.o starttls.o dns.lib tls.lib
 	dossl.o tlsarralloc.o variables.o control.o ipalloc.o dns.o \
 	dnsdoe.o strsalloc.o socket_tcp.o socket_tcp6.o timeoutconn.o \
 	socket_ip4loopback.o socket_v6loopback.o starttls.o \
-	`cat dns.lib tls.lib` $(QMAILLIB)
+	$(QMAILLIB) `cat dns.lib tls.lib`
 
 qmail-daned.o: \
 compile qmail-daned.c control.h variables.h \
@@ -3556,8 +3556,7 @@ sql-database.9 conf-sysconfdir
 	
 sys-checkpwd: load sys-checkpwd.o \
 shadow.lib crypt.lib
-	./load sys-checkpwd \
-	`cat shadow.lib crypt.lib` $(QMAILLIB)
+	./load sys-checkpwd $(QMAILLIB) `cat shadow.lib crypt.lib` -lcrypto
 
 sys-checkpwd.o: \
 compile sys-checkpwd.c hasspnam.h \
@@ -3677,12 +3676,6 @@ udplogger: load udplogger.o
 udplogger.o: compile udplogger.c conf-ip haveip6.h
 	./compile -DDYNAMIC_BUF `grep -h -v "^#" conf-ip` udplogger.c
 
-udpclient: load udpclient.o
-	./load udpclient $(QMAILLIB)
-
-udpclient.o: compile udpclient.c
-	./compile udpclient.c
-
 whois: \
 load whois.o
 	./load whois $(QMAILLIB)
@@ -3750,7 +3743,7 @@ ctrlenv.9 conf-prefix conf-sysconfdir
 sslerator: load sslerator.o variables.o auto_control.o \
 control.o auto_sysconfdir.o tls.lib
 	./load sslerator variables.o auto_control.o \
-	auto_sysconfdir.o control.o `cat tls.lib` $(QMAILLIB)
+	auto_sysconfdir.o control.o $(QMAILLIB) `cat tls.lib`
 
 sslerator.o: compile sslerator.c control.h auto_sysconfdir.h \
 conf-tls

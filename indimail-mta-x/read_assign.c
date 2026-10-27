@@ -1,5 +1,5 @@
 /*
- * $Id: read_assign.c,v 1.4 2025-10-03 16:53:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: read_assign.c,v 1.5 2026-10-27 21:40:22+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <ctype.h>
@@ -41,7 +41,7 @@ read_assign(const char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 		die_nomem();
 	in_dir.len--;
 	for (s = in_dir.s; *s; s++) {
-		if (isupper(*s))
+		if (isupper((unsigned char) *s))
 			*s = tolower(*s);
 	}
 	if (!(cdbdir = env_get("ASSIGNDIR")))
@@ -110,7 +110,7 @@ read_assign(const char *domain, stralloc *dir, uid_t *uid, gid_t *gid)
 void
 getversion_read_assign_c()
 {
-	const char     *x = "$Id: read_assign.c,v 1.4 2025-10-03 16:53:20+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: read_assign.c,v 1.5 2026-10-27 21:40:22+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -118,6 +118,9 @@ getversion_read_assign_c()
 
 /*
  * $Log: read_assign.c,v $
+ * Revision 1.5  2026-10-27 21:40:22+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.4  2025-10-03 16:53:20+05:30  Cprogrammer
  * fixed datatype passed to scan_uint()
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: cdbmake.c,v $
+ * Revision 1.4  2026-10-27 21:37:35+05:30  Cprogrammer
+ * fix for CYGWIN
+ *
  * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -48,8 +51,13 @@ die_readformat(void)
 	strerr_die2x(111, FATAL, "unable to read input: bad format");
 }
 
+#ifdef __CYGWIN__
+void
+get(char *ch)
+#else
 inline void
 get(char *ch)
+#endif
 {
 	switch (substdio_get(subfdin, ch, 1)) {
 	case 0:
@@ -156,7 +164,7 @@ main(int argc, char **argv)
 void
 getversion_cdbmake_c()
 {
-	const char     *x = "$Id: cdbmake.c,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: cdbmake.c,v 1.4 2026-10-27 21:37:35+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }

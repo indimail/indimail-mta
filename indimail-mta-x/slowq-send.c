@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.43 2025-05-06 22:39:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.44 2026-10-27 21:40:28+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -1559,7 +1559,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			for (brep = orig_recip.s; *brep != ':' && brep < orig_recip.s + orig_recip.len; brep++);
 			if (*brep == ':') {
 				*brep++ = 0;
-				for (; *brep && isspace(*brep); brep++);
+				for (; *brep && isspace((unsigned char) *brep); brep++);
 			}
 			close(fd);
 			if (r == -1)
@@ -3815,7 +3815,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	const char     *x = "$Id: slowq-send.c,v 1.43 2025-05-06 22:39:44+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: slowq-send.c,v 1.44 2026-10-27 21:40:28+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3825,6 +3825,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.44  2026-10-27 21:40:28+05:30  Cprogrammer
+ * fix compiler warnings
+ *
  * Revision 1.43  2025-05-06 22:39:44+05:30  Cprogrammer
  * reset tv.tv_sec on EINVAL
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: maildirsize.c,v 1.14 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: maildirsize.c,v 1.15 2026-10-27 21:39:36+05:30 Cprogrammer Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
@@ -10,7 +10,7 @@
 #elif defined(DARWIN) || defined(FREEBSD)
 #include <sys/param.h>
 #include <sys/mount.h>
-#elif defined(linux)
+#elif defined(linux) || defined(__CYGWIN__)
 #include <sys/vfs.h>
 #endif
 #include <sys/stat.h>
@@ -123,12 +123,15 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	const char     *x = "$Id: maildirsize.c,v 1.14 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildirsize.c,v 1.15 2026-10-27 21:39:36+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.15  2026-10-27 21:39:36+05:30  Cprogrammer
+ * fix for cygwin
+ *
  * Revision 1.14  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

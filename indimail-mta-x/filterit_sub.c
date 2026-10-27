@@ -1,5 +1,5 @@
 /*
- * $Id: filterit_sub.c,v 1.9 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: filterit_sub.c,v 1.10 2026-10-27 21:39:20+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -611,7 +611,7 @@ filterit_sub1(int argc, char **argv)
 					1, bounce_message, argc, argv);
 		break;
 	case 4: /*- Numerical Logical Expression */
-		for (ptr = matched_header.s + tmp.len; isspace(*ptr); ptr++, tmp.len++);
+		for (ptr = matched_header.s + tmp.len; isspace((unsigned char) *ptr); ptr++, tmp.len++);
 		match = logical_exp(matched_header.s + tmp.len, keyword);
 		if (negate)
 			match = !match;
@@ -620,7 +620,7 @@ filterit_sub1(int argc, char **argv)
 					bounce_message, argc, argv);
 		break;
 	case 5: /*- RegExp */
-		for (ptr = matched_header.s + tmp.len; isspace(*ptr); ptr++, tmp.len++);
+		for (ptr = matched_header.s + tmp.len; isspace((unsigned char) *ptr); ptr++, tmp.len++);
 		if ((match = matchregex(matched_header.s + tmp.len, keyword, 0)) == -1)
 			break;
 		if (negate)
@@ -659,6 +659,9 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.10  2026-10-27 21:39:20+05:30  Cprogrammer
+ * fixed compiler warning
+ *
  * Revision 1.9  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

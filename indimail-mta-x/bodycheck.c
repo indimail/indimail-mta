@@ -1,5 +1,5 @@
 /*
- * $Id: bodycheck.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: bodycheck.c,v 1.8 2026-10-27 21:37:21+05:30 Cprogrammer Exp mbhangui $
  */
 #include "substdio.h"
 #include "alloc.h"
@@ -47,7 +47,7 @@ bodycheck(stralloc *body, stralloc *line, const char **desc, int in_header)
 				{
 					pos2 = cptr;
 					*cptr = 0;
-					for (cptr++;*cptr && isspace(*cptr);cptr++);
+					for (cptr++;*cptr && isspace((unsigned char) *cptr);cptr++);
 					if (!str_diffn(cptr, "-header", 7))
 						header_check = 1;
 					else
@@ -118,7 +118,7 @@ bodycheck(stralloc *body, stralloc *line, const char **desc, int in_header)
 			{
 				pos2 = cptr;
 				*cptr = 0;
-				for (cptr++;*cptr && isspace(*cptr);cptr++);
+				for (cptr++;*cptr && isspace((unsigned char) *cptr);cptr++);
 				if (!str_diffn(cptr, "-header", 7))
 					header_check = 1;
 				else
@@ -194,12 +194,15 @@ bodycheck_free()
 void
 getversion_bodycheck_c()
 {
-	const char     *x = "$Id: bodycheck.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: bodycheck.c,v 1.8 2026-10-27 21:37:21+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 /*
  * $Log: bodycheck.c,v $
+ * Revision 1.8  2026-10-27 21:37:21+05:30  Cprogrammer
+ * fixed compiler warnings
+ *
  * Revision 1.7  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *
