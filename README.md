@@ -1,6 +1,6 @@
 [![Matrix](https://img.shields.io/matrix/indimail:matrix.org.svg)](https://matrix.to/#/#indimail:matrix.org)
 
-** CodeQL Status
+**CodeQL Status**
 
 [![CodeQL-indimail-mta](https://github.com/indimail/indimail-mta/actions/workflows/codeql.yml/badge.svg)](https://github.com/indimail/indimail-mta/actions/workflows/codeql.yml)
 
