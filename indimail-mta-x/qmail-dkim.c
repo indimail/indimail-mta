@@ -1,10 +1,9 @@
 /*
- * $Id: qmail-dkim.c,v 1.84 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.86 2026-11-10 15:12:38+05:30 Cprogrammer Exp mbhangui $
  */
-#include "hasdkim.h"
-#ifdef HASDKIM
 #include <unistd.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -26,7 +25,7 @@
 #include <env.h>
 #include <getEnvConfig.h>
 #include <error.h>
-#include <dkim.h>
+#include "dkim_functions.h"
 #include <makeargs.h>
 #include <noreturn.h>
 #include <qprintf.h>
@@ -39,16 +38,16 @@
 #include "pidopen.h"
 #include "buffer_defs.h"
 #include "custom_error.h"
-#include <openssl/evp.h>
 
-#define DKIM_MALLOC(n)     OPENSSL_malloc(n)
-#define DKIM_MFREE(s)      OPENSSL_free(s); s = NULL;
-#define ADDR 1003
-#define HAVE_EVP_SHA256
 #define strncasecmp(x,y,z) case_diffb((x), (z), (y))
-#define strcasecmp(x,y)    case_diffs((x), (y))
 
-extern char    *dns_text(char *);
+extern char    *dns_text(char *); /*- TXT record, "e=temp;" or "e=perm;" on error */
+
+static char    *
+dns_lookup(const char *name)
+{
+	return dns_text((char *) name);
+}
 
 char            inbuf[BUFSIZE_IN];
 char            outbuf[BUFSIZE_OUT];
@@ -59,7 +58,8 @@ datetime_sec    starttime;
 struct datetime dt;
 unsigned long   uid;
 int             readfd;
-DKIMContext     ctxt;
+DKIMSign       *sctx;
+DKIMVerify     *vctx;
 const char     *dkimsignoptions;
 
 no_return void
@@ -67,7 +67,10 @@ die(int e, int what)
 {
 	if (!what)
 		_exit(e);
-	(what == 1 ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
+	if (what == 1)
+		dkim_sign_free(sctx);
+	else
+		dkim_verify_free(vctx);
 	_exit(e);
 }
 
@@ -96,11 +99,17 @@ sigbug(int x)
 	die(QQ_INTERNAL_BUG, 0);
 }
 
-int DKIM_CALL
+/*
+ * returns 1 if the header is to be signed.
+ * EXCLUDE_DKIMSIGN is a colon separated list of header names. The names are
+ * matched exactly (the old code did a prefix match, so excluding "To" also
+ * excluded "Topic:").
+ */
+static int
 SignThisHeader(const char *szHeader)
 {
-	char           *excl = 0, *cptr, *ptr;
-	int             i;
+	const char     *excl, *p, *e;
+	int             n;
 
 	if ((!strncasecmp((char *) szHeader, "X-", 2) && strncasecmp((char *) szHeader, "X-Mailer:", 9))
 			|| !strncasecmp((char *) szHeader, "Received:", 9)
@@ -112,17 +121,14 @@ SignThisHeader(const char *szHeader)
 		return 0;
 	if (!(excl = env_get("EXCLUDE_DKIMSIGN")))
 		return 1;
-	for (i = 0, cptr = ptr = excl; *ptr; ptr++) {
-		if (*ptr == ':') {
-			if (strncasecmp((char *) szHeader, cptr, i) == 0)
-				return 0;
-			cptr = ptr + 1;
-			i = 0;
-		} else
-			i++;
+	for (p = excl; *p;) {
+		while (*p == ':')
+			p++;
+		for (e = p; *e && *e != ':'; e++);
+		if ((n = e - p) && !case_diffb(szHeader, n, p) && szHeader[n] == ':')
+			return 0;
+		p = e;
 	}
-	if (strncasecmp((char *) szHeader, cptr, i) == 0)
-		return 0;
 	return 1;
 }
 
@@ -140,6 +146,8 @@ maybe_die_dkim(int e)
 		custom_error("qmail-dkim", "Z", "Could not find From: or Sender: header in message", 0, "X.1.7");
 	case DKIM_BAD_PRIVATE_KEY:
 		custom_error("qmail-dkim", "D", "Could not parse private key", 0, "X.7.5");
+	case DKIM_OPENSSL_TOO_OLD:
+		custom_error("qmail-dkim", "Z", "OpenSSL version too old on this system", 0, "X.3.0");
 	default:
 		return;
 	}
@@ -147,7 +155,7 @@ maybe_die_dkim(int e)
 typedef const char c_char;
 static c_char  *dkimsign = 0;
 static c_char  *dkimverify = 0;
-static c_char  *dkimpractice =  "FGHIJKLMNPQRSTUVWX";
+static c_char  *dkimpractice = 0;
 static stralloc dkimoutput = { 0 };  /*- DKIM-Signature */
 static stralloc dksignature = { 0 }; /*- content of private signature */
 static stralloc sigdomains = { 0 };  /*- domains which must have signatures */
@@ -229,7 +237,6 @@ dkim_setoptions(DKIMSignOptions *opts, const char *signOptions)
 	opts->szIdentity[0] = '\0';
 	opts->expireTime = starttime + 604800;	// expires in 1 week
 	opts->nHash = DKIM_HASH_SHA256;
-	str_copy(opts->szRequiredHeaders, "NonExistent");
 	if (!signOptions)
 		return (0);
 	if (!stralloc_copys(&dkimopts, "dkim ") ||
@@ -294,19 +301,15 @@ dkim_setoptions(DKIMSignOptions *opts, const char *signOptions)
 			case '1':
 				opts->nHash = DKIM_HASH_SHA1;
 				break;
-#ifdef HAVE_EVP_SHA256
 			case '2':
 				opts->nHash = DKIM_HASH_SHA256;
 				break;
 			case '3':
 				opts->nHash = DKIM_HASH_SHA1_AND_SHA256;
 				break;
-#endif
-#if OPENSSL_VERSION_NUMBER >= 0x10101000L
 			case '4':
 				opts->nHash = DKIM_HASH_ED25519;
 				break;
-#endif
 			default:
 				free_makeargs(argv);
 				return (1);
@@ -349,7 +352,6 @@ write_signature(const char *domain, DKIMSignOptions *opts, size_t selector_size)
 				dkimsignoptions = ptr;
 				if (dkim_setoptions(opts, dkimsignoptions))
 					custom_error("qmail-dkim", "Z", "Invalid DKIMSIGNOPTIONS", 0, "X.3.0");
-				DKIMSignReplaceHash(&ctxt, opts);
 			}
 		}
 	}
@@ -392,7 +394,8 @@ write_signature(const char *domain, DKIMSignOptions *opts, size_t selector_size)
 	switch (control_readnativefile(&dksignature, keyfn, 1))
 	{
 	case 0: /*- missing signature file */
-		DKIMSignFree(&ctxt);
+		dkim_sign_free(sctx);
+		sctx = 0;
 		/*
 		 * You may have multiple domains, but may chose to sign
 		 * only for few domains which have the key present. Do not
@@ -405,7 +408,8 @@ write_signature(const char *domain, DKIMSignOptions *opts, size_t selector_size)
 		restore_gid();
 		break;
 	default:
-		DKIMSignFree(&ctxt);
+		dkim_sign_free(sctx);
+		sctx = 0;
 		if (errno == error_isdir && pct_found)
 			return;
 		custom_error("qmail-dkim", "Z", "unable to read private key.", 0, "X.3.0");
@@ -424,193 +428,25 @@ write_signature(const char *domain, DKIMSignOptions *opts, size_t selector_size)
 			ptr++;
 		}
 		str_copyb(opts->szSelector, selector, selector_size);
-		DKIMSignReplaceSelector(&ctxt, opts);
 	}
-	i = DKIMSignGetSig2(&ctxt, dksignature.s, &pSig);
+	/*
+	 * the message has been read once. dkim_sign_get() signs from the
+	 * saved hashes with whatever options are in 'opts' right now.
+	 * pSig holds complete DKIM-Signature header(s), each ending in LF.
+	 */
+	i = dkim_sign_get(sctx, opts, dksignature.s, &pSig);
 	maybe_die_dkim(i);
+	if (i) { /*- some other error, treat as temporary */
+		dkim_sign_free(sctx);
+		custom_error("qmail-dkim", "Z", dkim_status_text(i, 0), 0, "X.3.0");
+	}
 	if (pSig) {
-		if (!stralloc_catb(&dkimoutput, pSig, str_len(pSig)) ||
-				!stralloc_cats(&dkimoutput, "\n"))
+		if (!stralloc_cats(&dkimoutput, pSig))
 			die(QQ_OUT_OF_MEMORY, 1);
+		dkim_free(pSig);
 	}
-	DKIMSignFree(&ctxt);
-}
-
-int
-ParseTagValues(char *list, const char *letters[], char *values[])
-{
-	char           *t, *ptr, *key;
-	int             i;
-
-	/*- start with all args unset */
-	for (i = 0; letters[i]; i++)
-		values[i] = 0;
-	key = 0;
-	for(ptr = list;*ptr;) {
-		if ((*ptr == ' ') || (*ptr == '\t') || (*ptr == '\r') || (*ptr == '\n')) /*- FWS */
-			*ptr++ = 0;
-		if (!key)
-			key = ptr;
-		if (*ptr == '=') {
-			*ptr = 0;
-			for (i = 0;letters[i];i++) {
-				if (!str_diff(letters[i], key)) {
-					ptr++;
-					for (;*ptr;) {
-						if ((*ptr == ' ') || (*ptr == '\t') || (*ptr == '\r') || (*ptr == '\n')) {
-							ptr++;
-							continue;
-						}
-						break;
-					}
-					values[i] = ptr;
-					for(;*ptr && *ptr != ';';ptr++);
-					t = ptr;
-					if (*ptr)
-						*ptr++ = 0;
-					for(;t != values[i];t--) { /*- RFC 4871 3.2 */
-						if ((*t == ' ') || (*t == '\t') || (*t == '\r') || (*t == '\n')) {
-							*t = 0;
-							continue;
-						}
-						break;
-					}
-					key = 0;
-					break;
-				}
-			}
-		} else
-			ptr++;
-	}
-	return (0);
-}
-
-int
-checkSSP(char *domain, int *bTesting)
-{
-	char           *query, *results;
-	const char     *tags[] = { "dkim", "t", 0};
-	char           *values[2];
-	int             bIsParentSSP = 0, iSSP = DKIM_SSP_UNKNOWN;
-
-	*bTesting = 0;
-	if (!(query = DKIM_MALLOC(str_len("_ssp._domainkey.") + str_len(domain) + 1)))
-		die(QQ_OUT_OF_MEMORY, 0);
-	sprintf(query, "_ssp._domainkey.%s", domain);
-	results = dns_text(query);
-	DKIM_MFREE(query);
-	if (!str_diff(results, "e=temp;")) {
-		DKIM_MFREE(results);
-		return DKIM_SSP_TEMPFAIL;
-	} else
-	if (!str_diff(results, "e=perm;")) {
-		results = dns_text(domain);
-		if (!str_diff(results, "e=temp;")) {
-			DKIM_MFREE(results);
-			return DKIM_SSP_TEMPFAIL;
-		} else
-		if (!str_diff(results, "e=perm;")) {
-			DKIM_MFREE(results);
-			return DKIM_SSP_SCOPE;
-		}
-		bIsParentSSP = 1;
-	}
-	/*-
-	 * PG.1 2013-01-03
-	 * Bug fix by Piotr Gronek, Faculty of Physics & Applied Computer Science, Poland 2013-01-03
-	 * Deallocating storage for 'results' here is premature - moved beyond last reference to it.
-	 *
-	 */
-	if (!ParseTagValues(results, tags, values)) {
-		DKIM_MFREE(results);
-		return DKIM_SSP_UNKNOWN;
-	}
-	DKIM_MFREE(results);
-	if (values[0] != NULL) {
-		if (strcasecmp(values[0], "all") == 0)
-			iSSP = DKIM_SSP_ALL;
-		else
-		if (strcasecmp(values[0], "strict") == 0)
-			iSSP = DKIM_SSP_STRICT;
-	}
-	// flags
-	if (values[1] != NULL) {
-		char           *s, *p;
-		for (p = values[1], s = values[1]; *p; p++) {
-			if (*p == '|')
-				*p = 0;
-			else
-				continue;
-			if (!str_diff(s, "y"))
-				*bTesting = 1;
-			else
-			if (!str_diff(s, "s")) {
-				if (bIsParentSSP) {
-					/*-
-					 * this is a parent's SSP record that should not apply to subdomains
-					 * the message is non-suspicious
-					 */
-					*bTesting = 0;
-					return (DKIM_SSP_UNKNOWN);
-				}
-			}
-			s = p + 1;
-		}
-	}
-	return iSSP;
-}
-
-int
-checkADSP(char *domain)
-{
-	char           *query, *results;
-	const char     *tags[] = { "dkim", 0};
-	char           *values[1];
-
-	results = dns_text(domain);
-	if (!str_diff(results, "e=perm;")) {
-		DKIM_MFREE(results);
-		return DKIM_ADSP_SCOPE;
-	} else
-	if (!str_diff(results, "e=temp;")) {
-		DKIM_MFREE(results);
-		return DKIM_ADSP_TEMPFAIL;
-	}
-	if (!(query = DKIM_MALLOC(str_len("_adsp._domainkey.") + str_len(domain) + 1))) {
-		DKIM_MFREE(results);
-		die(QQ_OUT_OF_MEMORY, 0);
-	}
-	sprintf(query, "_adsp._domainkey.%s", domain);
-	results = dns_text(query);
-	DKIM_MFREE(query);
-	if (!str_diff(results, "e=perm;")) {
-		DKIM_MFREE(results);
-		return DKIM_ADSP_SCOPE;
-	} else
-	if (!str_diff(results, "e=temp;")) {
-		DKIM_MFREE(results);
-		return DKIM_ADSP_TEMPFAIL;
-	}
-	/*-
-	 * PG.1 2013-01-03
-	 * Bug fix by Piotr Gronek, Faculty of Physics & Applied Computer Science, Poland 2013-01-03
-	 *
-	 * Deallocating storage for 'results' here is premature - moved beyond last reference to it.
-	 *
-	 */
-	if (!ParseTagValues(results, tags, values)) {
-		DKIM_MFREE(results);
-		return DKIM_SSP_UNKNOWN;
-	}
-	DKIM_MFREE(results);
-	if (values[0] != NULL) {
-		if (strcasecmp(values[0], "all") == 0)
-			return (DKIM_ADSP_ALL);
-		else
-		if (strcasecmp(values[0], "discardable") == 0)
-			return (DKIM_ADSP_DISCARDABLE);
-	}
-	return DKIM_ADSP_UNKNOWN; /*- No ADSP Record */
+	dkim_sign_free(sctx);
+	sctx = 0;
 }
 
 void
@@ -630,256 +466,18 @@ dkimverify_exit(int dkimRet, const char *status, const char *code)
 }
 
 void
-writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useSSP, int useADSP)
+writeHeaderNexit(int ret, int origRet)
 {
-	const char     *dkimStatus = 0, *sspStatus = 0, *adspStatus = 0, *code = 0, *orig = 0;
+	const char     *dkimStatus, *code = 0;
 	char            strnum[FMT_ULONG];
 
-	switch (ret)
-	{
-	case DKIM_SUCCESS:			/*- 0 */ /*- A */
-		dkimStatus = "good        ";
-		code = "X.7.0";
-		break;
-	case DKIM_FINISHED_BODY:	/*- 1 */ /* B */
-		dkimStatus = "process result: no more message body is needed";
-		code = "X.7.0";
-		break;
-	case DKIM_PARTIAL_SUCCESS:	/*- 2 */ /*- C */
-		dkimStatus = "verify result: at least none but not all signatures verified";
-		code = "X.7.0";
-		break;
-	case DKIM_NEUTRAL:			/*- 3 */ /*- D */
-		dkimStatus = "verify result: no signatures verified but message is not suspicious";
-		code = "X.7.0";
-		break;
-	case DKIM_SUCCESS_BUT_EXTRA:/*- 4 */ /*- E */
-		dkimStatus = "signature result: signature verified but it did not include all of the body";
-		code = "X.7.0";
-		break;
-	case DKIM_3PS_SIGNATURE: /*- 5 */ /*- F */
-		dkimStatus = "signature result: 3rd party signature";
-		code = "X.7.0";
-		break;
-	case DKIM_FAIL:				/*- -1 */ /*- G */
-		dkimStatus = "DKIM Signature verification failed";
-		code = "X.7.0";
-		break;
-	case DKIM_BAD_SYNTAX:		/*- -2 */ /*- H */
-		dkimStatus = "signature error: DKIM-Signature could not parse or has bad tags/values";
-		code = "X.7.5";
-		break;
-	case DKIM_SIGNATURE_BAD:	/*- -3 */ /*- I */
-#if OPENSSL_VERSION_NUMBER >= 0x10101000L
-		dkimStatus = "signature error: RSA/ED25519 verify failed";
-#else
-		dkimStatus = "signature error: RSA verify failed";
-#endif
-		code = "X.7.5";
-		break;
-	case DKIM_SIGNATURE_BAD_BUT_TESTING: /* -4 */ /*- J */
-#if OPENSSL_VERSION_NUMBER >= 0x10101000L
-		dkimStatus = "signature error: RSA/ED25519 verify failed but testing";
-#else
-		dkimStatus = "signature error: RSA verify failed but testing";
-#endif
-		code = "X.7.5";
-		break;
-	case DKIM_SIGNATURE_EXPIRED: /*- -5 */ /*- K */
-		dkimStatus = "signature error: x= is old";
-		code = "X.7.5";
-		break;
-	case DKIM_SELECTOR_INVALID: /*- -6 */ /*- L */
-		dkimStatus = "signature error: selector doesn't parse or contains invalid values";
-		code = "X.7.5";
-		break;
-	case DKIM_SELECTOR_GRANULARITY_MISMATCH: /*- -7 */ /*- M */
-		dkimStatus = "signature error: selector g= doesn't match i=";
-		code = "X.7.5";
-		break;
-	case DKIM_SELECTOR_KEY_REVOKED: /*- -8 */ /*- N */
-		dkimStatus = "signature error: selector p= empty";
-		code = "X.7.5";
-		break;
-	case DKIM_SELECTOR_DOMAIN_NAME_TOO_LONG: /*- -9 */ /*- O */
-		dkimStatus = "signature error: selector domain name too long to request";
-		code = "X.7.0";
-		break;
-	case DKIM_SELECTOR_DNS_TEMP_FAILURE: /*- -10 */ /*- P */
-		dkimStatus = "signature error: temporary dns failure requesting selector";
-		code = "X.7.0";
-		break;
-	case DKIM_SELECTOR_DNS_PERM_FAILURE: /*- -11 */ /*- Q */
-		dkimStatus = "signature error: permanent dns failure requesting selector";
-		code = "X.7.0";
-		break;
-	case DKIM_SELECTOR_PUBLIC_KEY_INVALID: /*- -12 */ /* R */
-		dkimStatus = "signature error: selector p= value invalid or wrong format";
-		code = "X.7.5";
-		break;
-	case DKIM_NO_SIGNATURES: /*- -13 */ /*- S */
-		dkimStatus = "no signatures";
-		code = "X.7.5";
-		break;
-	case DKIM_NO_VALID_SIGNATURES: /*- -14 */ /*- T */
-		dkimStatus = "no valid signatures";
-		code = "X.7.5";
-		break;
-	case DKIM_BODY_HASH_MISMATCH: /*- -15 */ /*- U */
-		dkimStatus = "signature verify error: message body does not hash to bh value";
-		code = "X.7.7";
-		break;
-	case DKIM_SELECTOR_ALGORITHM_MISMATCH: /*- -16 */ /*- V */
-		dkimStatus = "signature error: selector h= doesn't match signature a=";
-		code = "X.7.7";
-		break;
-	case DKIM_STAT_INCOMPAT: /*- -17 */ /*- W */
-		dkimStatus = "signature error: incompatible v=";
-		code = "X.7.6";
-		break;
-	case DKIM_UNSIGNED_FROM: /*- -18 */ /*- X */
-		dkimStatus = "signature error: not all message's From headers in signature";
-		code = "X.7.7";
-		break;
-	case DKIM_BAD_IDENTITY: /*- -19 */ /*- Y */
-		dkimStatus = "signature error: invalid identify in signature";
-		code = "X.7.7";
-		break;
-	default:
-		dkimStatus = "error";
-		code = "X.3.0";
-		break;
-	}
-	if (useSSP && resDKIMSSP != -1) {
-		switch(resDKIMSSP)
-		{
-			case DKIM_SSP_ALL:
-				sspStatus = (char *) "all;";
-				break;
-			case DKIM_SSP_STRICT:
-				sspStatus = (char *) "strict;";
-				break;
-			case DKIM_SSP_SCOPE:
-				sspStatus = (char *) "out of scope;";
-				break;
-			case DKIM_SSP_TEMPFAIL:
-				sspStatus = (char *) "temporary failure;";
-				break;
-			case DKIM_SSP_UNKNOWN:
-			default:
-				sspStatus = (char *) "unknown;";
-				break;
-		}
-	}
-	if (useADSP && resDKIMADSP != -1) {
-		switch(resDKIMADSP)
-		{
-			case DKIM_ADSP_ALL:
-				adspStatus = (char *) "all;";
-				break;
-			case DKIM_ADSP_DISCARDABLE:
-				adspStatus = (char *) "discardable;";
-				break;
-			case DKIM_ADSP_SCOPE:
-				adspStatus = (char *) "out of scope;";
-				break;
-			case DKIM_ADSP_TEMPFAIL:
-				adspStatus = (char *) "temporary failure;";
-				break;
-			case DKIM_ADSP_UNKNOWN:
-			default:
-				adspStatus = (char *) "unknown ;";
-				break;
-		}
-	}
+	dkimStatus = dkim_status_text(ret, &code);
 	if (!stralloc_copys(&dkimoutput, "DKIM-Status: ") ||
 			!stralloc_cats(&dkimoutput, dkimStatus))
 		die(QQ_OUT_OF_MEMORY, 0);
 	if (origRet != DKIM_MAX_ERROR && ret != origRet) {
-		if (!stralloc_cats(&dkimoutput, "\n\t(old="))
-			die(QQ_OUT_OF_MEMORY, 0);
-		switch (origRet)
-		{
-		case DKIM_SUCCESS:			/*- 0 */ /*- A */
-			orig = "SUCCESS";
-			break;
-		case DKIM_FINISHED_BODY:	/*- 1 */ /*- B */
-			orig = "FINISHED BODY";
-			break;
-		case DKIM_PARTIAL_SUCCESS:	/*- 2 */ /* C */
-			orig = "PARTIAL SUCCESS";
-			break;
-		case DKIM_NEUTRAL:			/*- 3 */ /* D */
-			orig = "NEUTRAL";
-			break;
-		case DKIM_SUCCESS_BUT_EXTRA:/*- 4 */ /* E */
-			orig = "SUCCESS(BUT EXTRA)";
-			break;
-		case DKIM_3PS_SIGNATURE: /*- 5 */ /*- F */
-			orig = "3rd PARTY SIGNATURE";
-			break;
-		case DKIM_FAIL:				/*- -1 */ /*- G */
-			orig = "FAIL";
-			break;
-		case DKIM_BAD_SYNTAX:		/*- -2 */ /*- H */
-			orig = "BAD SYNTAX";
-			break;
-		case DKIM_SIGNATURE_BAD:	/*- -3 */ /*- I */
-			orig = "SIGNATURE BAD";
-			break;
-		case DKIM_SIGNATURE_BAD_BUT_TESTING: /*- -4 */ /*- J */
-			orig = "SIGNATURE BAD (TESTING)";
-			break;
-		case DKIM_SIGNATURE_EXPIRED: /*- -5 */ /*- K */
-			orig = "SIGNATURE EXPIRED";
-			break;
-		case DKIM_SELECTOR_INVALID: /*- -6 */ /*- L */
-			orig = "SELECTOR INVALID";
-			break;
-		case DKIM_SELECTOR_GRANULARITY_MISMATCH: /* -7 */ /*- M */
-			orig = "SELECTOR GRANULARITY MISMATCH";
-			break;
-		case DKIM_SELECTOR_KEY_REVOKED: /* -8 */ /*- N */
-			orig = "SELECTOR KEY REVOKED";
-			break;
-		case DKIM_SELECTOR_DOMAIN_NAME_TOO_LONG: /*- 9 */ /*- O */
-			orig = "DOMAIN NAME TOO LONG";
-			break;
-		case DKIM_SELECTOR_DNS_TEMP_FAILURE: /*- -10 */ /*- P */
-			orig = "DNS TEMP FAILURE";
-			break;
-		case DKIM_SELECTOR_DNS_PERM_FAILURE: /*- -11 */ /*- Q */
-			orig = "DNS PERM FAILURE";
-			break;
-		case DKIM_SELECTOR_PUBLIC_KEY_INVALID: /* -12 */ /*- R */
-			orig = "PUBLIC KEY INVALID";
-			break;
-		case DKIM_NO_SIGNATURES: /* -13 */ /*- S */
-			orig = "NO SIGNATURES";
-			break;
-		case DKIM_NO_VALID_SIGNATURES: /*- -14 */ /*- T */
-			orig = "NO VALID SIGNATURES";
-			break;
-		case DKIM_BODY_HASH_MISMATCH:  /*- -15 *//*- U */
-			orig = "BODY HASH MISMATCH";
-			break;
-		case DKIM_SELECTOR_ALGORITHM_MISMATCH: /*- -16 */ /*- V */
-			orig = "ALGORITHM MISMATCH";
-			break;
-		case DKIM_STAT_INCOMPAT: /*- -17 */ /*- W */
-			orig = "STAT INCOMPAT";
-			break;
-		case DKIM_UNSIGNED_FROM: /*- -18 */ /*- X */
-			orig = "UNSIGNED FROM";
-			break;
-		case DKIM_BAD_IDENTITY: /*- -19 */ /*- Y */
-			orig = "BAD IDENTITY";
-			break;
-		default:
-			orig = "Unkown error";
-			break;
-		}
-		if (!stralloc_cats(&dkimoutput, orig) ||
+		if (!stralloc_cats(&dkimoutput, "\n\t(old=") ||
+				!stralloc_cats(&dkimoutput, dkim_code_name(origRet)) ||
 				!stralloc_cats(&dkimoutput, ":"))
 			die(QQ_OUT_OF_MEMORY, 0);
 		if (origRet < 0) {
@@ -894,35 +492,28 @@ writeHeaderNexit(int ret, int origRet, int resDKIMSSP, int resDKIMADSP, int useS
 	}
 	if (!stralloc_cats(&dkimoutput, "\n"))
 		die(QQ_OUT_OF_MEMORY, 0);
-	if (useSSP && sspStatus) {
-		if (!stralloc_cats(&dkimoutput, "X-DKIM-SSP: ") ||
-				!stralloc_cats(&dkimoutput, sspStatus) ||
-				!stralloc_cats(&dkimoutput, "\n"))
-			die(QQ_OUT_OF_MEMORY, 0);
-	}
-	if (useADSP && adspStatus) {
-		if (!stralloc_cats(&dkimoutput, "X-DKIM-ADSP: ") ||
-				!stralloc_cats(&dkimoutput, adspStatus) ||
-				!stralloc_cats(&dkimoutput, "\n"))
-			die(QQ_OUT_OF_MEMORY, 0);
-	}
 	dkimverify_exit(ret, dkimStatus, code);
 	return;
 }
 
+/*
+ * Is the signaturedomains / nosignaturedomains logic to be applied to this
+ * verification result? Controlled by the letters in DKIMPRACTICE; if that is
+ * not set the letters of DKIMVERIFY are used. An empty string means "any
+ * failure". (ADSP and SSP have been removed, this is what remains of
+ * SIGN_PRACTICE=local.)
+ */
 int
-checkPractice(int dkimRet, int useADSP, int useSSP)
+checkPractice(int dkimRet)
 {
 	char           *ptr;
 
-	if (!(ptr = env_get("DKIMPRACTICE"))) {
-		/*- if SIGN_PRACTICE="local" then you can use DKIMVERIFY env variable too */
-		if (!useADSP && !useSSP)
-			dkimpractice = dkimverify; /*- DKIMVERIFY env variable */
-		else
-			return (0);
-	} else
+	if (!(ptr = env_get("DKIMPRACTICE")))
+		dkimpractice = dkimverify; /*- DKIMVERIFY env variable */
+	else
 		dkimpractice = ptr;
+	if (!dkimpractice)
+		return (0);
 	if (!*dkimpractice) {
 		if (dkimRet < 0 || dkimRet == DKIM_3PS_SIGNATURE)
 			return (1);
@@ -942,33 +533,23 @@ checkPractice(int dkimRet, int useADSP, int useSSP)
 	return (0);
 }
 
-static char    *callbackdata;
-
-int
-dns_bypass(const char *domain, char *buffer, int maxlen)
-{
-	if (callbackdata) {
-		str_copy(buffer, callbackdata);
-		return 0;
-	} else
-		return 1;
-}
-
 int
 main(int argc, char *argv[])
 {
 	int             pim[2];
 	int             wstat;
-	int             resDKIMSSP = -1, resDKIMADSP = -1, useSSP = 0, useADSP = 0, accept3ps = 0;
-	int             sCount = 0, sSize = 0, verbose = 0;
+	int             verbose = 0;
 	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0, len, token_len;
 	unsigned long   pid, death;
 	const char     *selector = NULL, *ptr;
 	stralloc        dkimfn = {0};
 	DKIMVerifyDetails *pDetails;
-	DKIMSignOptions   sopts = { 0 };
-	DKIMVerifyOptions vopts = { 0 };
+	DKIMSignOptions   sopts;
+	DKIMVerifyOptions vopts;
 
+	exit_if_old(QQ_SYSTEM_MISCONFIG);
+	memset(&sopts, 0, sizeof(sopts));
+	memset(&vopts, 0, sizeof(vopts));
 	starttime = now();
 	sig_blocknone();
 	umask(033);
@@ -1017,46 +598,37 @@ main(int argc, char *argv[])
 		if (ptr)
 			sopts.expireTime = 0;
 		sopts.pfnHeaderCallback = SignThisHeader;
-		if (DKIMSignInit(&ctxt, &sopts) != DKIM_SUCCESS) /*- failed to initialize signature */
+		/*
+		 * BOUNCEDOMAIN (or bouncehost/me control file) is used for d= when no
+		 * domain can be found in the message. It may be user@domain or domain.
+		 */
+		if ((ptr = env_get("BOUNCEDOMAIN")) && *ptr) {
+			const char     *at = ptr + str_chr(ptr, '@');
+
+			at = *at ? at + 1 : ptr;
+			str_copyb(sopts.szDefaultDomain, at, sizeof(sopts.szDefaultDomain) - 1);
+		}
+		if (!(sctx = dkim_sign_new(&sopts))) /*- failed to initialize signature */
 			custom_error("qmail-dkim", "Z", "dkim initialization failed", 0, "X.3.0");
 	} else {
-		const char     *x;
-
 		restore_gid();
 		if (!dkimverify)
 			dkimverify = "";
-		if (!(x = env_get("SIGN_PRACTICE")))
-			x = "adsp";
-		if (!str_diffn("adsp", x, 4)) {
-			useADSP = 1;
-			accept3ps = 1;
-		} else
-		if (!str_diffn("ssp", x, 3)) {
-			useSSP = 1;
-			accept3ps = 1;
-		} else
-		if (!str_diffn("local", x, 5)) {
-			useSSP = 0;
-			useADSP = 0;
-			accept3ps = 1;
-		}
-		if (useADSP)
-			vopts.nCheckPractices = useADSP;
-		else
-		if (useSSP)
-			vopts.nCheckPractices = useSSP;
-		else
-			vopts.nCheckPractices = 0;
-		vopts.nAccept3ps = accept3ps;
-		if (!(callbackdata = env_get("SELECTOR_DATA")))
-			vopts.pfnSelectorCallback = NULL;	/*- SelectorCallback; */
-		else
-			vopts.pfnSelectorCallback = dns_bypass;
-		if (env_get("UNSIGNED_FROM"))
+		/*
+		 * SELECTOR_DATA: use this text instead of a DNS lookup for the public key
+		 */
+		vopts.pszSelectorOverride = env_get("SELECTOR_DATA");
+		vopts.pfnDnsCallback = dns_lookup;
+		if (env_get("UNSIGNED_FROM")) /*- accept signatures that do not cover every From: header */
 			vopts.nAllowUnsignedFromHeaders = 1;
 		vopts.nSubjectRequired = env_get("UNSIGNED_SUBJECT") ? 0 : 1;
-		vopts.nHonorBodyLengthTag = env_get("HONOR_BODYLENGTHTAG") ? 0 : 1;
-		DKIMVerifyInit(&ctxt, &vopts);		/*- this is always successful */
+		/*
+		 * the man page says: set HONOR_BODYLENGTHTAG to honor l=. The old code
+		 * did the opposite (honored l= unless the variable was set).
+		 */
+		vopts.nHonorBodyLengthTag = env_get("HONOR_BODYLENGTHTAG") ? 1 : 0;
+		if (!(vctx = dkim_verify_new(&vopts)))
+			custom_error("qmail-dkim", "Z", "dkim initialization failed", 0, "X.3.0");
 	}
 	/*- Initialization */
 	uid = getuid();
@@ -1081,76 +653,66 @@ main(int argc, char *argv[])
 		register int    n;
 		register char  *x;
 
-		if ((n = substdio_feed(&ssin)) < 0) {
-			(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
+		if ((n = substdio_feed(&ssin)) < 0)
 			die_read();
-		}
 		if (!n)
 			break;
 		x = substdio_PEEK(&ssin);
 		if (!ret) {
-			if ((ret = (dkimsign ? DKIMSignProcess : DKIMVerifyProcess) (&ctxt, x, n)) == DKIM_INVALID_CONTEXT)
-				(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
-			maybe_die_dkim(ret);
+			ret = dkimsign ? dkim_sign_process(sctx, x, n) : dkim_verify_process(vctx, x, n);
+			maybe_die_dkim(ret); /*- exits on out of memory */
+			if (ret) /*- any other error: stop feeding the DKIM code, still pass the mail on */
+				ret = DKIM_FAIL;
 		}
-		if (substdio_put(&ssout, x, n) == -1) {
-			(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
+		if (substdio_put(&ssout, x, n) == -1)
 			die_write();
-		}
 		substdio_SEEK(&ssin, n);
 	}
-	if (substdio_flush(&ssout) == -1) {
-		(dkimsign ? DKIMSignFree : DKIMVerifyFree) (&ctxt);
+	if (substdio_flush(&ssout) == -1)
 		die_write();
-	}
 	if (dkimsign || dkimverify) {
 		if (dkimsign) {
-			const char     *t;
+			const char     *t = 0;
 
-			if (!(t = DKIMSignGetDomain(&ctxt))) {
-				DKIMSignFree(&ctxt);
-				maybe_die_dkim(DKIM_INVALID_CONTEXT);
+			if (ret || !(t = dkim_sign_domain(sctx))) { /*- ret != 0: DKIM code gave up on this message */
+				dkim_sign_free(sctx);
+				sctx = 0;
+				maybe_die_dkim(DKIM_NO_SENDER);
 			}
-			write_signature(t, &sopts, sizeof(sopts.szSelector) - 1); /*- calls DKIMSignFree(&ctxt) */
+			write_signature(t, &sopts, sizeof(sopts.szSelector) - 1); /*- frees sctx */
 		} else
 		if (dkimverify) {
-			char            szPolicy[512];
-
 			restore_gid();
 			if (!ret) {
 				if (env_get("VERBOSE"))
 					verbose = 1;
-				if ((ret = DKIMVerifyResults(&ctxt, &sCount, &sSize)) != DKIM_SUCCESS)
-					maybe_die_dkim(ret);
-				if ((ret = DKIMVerifyGetDetails(&ctxt, &nSigCount, &pDetails, szPolicy)) != DKIM_SUCCESS)
-					maybe_die_dkim(ret);
-				else
-				for (ret = DKIM_FAIL,i = 0; i < nSigCount; i++) {
-					if (verbose)
-						subprintf(subfderr, "Signature # %02d: ", i + 1);
-					if (pDetails[i].nResult >= 0) {
-						ret = 0;
-						if (verbose)
-							subprintf(subfderr, "Success\n");
-					} else {
-						if (ret == DKIM_FAIL)
-							ret = pDetails[i].nResult;
-						if (verbose)
-							subprintf(subfderr, "Failure %d\n", pDetails[i].nResult);
+				if ((ret = dkim_verify_finish(vctx, &nSigCount, &pDetails)) != DKIM_SUCCESS)
+					maybe_die_dkim(ret); /*- exits on out of memory */
+				else {
+					/*
+					 * one result per DKIM-Signature header. One good signature is
+					 * enough; otherwise the first failure is reported.
+					 */
+					if (verbose) {
+						for (i = 0; i < nSigCount; i++) {
+							subprintf(subfderr, "Signature # %02d: ", i + 1);
+							if (pDetails[i].nResult >= 0)
+								subprintf(subfderr, "Success\n");
+							else
+								subprintf(subfderr, "Failure %d\n", pDetails[i].nResult);
+						}
+						substdio_flush(subfderr);
 					}
+					ret = dkim_verify_status(nSigCount, pDetails);
 				}
-				if (verbose)
-					substdio_flush(subfderr);
-				if (!nSigCount)
-					ret = DKIM_NO_SIGNATURES;
 			}
 			/*- what to do if DKIM Verification fails */
-			if (checkPractice(ret, useADSP, useSSP)) {
-				char           *domain;
+			if (checkPractice(ret)) {
+				const char     *domain;
 				int             skip_nosignature_domain = 0;
 
 				origRet = ret;
-				if ((domain = DKIMVerifyGetDomain(&ctxt))) {
+				if ((domain = dkim_verify_author_domain(vctx))) {
 					if (!(ptr = env_get("SIGNATUREDOMAINS"))) {
 						if (control_readfile(&sigdomains, "signaturedomains", 0) == -1)
 							custom_error("qmail-dkim", "Z", "unable to read signaturedomains.", 0, "X.3.0");
@@ -1162,14 +724,16 @@ main(int argc, char *argv[])
 						if (!case_diffb(ptr, token_len, domain)) {
 							ret = origRet;
 							skip_nosignature_domain = 1;
-							useADSP = 0;
-							useSSP = 0;
 							break;
 						}
 						ptr = sigdomains.s + len;
 					}
-					/* if not found in signaturedomains */
-					if (!skip_nosignature_domain) {
+					/*
+					 * not in signaturedomains: if the domain is listed in nosignaturedomains
+					 * (or the list has *) a message without any DKIM-Signature is neutral.
+					 * A message that has a signature which fails is still a failure.
+					 */
+					if (!skip_nosignature_domain && ret == DKIM_NO_SIGNATURES) {
 						if (!(ptr = env_get("NOSIGNATUREDOMAINS"))) {
 							if (control_readfile(&nsigdomains, "nosignaturedomains", 0) == -1)
 								custom_error("qmail-dkim", "Z", "unable to read nosignaturedomains.", 0, "X.3.0");
@@ -1180,51 +744,16 @@ main(int argc, char *argv[])
 							len += ((token_len = str_len(ptr)) + 1); /*- next domain */
 							if (*ptr == '*' || !case_diffb(ptr, token_len, domain)) {
 								ret = DKIM_NEUTRAL;
-								useADSP = 0;
-								useSSP = 0;
 								break;
 							}
 							ptr = nsigdomains.s + len;
 						}
 					}
 				}
-				if (!domain || !*domain)
-					; /*- do nothing ? */
-				else
-				if (useADSP) {
-					resDKIMADSP = checkADSP(domain);
-					if (sCount > 0) {
-						if (resDKIMADSP == DKIM_ADSP_UNKNOWN || resDKIMADSP == DKIM_ADSP_ALL)
-							ret = (sCount == sSize ? DKIM_SUCCESS : DKIM_PARTIAL_SUCCESS);
-					}
-					/* if the message should be signed, return fail */
-					if (resDKIMADSP == DKIM_ADSP_DISCARDABLE)
-						ret = DKIM_FAIL;
-					else
-						ret = DKIM_NEUTRAL;
-				} else
-				if (useSSP) {
-					int             bTestingPractices = 0;
-					char           *domain_t;
-
-					if ((domain_t = DKIMVerifyGetDomain(&ctxt)))
-						resDKIMSSP = checkSSP(domain_t, &bTestingPractices);
-					if (sCount > 0) {
-						if ((resDKIMSSP == DKIM_SSP_UNKNOWN || resDKIMSSP == DKIM_SSP_ALL))
-							ret = (sCount == sSize ? DKIM_SUCCESS : DKIM_PARTIAL_SUCCESS);
-					}
-					// if the SSP is testing, return neutral
-					if (bTestingPractices)
-						ret = DKIM_NEUTRAL;
-					/* if the message should be signed, return fail */
-					if (resDKIMSSP == DKIM_SSP_ALL || resDKIMSSP == DKIM_SSP_STRICT)
-						ret = DKIM_FAIL;
-					else
-						ret = DKIM_NEUTRAL;
-				}
 			}
-			DKIMVerifyFree(&ctxt);
-			writeHeaderNexit(ret, origRet, resDKIMSSP, resDKIMADSP, useSSP, useADSP);
+			dkim_verify_free(vctx);
+			vctx = 0;
+			writeHeaderNexit(ret, origRet);
 		} /*- if (dkimverify) */
 	}
 	if (pipe(pim) == -1)
@@ -1278,40 +807,34 @@ main(int argc, char *argv[])
 		die(QQ_CRASHED, 0);
 	die(wait_exitcode(wstat), 0);
 }
-#else
-#warning "not compiled with -DHASDKIM"
-#include "substdio.h"
-#include <unistd.h>
-
-static char     sserrbuf[512];
-struct substdio sserr;
-
-int
-main(int argc, char **argv)
-{
-	substdio_fdbuf(&sserr, (ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
-	substdio_puts(&sserr, "not compiled with -DHASDKIM\n");
-	substdio_flush(&sserr);
-	_exit(111);
-}
-#endif
 
 #ifndef lint
 void
 getversion_qmail_dkim_c()
 {
-	const char     *x = "$Id: qmail-dkim.c,v 1.84 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-dkim.c,v 1.86 2026-11-10 15:12:38+05:30 Cprogrammer Exp mbhangui $";
 
-#ifdef HASDKIM
-	x = sccsidmakeargsh;
-	x = sccsidgetdomainth;
-#endif
-	x++;
+	(void) x;
 }
 #endif
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.86  2026-11-10 15:12:38+05:30  Cprogrammer
+ * fix compile (albeit with stub) on older openssl versions
+ *
+ * Revision 1.85  2026-11-09 23:23:58+05:30  Cprogrammer
+ * compile qmail-dkim using dns_functions.c instead of linking with libdkim2
+ *
+ * Revision 1.85
+ * replaced libdkim (C++) with dkim_functions.c (C)
+ * removed SSP/ADSP and SIGN_PRACTICE; dkimpractice now selects when
+ * signaturedomains/nosignaturedomains are applied
+ * sign once, call dkim_sign_get() once per signature
+ * verify each DKIM-Signature independently; one good signature is enough
+ * HONOR_BODYLENGTHTAG semantics fixed to match the man page
+ * EXCLUDE_DKIMSIGN matches header names exactly
+ *
  * Revision 1.84  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

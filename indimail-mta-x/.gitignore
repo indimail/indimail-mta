@@ -152,7 +152,6 @@ forward.1
 getDomainToken.o
 getqueue.o
 greydaemon
-hasdkim.h
 hasifaddr.h
 hasldap.h
 haslibgsasl.h
@@ -485,3 +484,6 @@ qmail-qfilter.1
 uenv
 uenv.1
 *.exe
+dkim
+dkim.o
+dkim.8

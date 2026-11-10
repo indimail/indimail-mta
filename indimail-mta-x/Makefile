@@ -26,7 +26,7 @@ it = 822date 822field 822header 822print 822received addrlist analyzer \
 	binm2+df binm3 binm3+df bouncesaying cdb-database cdbdump cdbget \
 	cdbgetm cdbmake cdbmake-12 cdbmake-sv cdbstats cdbtest cidr \
 	condredirect config-fast create_services indimail-mta.cron ctrlenv \
-	datemail dknewkey dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr \
+	datemail dknewkey dkim dnsblcheck dnscname dnsfq dnsip dnsmxip dnsptr \
 	dnstlsarr dnstxt dot-forward drate etrn except fastforward \
 	favicon.base64 filterit forward generic.so greydaemon home home+df \
 	hostname iftocc indimail-mta.changes setqload qmonitor \
@@ -58,7 +58,7 @@ man = authcram.1 cdb-database.8 cdbdump.1 cdbget.1 cdbgetm.1 cdbmake.1 \
 	dot-forward.1 dot-qmail.5 drate.1 drate.1 fastforward.1 filterto.1 \
 	indimail-env.7 filterit.1 forward.1 maildirserial.1 mlmatchup.8 \
 	multi-queue.7 new-inject.1 plugin_init.3 plugtest.1 predate.1 \
-	printass.1 qarf.1 qfrontend.1 qmail-cdb.8 qmail-clean.8 \
+	printass.1 qarf.1 qfrontend.1 qmail-cdb.8 qmail-clean.8 dkim.8 \
 	indimail-control.5 qmail-daned.8 qtop.1 qmail-direct.8 qmail-dkim.8 \
 	qmail-getpw.8 qmail-inject.8 qmail-limits.7 qmail-local.8 qmail-multi.8 \
 	qmail-qfilter.1 qmonitor.8 indimail-mta.7 qmail-newu.8 qmail-poppass.8 \
@@ -1490,51 +1490,46 @@ dknewkey: dknewkey.sh warn-auto.sh conf-sysconfdir
 dknewkey.8: dknewkey.9
 	$(edit) dknewkey.9 > $@
 
-dkim.lib: \
-compile trydkim.c dns_text.o conf-dkim dns.lib
-	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
-	-I/usr/include/dkim -I../libdkim2-x \
-	`grep -h -v "^#" conf-dkim` trydkim.c -o trydkim1.o && \
-	c++ -o trydkim1 trydkim1.o dns_text.o \
-	`cat dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
-	-L../libdkim2-x/.libs -ldkim2 -lcrypto -ldkim2 $(QMAILLIB) ) >/dev/null 2>&1 \
-	&& echo "-ldkim2" || echo "WARNING!!! Not linked with libdkim2" 1>&2 ) > dkim.lib
-	rm -f trydkim1.o trydkim1
-
-hasdkim.h: dns_text.o \
-trydkim.c compile dns.lib dkim.lib conf-indi
-	( ( ./compile -I/usr/local/include/dkim -I/opt/local/include/dkim \
-	-I/usr/include/dkim -I../libdkim2-x \
-	`grep -h -v "^#" conf-dkim` trydkim.c -o trydkim2.o && \
-	c++ -o trydkim2 trydkim2.o dns_text.o \
-	`cat dkim.lib dns.lib` $(LDFLAGS) -L/usr/local/lib -L/opt/local/lib \
-	-L../libdkim2-x/.libs -lcrypto $(QMAILLIB) ) >/dev/null 2>&1 \
-	&& (echo "#define HASDKIM 1") || echo "WARNING!!! Not compiled with -DHASDKIM" 1>&2 ) > hasdkim.h; \
-	rm -f trydkim2.o trydkim2
-
 qmail-dkim: qmail-dkim.o auto_control.o pidopen.o auto_prefix.o \
-variables.o control.o dns_text.o getDomainToken.o \
+variables.o control.o dns_text.o getDomainToken.o dkim_functions.o \
 qmulti.o auto_qmail.o custom_error.o getqueue.o parse_env.o \
-dns.lib dkim.lib rt.lib conf-ld-$(SYSTEM) load
+dns.lib rt.lib conf-ld-$(SYSTEM) load
 	./load qmail-dkim auto_control.o qmulti.o auto_prefix.o \
 	variables.o control.o pidopen.o dns_text.o custom_error.o \
-	-L../libdkim2-x/.libs `cat dkim.lib` parse_env.o \
-	getDomainToken.o getqueue.o `cat conf-ld-$(SYSTEM) 2>/dev/null` \
-	auto_qmail.o $(static_option) $(QMAILLIB) \
-	$(dynamic_option) -lcrypto `cat dns.lib rt.lib`
+	parse_env.o getDomainToken.o getqueue.o dkim_functions.o \
+	`cat conf-ld-$(SYSTEM) 2>/dev/null` auto_qmail.o $(static_option) \
+	$(QMAILLIB) $(dynamic_option) -lcrypto `cat dns.lib rt.lib`
 
 qmail-dkim.o: \
-compile qmail-dkim.c qmail.h control.h hasdkim.h variables.h \
-auto_control.h qmulti.h pidopen.h custom_error.h getDomainToken.h \
-buffer_defs.h
-	./compile -I/usr/include/dkim -I/usr/local/include/dkim \
-		-I../libdkim2-x -I/opt/local/include/dkim qmail-dkim.c
+compile qmail-dkim.c qmail.h control.h variables.h auto_control.h \
+qmulti.h pidopen.h custom_error.h getDomainToken.h \
+buffer_defs.h dkim_functions.h conf-ld-$(SYSTEM)
+	./compile qmail-dkim.c
+
+dkim_functions.o: \
+compile dkim_functions.c dkim_functions.h
+	./compile dkim_functions.c
+
+dkim: dkim.o dkim_functions.o dns_text.o conf-ld-$(SYSTEM) \
+dns.lib
+	./load dkim dkim_functions.o dns_text.o \
+	`cat conf-ld-$(SYSTEM) 2>/dev/null` $(static_option) \
+	$(QMAILLIB) $(dynamic_option) -lcrypto `cat dns.lib`
+
+dkim.o: dkim.c dkim_functions.h compile
+	./compile dkim.c
 
 qmail-dkim.8: qmail-dkim.9 conf-prefix conf-sysconfdir
 	cat qmail-dkim.9 \
 	| sed s}@prefix\@}"`head -1 conf-prefix`"}g \
 	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
 	> qmail-dkim.8
+
+dkim.8: dkim.9 conf-prefix conf-sysconfdir
+	cat dkim.9 \
+	| sed s}@prefix\@}"`head -1 conf-prefix`"}g \
+	| sed s}@controldir\@}"`head -1 conf-sysconfdir`/control"}g \
+	> dkim.8
 
 pidopen.o: \
 compile pidopen.h pidopen.c
@@ -1839,8 +1834,8 @@ auto_prefix.o
 qmail-showctl.o: compile qmail-showctl.c control.h auto_sysconfdir.h \
 auto_uids.h auto_qmail.h auto_break.h auto_patrn.h auto_spawn.h \
 auto_split.h spf.h variables.h auto_control.h indimail_stub.h \
-hassrs.h auto_prefix.h conf-srs conf-spf conf-batv conf-dkim conf-tls
-	./compile `grep -h -v "^#" conf-spf conf-batv conf-dkim conf-tls` \
+hassrs.h auto_prefix.h conf-srs conf-spf conf-batv conf-tls
+	./compile `grep -h -v "^#" conf-spf conf-batv conf-tls` \
 	qmail-showctl.c
 
 qmail-showctl.8: qmail-showctl.9 conf-split conf-sysconfdir conf-qmail

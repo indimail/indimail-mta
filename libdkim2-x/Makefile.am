@@ -15,19 +15,19 @@ libdkim2_la_LDFLAGS = -version-info @LIBVER@ -pie
 libdkim2_la_CXXFLAGS = -fPIE
 
 libdkim2dir=@libdir@
-dkimbindir=@prefix@/bin
-dkimbin_PROGRAMS = dkim
+#dkimbindir=@prefix@/bin
+#dkimbin_PROGRAMS = dkim
 noinst_DATA = libdkim2.spec libdkim2.changes PKGBUILD
 
-dkim_SOURCES = dkim.cpp
-dkim_LDFLAGS = $(LDFLAGS)
-dkim_LDADD = libdkim2.la $(LIB_RESOLV) $(LIB_CRYPTO)
-dkim_CXXFLAGS = $(CXXFLAGS) -fPIE
+#dkim_sources = dkim.cpp
+#dkim_ldflags = $(ldflags)
+#dkim_ldadd = libdkim2.la $(lib_resolv) $(lib_crypto)
+#dkim_cxxflags = $(cxxflags) -fpie
 
 pkgconfigdir=@pkgconfigdir@
 pkgconfig_DATA = libdkim2.pc
 
-man_MANS=dkim.8
+#man_MANS=dkim.8
 
 dkimfuncs.$(OBJEXT): dkim.h dkimverify.h dkimsign.h config.h dkimfuncs.cpp
 dns.$(OBJEXT): dns.h dns.cpp
@@ -44,8 +44,8 @@ edit = sed \
 	-e 's}@pkgconfigdir\@}$(pkgconfigdir)}g' \
 	-e 's}@VERSION\@}$(VERSION)}g' \
 	-e 's}@prefix\@}$(prefix)}g'
-dkim.8: dkim.9
-	cat dkim.9 | sed s}@controldir\@}$(sysconfdir)/indimail/control}g > $@
+#dkim.8: dkim.9
+#	cat dkim.9 | sed s}@controldir\@}$(sysconfdir)/indimail/control}g > $@
 libdkim2.spec: libdkim2.spec.in catChangeLog doc/ChangeLog conf-version conf-release conf-email
 	(cat $@.in;./catChangeLog) | $(edit) > $@
 libdkim2.changes: doc/ChangeLog conf-version conf-release conf-email

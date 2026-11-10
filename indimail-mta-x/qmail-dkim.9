@@ -1,7 +1,7 @@
 .\" vim: tw=75
 .TH qmail-dkim 8
 .SH NAME
-qmail-dkim \- sign/verify using DKIM (SSP/ADSP optionally) and queue a mail
+qmail-dkim \- sign/verify using DKIM and queue a mail
 message for delivery
 
 .SH SYNOPSIS
@@ -45,9 +45,11 @@ above will make qmail-dkim call qmail-spamfilter instead of qmail-queue.
 
 \fBqmail-dkim\fR supports RSA-SHA1, RSA-SHA256 and ED25519-SHA256
 (RFC-8463) encryption methods for signing and verification. By default
-RSA-SHA256 is used. \fBqmail-dkim\fR can optionally use \fBSender Signing
-Practice (SSP)\fR or \fBAuthor Domain Signing Practice\fR. \fBqmail-dkim\fR
-uses libdkim and OpenSSL libraries for signing and verification.
+RSA-SHA256 is used. A message may carry any number of DKIM-Signature
+headers. Each one is verified on its own and one good signature is enough
+for the message to pass. At most 10 signatures are checked.
+\fBqmail-dkim\fR uses OpenSSL and the functions in dkim_functions.c for
+signing and verification.
 
 To sign a message, set the \fBDKIMSIGN\fR environment variable to the
 pathname of the private key that will be used to sign the message. You can
@@ -118,7 +120,7 @@ Apart from setting \fBDKIMSIGNOPTIONS\fR, you can set the identity and the
 expire time by setting \fBDKIMIDENTITY\fR and \fBDKIMEXPIRE\fR
 respectively. \fBDKIMIDENTITY\fR takes precedence over -i option specified
 in \fBDKIMSIGNOPTIONS\fR. Similarly, \fBDKIMEXPIRE\fR takes precedence over
--x option specifed in \fBR DKIMSIGNOPTIONS\fR. \fBqmail-dkim\fR uses the
+-x option specifed in \fBDKIMSIGNOPTIONS\fR. \fBqmail-dkim\fR uses the
 domain found in the Return-Path, Sender, From, X-Bounced-Address headers to
 set the domain tag. If not it uses the value in \fIbouncehost\fR control
 file. If \fIbouncehost\fR is missing, \fIme\fR is used. You can use
@@ -138,7 +140,7 @@ set \fBDKIMSIGNOPTIONSEXTRA\fR to have "-z 4" along with other options if
 any.
 
 To verify a message, set the \fBDKIMVERIFY\fR environment variable to a
-desired set of letters.  Precisely, if you want a libdkim return status to
+desired set of letters. Precisely, if you want a DKIM return status to
 generate an error, include that letter, where A is the first return status
 (DKIM_SUCCESS), B is the second (DKIM_FINISHED_BODY), etc. The letter
 should be uppercase if you want a permanent error to be returned, and
@@ -213,81 +215,38 @@ be taken when a mail arrives with no DKIM signature. Note that
 \fBqmail-dkim\fR always inserts the \fBDKIM-Status\fR header, so that
 messages can be rejected later at delivery time, or in the mail reader. In
 that case you may set \fBDKIMVERIFY\fR to an empty string or "p" to issue
-temporary error for temporary DNS resolution failure. If you want to check
-all message's From header in signature set the \fBUNSIGNED_FROM\fR
-environment variable to an empty string. If you want to check messages
-without signed subject header, set \fBUNSIGNED_SUBJECT\fR environment
-variable. If you want to honor body lengh tag (l=), set
-\fBHONOR_BODYLENGTHTAG\fR environment variable.
+temporary error for temporary DNS resolution failure. Every From header of
+the message must be covered by the h= tag of the signature. To accept
+signatures that do not cover all of them, set the \fBUNSIGNED_FROM\fR
+environment variable. If you want to check messages without signed subject
+header, set \fBUNSIGNED_SUBJECT\fR environment variable. If you want to
+honor the body length tag (l=), set \fBHONOR_BODYLENGTHTAG\fR environment
+variable.
 
-qmail-dkim supports signing practice which can be additonall checked when a
-signature verifcation fails -
-
-.BR "SSP - Sender Signing Practice"
-
-and
-
-.BR "ADSP - Author Domain Signing Practice" .
-
-When a signature fails to verify for a message, you can use SSP/ADSP to
-determine if the message is suspicious or not. To verify a message against
-SSP/ADSP, set the \fBDKIMPRACTICE\fR environment variable to the desired
-set of letters allowed for DKIMVERIFY environment variable. SSP/ADSP should
-be used only when signature verification fails. SSP/ADSP should be invoked
-only when libdkim returns the error codes
-(F,G,H,I,J,K,L,M,N,P,Q,R,S,T,U,V,W,X) for signature verification. In case
-you want to test against SSP/ADSP only for DKIM_NO_SIGNATURE and
-DKIM_NO_VALID_SIGNATURE set the environment variable
-\fBDKIMPRACTICE="ST"\fR. If you want automatic behaviour, set DKIMPRACTICE
-to an empty string. In this case ADSP/SSP will be used when return code
-matches "FGHIJKLMNPQRSTUVWX". \fBqmail-dkim\fR uses ADSP as the default
-signing practice. You can override this by setting the SIGN_PRACTICE to
-ssp, adsp, local (lowercase). if you set SIGN_PRACTICE to \fIlocal\fB,
-\fBqmail-dkim\fR will check the domain against the control file
-\fIsignaturedomains\fR (See Below). If the domain is found listed in
-\fIsignaturedomains\fR, \fBqmail-dkim\fR will bypass ADSP/SSP and return
-DKIM_FAIL if signature fails to verify. Setting \fBSIGN_PRACTICE\fR to
-anything else will cause \fBqmail-dkim\fR to disable Signing Practice.
-
-If ADSP or SSP is checked, \fBqmail-dkim will insert the \fBX-DKIM-ADSP\fR
-or \fBX-DKIM-SSP\fR header as given below
-
-.nf
-A - DKIM_SUCCESS             - Message passes ADSP test
-B - DKIM_ADSP_UNKNOWN        - some messages may be signed
-C - DKIM_ADSP_ALL            - All message are signed with author signature 
-D - DKIM_ADSP_DISCARDABLE    - messages which fail verification are
-                               Discardable
-E - DKIM_ADSP_SCOPE          - domain is out of scope
-F - DKIM_ADSP_TEMPFAIL       - Temporary Error 
-
-or
-
-A - DKIM_SUCCESS             - Message passes ADSP test
-B - DKIM_SSP_UNKNOWN         - some messages may be signed
-C - DKIM_SSP_ALL             - All message are signed with author signature 
-D - DKIM_SSP_STRICT          - messages which fail verification are
-                               Discardable
-E - DKIM_SSP_SCOPE           - domain is out of scope
-F - DKIM_SSP_TEMPFAIL        - Temporary Error 
-.fi
+When signature verification fails, the control files \fIsignaturedomains\fR
+and \fInosignaturedomains\fR (see below) can change the result. This is
+done only for the DKIMVERIFY letters that match the failure. To use a
+different set of letters, set the environment variable \fBDKIMPRACTICE\fR.
+If \fBDKIMPRACTICE\fR is an empty string, the control files are consulted
+for any failure. SSP/ADSP are obsolete and are no longer supported. The
+variable \fBSIGN_PRACTICE\fR is ignored.
 
 You can have a control file \fIsignaturedomains\fR containing a list of
 domains which you know are sure to sign messages using DKIM. If a message
 comes from a domain listed in \fIRsignaturedomains\fR, and the signature
 fails verification (any of DKIM failure status), \fBqmail-dkim\fR will
-bypass ADSP/SSP checks and return DKIM_FAIL. The name of this control file
-can be overridden by the environment variable \fBSIGNATUREDOMAINS\fR.
+keep the failure (DKIM_FAIL). The name of this control file can be
+overridden by the environment variable \fBSIGNATUREDOMAINS\fR.
 
 You can have a control file \fInosignaturedomains\fR containing a list of
 domains which you know are sure not to sign messages using DKIM. If a
 message comes from a domain listed in \fInosignaturedomains\fR, and does
-not have a DKIM-Signature header, \fBqmail-dkim\fR will bypass ADSP/SSP
-checks and return DKIM_NEUTRAL. The wildcard entry '*' in this file, will
-result in all mails which do not have a signature to pass DKIM test (unless
-the domain is listed in the control file \fBsignaturedomains\fR). The name
-of this control file can be overridden by the environment variable
-\fBNOSIGNATUREDOMAINS\fR.
+not have a DKIM-Signature header, \fBqmail-dkim\fR will return
+DKIM_NEUTRAL. A message whose signature fails to verify is not affected.
+The wildcard entry '*' in this file, will result in all mails which do not
+have a signature to pass DKIM test (unless the domain is listed in the
+control file \fBsignaturedomains\fR). The name of this control file can be
+overridden by the environment variable \fBNOSIGNATUREDOMAINS\fR.
 
 \fBqmail-dkim\fR will use the environment variable \fBSELECTOR_DATA\fR
 instead of dns for the public key text record. This can be used to test
@@ -327,7 +286,8 @@ If the environment variable \fBCONTROLDIR\fR is set, \fBqmail-dkim\fR uses
 that instead of @controldir@ to read control files and the private key.
 
 .SH "EXIT CODES"
-\fBqmail-dkim\fR returns the same exit codes as qmail-queue with these additions:
+\fBqmail-dkim\fR returns the same exit codes as qmail-queue with these
+additions:
 
 .TP 5
 \fB35\fR

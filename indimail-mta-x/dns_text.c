@@ -1,5 +1,5 @@
 /*
- * $Id: dns_text.c,v 1.16 2025-10-03 15:39:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dns_text.c,v 1.17 2026-11-09 23:22:09+05:30 Cprogrammer Exp mbhangui $
  */
 #include <netdb.h>
 #include <sys/types.h>
@@ -178,7 +178,8 @@ char           *
 dns_text(char *dn)
 {
 	int             r;
-	
+
+	result.len = 0;
 	switch (r = dns_txtplus(dn))
 	{
 	case DNS_MEM:
@@ -193,13 +194,16 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	const char     *x = "$Id: dns_text.c,v 1.16 2025-10-03 15:39:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dns_text.c,v 1.17 2026-11-09 23:22:09+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 }
 // vim: shiftwidth=2:tabstop=4:softtabstop=4
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.17  2026-11-09 23:22:09+05:30  Cprogrammer
+ * BUGFIX: subsequent calls to dns_text() returned the same string with new record appended
+ *
  * Revision 1.16  2025-10-03 15:39:15+05:30  Cprogrammer
  * renamed getshort to get_short to fix OSX compilation error
  *

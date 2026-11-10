@@ -710,3 +710,6 @@ uenv.1
 rd-remote
 printass
 *.exe
+dkim
+dkim.exe
+dkim.8
