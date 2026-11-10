@@ -1,5 +1,5 @@
 /*
- * $Id: fghack.c,v 1.9 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: fghack.c,v 1.10 2026-11-10 21:59:33+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -22,6 +22,7 @@ main(int argc, char **argv, char **envp)
 	int             pi[2];
 	char            strnum[FMT_ULONG];
 
+	(void) argc;
 	if (!argv[1])
 		strerr_die1x(100, "fghack: usage: fghack child");
 
@@ -35,8 +36,9 @@ main(int argc, char **argv, char **envp)
 	case 0:
 		close(pi[0]);
 		for (i = 0; i < 30; ++i) {
-			if (dup(pi[1]) == -1)
+			if (dup(pi[1]) == -1) {
 				;
+			}
 		}
 		pathexec_run(argv[1], argv + 1, envp);
 		strerr_die4sys(111, FATAL, "unable to run ", argv[1], ": ");
@@ -93,13 +95,16 @@ main(int argc, char **argv, char **envp)
 void
 getversion_fghack_c()
 {
-	const char     *x = "$Id: fghack.c,v 1.9 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: fghack.c,v 1.10 2026-11-10 21:59:33+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: fghack.c,v $
+ * Revision 1.10  2026-11-10 21:59:33+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.9  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

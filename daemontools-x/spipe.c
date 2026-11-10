@@ -1,5 +1,5 @@
 /*
- * $Id: spipe.c,v 1.9 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: spipe.c,v 1.10 2026-11-10 22:00:03+05:30 Cprogrammer Exp mbhangui $
  *
  * spipe -- supervise a pipeline of programs
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -121,8 +121,10 @@ start_parts()
 void
 handle_intr(int sig)
 {
-	if (write(selfpipe[1], "", 1) == -1)
+	(void) sig;
+	if (write(selfpipe[1], "", 1) == -1) {
 		;
+	}
 }
 
 no_return void
@@ -132,8 +134,9 @@ mainloop()
 	signal(SIGINT, handle_intr);
 	signal(SIGQUIT, handle_intr);
 	signal(SIGTERM, handle_intr);
-	if (read(selfpipe[0], buf, 1) == -1)
+	if (read(selfpipe[0], buf, 1) == -1) {
 		;
+	}
 	stop_parts();
 	exit(0);
 }
@@ -150,13 +153,16 @@ main(int argc, char **argv)
 void
 getversion_spipe_c()
 {
-	const char     *x = "$Id: spipe.c,v 1.9 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: spipe.c,v 1.10 2026-11-10 22:00:03+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: spipe.c,v $
+ * Revision 1.10  2026-11-10 22:00:03+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.9  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

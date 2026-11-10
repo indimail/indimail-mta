@@ -1,5 +1,8 @@
 /*
  * $Log: pgrphack.c,v $
+ * Revision 1.6  2026-11-10 21:59:51+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.5  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -25,6 +28,7 @@
 int
 main(int argc, char **argv, char **envp)
 {
+	(void) argc;
 	if (!argv[1])
 		strerr_die1x(100, "pgrphack: usage: pgrphack child");
 	setsid(); /*- shouldn't fail; if it does, too bad */
@@ -37,7 +41,7 @@ main(int argc, char **argv, char **envp)
 void
 getversion_pgrphack_c()
 {
-	const char     *x = "$Id: pgrphack.c,v 1.5 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: pgrphack.c,v 1.6 2026-11-10 21:59:51+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

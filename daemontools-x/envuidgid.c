@@ -1,5 +1,5 @@
 /*
- * $Id: envuidgid.c,v 1.8 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: envuidgid.c,v 1.9 2026-11-10 21:59:21+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <pwd.h>
@@ -25,6 +25,7 @@ main(int argc, char **argv)
 	char           *account;
 	struct passwd  *pw;
 
+	(void) argc;
 	account = *++argv;
 	if (!account || !*++argv)
 		strerr_die1x(100, "envuidgid: usage: envuidgid account child");
@@ -43,13 +44,16 @@ main(int argc, char **argv)
 void
 getversion_envuidgid_c()
 {
-	const char     *x = "$Id: envuidgid.c,v 1.8 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: envuidgid.c,v 1.9 2026-11-10 21:59:21+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: envuidgid.c,v $
+ * Revision 1.9  2026-11-10 21:59:21+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.8  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

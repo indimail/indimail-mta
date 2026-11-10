@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.46 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: svscan.c,v 1.47 2026-11-10 22:00:15+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -54,7 +54,8 @@ typedef struct
 	int             pi[2];		/*- defined if flaglog */
 } svcs;
 static svcs    *x;
-static int      numx, scannow, auto_scan, use_run = 1,
+static unsigned numx;
+static int      scannow, auto_scan, use_run = 1,
 				verbose, silent, pidlen,
 				shutdown_in_progress, svscan_logpid,
 				svscan_logidx = -1;
@@ -90,7 +91,7 @@ initialize_run()
 void
 kill_svc(int what)
 {
-	int             i;
+	unsigned int    i;
 	char            strnum[FMT_ULONG];
 
 	for (i = 0; i < numx; ++i) {
@@ -300,9 +301,9 @@ sv_control(const char *service_name, const char *fn, const char *command)
 void
 start(const char *fn, const char *sdir)
 {
-	unsigned int    fnlen, t1, t2;
+	unsigned int    fnlen, t1, t2, i;
 	struct stat     st;
-	int             child, i, fdsource;
+	int             child, fdsource;
 	char           *s;
 	char           *args[6];
 
@@ -593,7 +594,8 @@ doit(char *sdir, pid_t mypid)
 {
 	DIR            *dir;
 	direntry       *d;
-	int             i, t, wstat;
+	unsigned int    i;
+	int             t, wstat;
 	pid_t           r;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
@@ -709,6 +711,7 @@ doit(char *sdir, pid_t mypid)
 static void
 sighup(int i)
 {
+	(void) i;
 	scannow = 1;
 	sig_block(sig_hangup);
 	if (verbose)
@@ -722,6 +725,7 @@ sigterm(int i)
 	char            strnum[FMT_ULONG];
 	int             wstat;
 
+	(void) i;
 	scannow = 0;
 	shutdown_in_progress = 1;
 	sig_ignore(sig_term);
@@ -751,7 +755,7 @@ sigterm(int i)
 static void
 open_svscan_log(char *sdir)
 {
-	const int       i = numx;
+	const uint i = numx;
 	struct stat     st;
 
 	/*- (semi-paranoid; could be more so) */
@@ -901,6 +905,8 @@ get_proc_cmdline(pid_t pid)
 static void
 sigchld(int signum, siginfo_t *si, void *data)
 {
+	(void) signum;
+	(void) data;
 	p_cmd_line = get_proc_cmdline(si->si_pid);
 	if (shutdown_in_progress)
 		return;
@@ -910,12 +916,14 @@ sigchld(int signum, siginfo_t *si, void *data)
 static void
 siguser1(int i)
 {
+	(void) i;
 	verbose = !verbose;
 }
 
 static void
 siguser2(int i)
 {
+	(void) i;
 	silent = !silent;
 }
 
@@ -927,6 +935,7 @@ main(int argc, char **argv)
 	char            dirbuf[256];
 	struct sigaction sa;
 	int             i;
+	unsigned int    j;
 
 	while ((i = getopt(argc, argv, "vsn:")) != opteof) {
 		switch (i)
@@ -1009,8 +1018,8 @@ main(int argc, char **argv)
 	if ((s = env_get("INITCMD")))
 		init_cmd(s, 0);
 	auto_scan = env_get("AUTOSCAN") ? 1 : 0;
-	for (i = 0; i < numx; ++i)
-		x[i].flagwantup = -1;
+	for (j = 0; j < numx; ++j)
+		x[j].flagwantup = -1;
 	for (scannow = 1;;) {
 		doit(sdir, svpid);
 		/*-
@@ -1050,13 +1059,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.46 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.47 2026-11-10 22:00:15+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) y;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.47  2026-11-10 22:00:15+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.46  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

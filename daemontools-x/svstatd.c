@@ -1,5 +1,5 @@
 /*
- * $Id: svstatd.c,v 1.2 2026-08-31 13:28:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svstatd.c,v 1.3 2026-11-10 22:00:20+05:30 Cprogrammer Exp mbhangui $
  *
  * © 2026 Manvendra Bhangui
  * All intellectual property developed during the term of this agreement, including but not limited
@@ -37,6 +37,8 @@ main(int argc, char **argv)
 	const char    **ptr;
 	char            strnum1[FMT_ULONG], strnum2[FMT_ULONG];
 
+	(void) argc;
+	(void) argv;
 	if (getln(subfdinsmall, &line, &match, '\n') == -1)
 		strerr_die2sys(111, FATAL, "unable to read input: ");
 	if (!line.len || !match) {
@@ -175,6 +177,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: svstatd.c,v $
+ * Revision 1.3  2026-11-10 22:00:20+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.2  2026-08-31 13:28:09+05:30  Cprogrammer
  * added feature to start/stop service
  *

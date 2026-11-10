@@ -1,5 +1,5 @@
 /*
- * $Id: svstat.c,v 1.17 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: svstat.c,v 1.18 2026-11-10 22:00:17+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -71,6 +71,7 @@ doit(char *dir, int *retval)
 			break;
 		case 1: /*- /run, /var/run doesn't exist */
 			strerr_warn4(WARN, "unable to open ", dir, "/supervise/ok: supervise not running: ", &strerr_sys);
+			return;
 		case -1:
 			strerr_warn2(WARN, "unable to get current working directory: ", &strerr_sys);
 			return;
@@ -101,7 +102,7 @@ doit(char *dir, int *retval)
 	}
 	r = read(fd, status, sizeof status);
 	close(fd);
-	if (r < sizeof status) {
+	if ((unsigned int) r < sizeof status) {
 		if (r == -1)
 			x = error_str(errno);
 		else {
@@ -188,6 +189,7 @@ main(int argc, char **argv)
 	int             fdorigdir, retval;
 	char           *dir;
 
+	(void) argc;
 	++argv;
 
 	if ((fdorigdir = open_read(".")) == -1)
@@ -215,13 +217,16 @@ main(int argc, char **argv)
 void
 getversion_svstat_c()
 {
-	const char     *x = "$Id: svstat.c,v 1.17 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: svstat.c,v 1.18 2026-11-10 22:00:17+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: svstat.c,v $
+ * Revision 1.18  2026-11-10 22:00:17+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.17  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

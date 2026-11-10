@@ -1,5 +1,8 @@
 /*
  * $Log: readproctitle.c,v $
+ * Revision 1.6  2026-11-10 21:59:57+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.5  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -23,8 +26,7 @@ int
 main(int argc, char **argv)
 {
 	char           *buf;
-	unsigned int    len;
-	int             i;
+	unsigned int    i, len;
 	char            ch;
 
 	if (argc < 2)
@@ -58,7 +60,7 @@ main(int argc, char **argv)
 void
 getversion_readproctitle_c()
 {
-	const char     *x = "$Id: readproctitle.c,v 1.5 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: readproctitle.c,v 1.6 2026-11-10 21:59:57+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

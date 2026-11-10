@@ -1,5 +1,8 @@
 /*
  * $Log: sorted.c,v $
+ * Revision 1.8  2026-11-10 22:00:00+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.7  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -35,7 +38,7 @@ int sorted_insert(sorted *sl, stralloc *sa)
 	int             i;
 	int             j;
 	int             eq;
-	int             len;
+	unsigned int    len;
 	stralloc        newsa;
 
 	if (!sorted_readyplus(sl, 1))
@@ -65,7 +68,7 @@ int sorted_insert(sorted *sl, stralloc *sa)
 void
 getversion_sorted_c()
 {
-	const char     *x = "$Id: sorted.c,v 1.7 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sorted.c,v 1.8 2026-11-10 22:00:00+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

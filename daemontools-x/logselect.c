@@ -1,5 +1,5 @@
 /*
- * $Id: logselect.c,v 1.6 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: logselect.c,v 1.7 2026-11-10 21:59:44+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -26,7 +26,7 @@ static substdio ssin;
 static stralloc sa;
 static char     starttime[TIMESTAMP];
 static char     stoptime[TIMESTAMP];
-static char     hex[16] = "0123456789abcdef";
+static char     hex[17] = "0123456789abcdef";
 
 no_return void
 die_usage(void)
@@ -150,9 +150,10 @@ main(int argc, char **argv)
 	struct taia     t;
 	DIR            *dir;
 	direntry       *d;
-	int             i;
+	unsigned int    i;
 	sorted          sl = { 0 };
 
+	(void) argc;
 	if (!*argv++)
 		die_usage();
 	if (!*argv)
@@ -231,13 +232,16 @@ main(int argc, char **argv)
 void
 getversion_logselect_c()
 {
-	const char     *x = "$Id: logselect.c,v 1.6 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: logselect.c,v 1.7 2026-11-10 21:59:44+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: logselect.c,v $
+ * Revision 1.7  2026-11-10 21:59:44+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.6  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

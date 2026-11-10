@@ -1,6 +1,6 @@
 /*-
  *
- * $Id: tai64n2tai.c,v 1.7 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: tai64n2tai.c,v 1.8 2026-11-10 22:00:26+05:30 Cprogrammer Exp mbhangui $
  *
  * tai64n2tai -- Convert TAI64N timestamps to older TAI format
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -89,6 +89,8 @@ main(int argc, char **argv)
 	char           *ptr;
 	tai            *t;
 
+	(void) argc;
+	(void) argv;
 	if (!stralloc_ready(&line, 26))
 		my_error("tai64n2tai: mem", 0, MEM_ERR);
 	for (;;) {
@@ -116,13 +118,16 @@ main(int argc, char **argv)
 void
 getversion_tai64n2tai_c()
 {
-	const char     *x = "$Id: tai64n2tai.c,v 1.7 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tai64n2tai.c,v 1.8 2026-11-10 22:00:26+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: tai64n2tai.c,v $
+ * Revision 1.8  2026-11-10 22:00:26+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.7  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

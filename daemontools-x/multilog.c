@@ -1,5 +1,5 @@
 /*
- * $Id: multilog.c,v 1.13 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: multilog.c,v 1.14 2026-11-10 21:59:48+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <time.h>
@@ -100,7 +100,7 @@ filesfit(struct cyclog *d)
 {
 	DIR            *dir;
 	direntry       *x;
-	int             count;
+	unsigned int    count;
 	int             i;
 
 	if (!(dir = opendir(".")))
@@ -301,10 +301,10 @@ fullcurrent(struct cyclog *d)
 }
 
 ssize_t
-c_write(int pos, char *buf, int len)
+c_write(int pos, char *buf, size_t len)
 {
 	struct cyclog  *d;
-	int             w;
+	unsigned int    w;
 
 	d = c + pos;
 	if (d->size > 0 && d->bytes >= d->size)
@@ -481,29 +481,33 @@ int             flaglog = 1;
 void
 exitasap(int i)
 {
+	(void) i;
 	flagexitasap = 1;
 }
 
 void
 forcerotate(int i)
 {
+	(void) i;
 	flagforcerotate = 1;
 }
 
 void
 logging(int i)
 {
+	(void) i;
 	flaglog = 1;
 }
 
 void
 nologging(int i)
 {
+	(void) i;
 	flaglog = 0;
 }
 
 ssize_t
-flushread(int fd, char *buf, int len)
+flushread(int fd, char *buf, size_t len)
 {
 	int             j;
 
@@ -664,7 +668,7 @@ doit(char **script)
 int
 main(int argc, char **argv)
 {
-
+	(void) argc;
 	f_sync = env_get("NOFSYNC") ? 0 : 1;
 	old_umask = umask(022);
 	if ((fdstartdir = open_read(".")) == -1)
@@ -689,13 +693,16 @@ main(int argc, char **argv)
 void
 getversion_multilog_c()
 {
-	const char     *x = "$Id: multilog.c,v 1.13 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: multilog.c,v 1.14 2026-11-10 21:59:48+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: multilog.c,v $
+ * Revision 1.14  2026-11-10 21:59:48+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.13  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: tai2tai64n.c,v 1.6 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: tai2tai64n.c,v 1.7 2026-11-10 22:00:23+05:30 Cprogrammer Exp mbhangui $
  *
  * tai2tai64n -- Convert older TAI format timestamps to TAI64N
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -89,6 +89,8 @@ main(int argc, char **argv)
 	char            tmp[32];
 	tai            *t;
 
+	(void) argc;
+	(void) argv;
 	for (;;) {
 		if (getln(&ssin, &user, &match, '\n') == -1)
 			my_error("tai2tai64n: read", 0, READ_ERR);
@@ -117,13 +119,16 @@ main(int argc, char **argv)
 void
 getversion_tai2tai64n_c()
 {
-	const char     *x = "$Id: tai2tai64n.c,v 1.6 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tai2tai64n.c,v 1.7 2026-11-10 22:00:23+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*-
  * $Log: tai2tai64n.c,v $
+ * Revision 1.7  2026-11-10 22:00:23+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.6  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

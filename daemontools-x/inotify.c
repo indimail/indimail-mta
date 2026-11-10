@@ -1,5 +1,5 @@
 /*
- * $Id: inotify.c,v 1.16 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: inotify.c,v 1.17 2026-11-10 21:59:37+05:30 Cprogrammer Exp mbhangui $
  *
  * This is the sample program to notify us for the file creation and file deletion takes place in “/tmp” directory
  */
@@ -48,6 +48,7 @@ out(const char *str)
 no_return void
 sigterm(int i)
 {
+	(void) i;
 	substdio_flush(subfdout);
 	substdio_flush(subfderr);
  	/* removing the watched directory from the watch list.  */
@@ -258,13 +259,16 @@ main(int argc, char **argv)
 void
 getversion_inotify_c()
 {
-	const char     *x = "$Id: inotify.c,v 1.16 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: inotify.c,v 1.17 2026-11-10 21:59:37+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: inotify.c,v $
+ * Revision 1.17  2026-11-10 21:59:37+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.16  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

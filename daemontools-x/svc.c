@@ -1,5 +1,5 @@
 /*
- * $Id: svc.c,v 1.16 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: svc.c,v 1.17 2026-11-10 22:00:09+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -23,13 +23,15 @@
 #define FATAL "svc: fatal: "
 #define WARN   "svc: warning: "
 
-int             datalen = 0, fdorigdir, timeout = 0;
+unsigned int    datalen = 0, timeout = 0;
+int             fdorigdir;
 char            data[20], bspace[1];
 substdio        b;
 
 void
 sigalrm(int i)
 {
+	(void) i;
 	return;
 }
 
@@ -154,7 +156,7 @@ main(int argc, char **argv)
 				data[datalen++] = opt;
 		}
 		if (opt == 'T')
-			scan_int(optarg, &timeout);
+			scan_uint(optarg, &timeout);
 		if (opt == 'u' || opt == 'd' || opt == 'r')
 			do_sleep = 1;
 		if (opt == 'w' || opt == 'W')
@@ -177,13 +179,16 @@ main(int argc, char **argv)
 void
 getversion_svc_c()
 {
-	const char     *x = "$Id: svc.c,v 1.16 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: svc.c,v 1.17 2026-11-10 22:00:09+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: svc.c,v $
+ * Revision 1.17  2026-11-10 22:00:09+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.16  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

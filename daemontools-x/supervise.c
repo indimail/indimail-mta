@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.62 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.63 2026-11-10 22:00:07+05:30 Cprogrammer Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -116,7 +116,7 @@ announce(short sleep_interval)
 			strerr_warn4(warn.s, "unable to write ", dir, "/supervise/status: ", &strerr_sys);
 		return;
 	}
-	if (r < sizeof status) {
+	if ((unsigned int) r < sizeof status) {
 		if (!silent)
 			strerr_warn4(warn.s, "unable to write ", dir, "/supervise/status: partial write: ", 0);
 		return;
@@ -160,8 +160,10 @@ do_kill(int prgrp, int *siglist, const char **signame)
 void
 trigger(int i) /*- argument needed to prevent compiler warning for use as a signal handler */
 {
-	if (write(selfpipe[1], "", 1) == -1)
+	(void) i;
+	if (write(selfpipe[1], "", 1) == -1) {
 		;
+	}
 }
 
 void
@@ -306,6 +308,7 @@ sigterm(int i)
 	const char     *signame[] = {0, 0};
 	const char     *p;
 
+	(void) i;
 	if (childpid) {
 		sig_block(sig_term);
 #ifdef USE_RUNFS
@@ -1395,13 +1398,16 @@ main(int argc, char **argv)
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.62 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.63 2026-11-10 22:00:07+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.63  2026-11-10 22:00:07+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.62  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

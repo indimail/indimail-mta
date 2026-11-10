@@ -1,5 +1,8 @@
 /*
  * $Log: qfilelog.c,v $
+ * Revision 1.9  2026-11-10 21:59:54+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.8  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -38,8 +41,9 @@
 void
 errmsg(const char *m)
 {
-	if (write(2, m, strlen(m)) == -1)
+	if (write(2, m, strlen(m)) == -1) {
 		;
+	}
 }
 
 void
@@ -139,6 +143,7 @@ loop(void)
 void
 catch_hup(int flag)
 {
+	(void) flag;
 	signal(SIGHUP, catch_hup);
 	do_close();
 	do_open();
@@ -147,6 +152,7 @@ catch_hup(int flag)
 no_return void
 catch_int(int flag)
 {
+	(void) flag;
 	do_close();
 	exit(0);
 }
@@ -170,7 +176,7 @@ main(int argc, char *argv[])
 void
 getversion_qfilelog_c()
 {
-	const char     *x = "$Id: qfilelog.c,v 1.8 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qfilelog.c,v 1.9 2026-11-10 21:59:54+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: svok.c,v $
+ * Revision 1.10  2026-11-10 22:00:12+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.9  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -44,6 +47,7 @@ main(int argc, char **argv)
 {
 	int             fd = -1;
 
+	(void) argc;
 	if (!argv[1])
 		strerr_die1x(100, "svok: usage: svok dir");
 	if (chdir(argv[1]) == -1)
@@ -86,7 +90,7 @@ main(int argc, char **argv)
 void
 getversion_svok_c()
 {
-	const char     *x = "$Id: svok.c,v 1.9 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: svok.c,v 1.10 2026-11-10 22:00:12+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
