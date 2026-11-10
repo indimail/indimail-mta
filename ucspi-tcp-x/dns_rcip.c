@@ -1,5 +1,8 @@
 /*
  * $Log: dns_rcip.c,v $
+ * Revision 1.5  2026-11-10 23:16:32+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.4  2020-08-03 17:23:03+05:30  Cprogrammer
  * use qmail library
  *
@@ -32,8 +35,7 @@ init(char ip[256])
 init(char ip[64])
 #endif
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 	int             iplen = 0;
 	char           *x;
 
@@ -63,7 +65,7 @@ init(char ip[64])
 	}
 	if (!iplen)
 	{
-		if ((i = openreadclose("/etc/resolv.conf", &data, 64)) == -1)
+		if ((int) (i = openreadclose("/etc/resolv.conf", &data, 64)) == -1)
 			return -1;
 		if (i)
 		{

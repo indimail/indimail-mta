@@ -1,5 +1,8 @@
 /*
  * $Log: tcprules.c,v $
+ * Revision 1.10  2026-11-10 23:17:06+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.9  2026-10-26 01:22:47+05:30  Cprogrammer
  * fix for cygwin
  *
@@ -94,9 +97,9 @@ getnum(char *buf, int len, unsigned long *u)
 void
 doaddressdata(void)
 {
-	int             i;
-	int             left;
-	int             right;
+	unsigned int    i;
+	unsigned int    left;
+	unsigned int    right;
 	unsigned long   bot;
 	char            strnum[FMT_ULONG];
 	unsigned long   top;
@@ -139,6 +142,7 @@ main(int argc, char **argv)
 	char            ch;
 	int             len, fd, i, e, colon, match = 1;
 
+	(void) argc;
 	if (!(fn = argv[1]))
 		usage();
 	if (!(fntemp = argv[2]))

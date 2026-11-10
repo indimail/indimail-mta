@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.15  2026-11-10 23:16:29+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.14  2026-11-10 16:20:15+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -72,7 +75,7 @@ int
 dlnamespace(const char *fn, char **envp, Lmid_t *id)
 {
 	char           *ptr, *cptr, *s;
-	int             i, j;
+	unsigned int    i, j;
 	char            strnum[FMT_ULONG], env_str[FMT_ULONG + 5]; /*- LMID_NO */
 
 	if (!id) {
@@ -176,6 +179,6 @@ dlnamespace(const char *fn, unsigned long *id)
 void
 getversion_dlnamespace_c()
 {
-	const char     *x = "$Id: dlnamespace.c,v 1.14 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dlnamespace.c,v 1.15 2026-11-10 23:16:29+05:30 Cprogrammer Exp mbhangui $";
 	(void) x;
 }

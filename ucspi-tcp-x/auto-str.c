@@ -1,5 +1,5 @@
 /*
- * $Id: auto-str.c,v 1.6 2026-09-04 07:55:32+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auto-str.c,v 1.7 2026-11-10 23:15:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -38,6 +38,7 @@ main(int argc, char **argv)
 	unsigned char   ch;
 	char            octal[4];
 
+	(void) argc;
 	if (!(name = argv[1]))
 		_exit(100);
 	if (!(value = argv[2]))
@@ -70,6 +71,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: auto-str.c,v $
+ * Revision 1.7  2026-11-10 23:15:59+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.6  2026-09-04 07:55:32+05:30  Cprogrammer
  * fix compiler warning for GCC16
  *

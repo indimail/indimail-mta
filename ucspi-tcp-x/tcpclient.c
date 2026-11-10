@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.41 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $
+ * $Id: tcpclient.c,v 1.42 2026-11-10 23:17:02+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -137,6 +137,7 @@ static c_char  *af_unix;
 no_return void
 sigterm(int i)
 {
+	(void) i;
 	_exit(0);
 }
 
@@ -147,6 +148,7 @@ sigchld(int x)
 	pid_t           pid;
 	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];
 
+	(void) x;
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		tmp1[fmt_ulong(tmp1, pid)] = 0;
 		if (wait_stopped(wstat) || wait_continued(wstat)) {
@@ -376,7 +378,8 @@ main(int argc, char **argv)
 #ifdef IPV6
 	int             fakev4 = 0;
 #endif
-	int             opt, j, s, cloop, flag_tcpclient = 1, flagssl = 0;
+	unsigned int    j;
+	int             opt, s, cloop, flag_tcpclient = 1, flagssl = 0;
 #ifdef TLS
 	SSL_CTX        *ctx = NULL;
 	SSL            *ssl = NULL;
@@ -923,13 +926,16 @@ do_data:
 void
 getversion_tcpclient_c()
 {
-	const char    *x = "$Id: tcpclient.c,v 1.41 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	const char    *x = "$Id: tcpclient.c,v 1.42 2026-11-10 23:17:02+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.42  2026-11-10 23:17:02+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.41  2026-11-10 16:20:15+05:30  mbhangui
  * fix set but unused variable warnings
  *

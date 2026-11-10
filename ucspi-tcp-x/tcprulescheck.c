@@ -1,5 +1,8 @@
 /*
  * $Log: tcprulescheck.c,v $
+ * Revision 1.7  2026-11-10 23:17:04+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -72,6 +75,7 @@ main(int argc, char **argv)
 	char           *ip;
 	const char     *info, *host;
 
+	(void) argc;
 	fnrules = argv[1];
 	if (!fnrules)
 		strerr_die1x(100, "tcprulescheck: usage: tcprulescheck rules.cdb");

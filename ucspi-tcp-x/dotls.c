@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.30 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $
+ * $Id: dotls.c,v 1.31 2026-11-10 23:16:42+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -414,7 +414,7 @@ GEN_ALLOC_typedef(saa, stralloc, sa, len, a)
 GEN_ALLOC_readyplus(saa, stralloc, sa, len, a, 10, saa_readyplus)
 saa             capakw = { 0 };	/*- list of EHLO/pop3/imap keywords and parameters */
 
-int             maxcapakwlen = 0;
+unsigned int    maxcapakwlen = 0;
 
 void
 extract_kw_smtp_pop3(enum starttls stls)
@@ -492,6 +492,9 @@ ehlo(char *host, int len, unsigned int *ilen)
 int
 do_data(char *x1, char *x2, int i)
 {
+	(void) x1;
+	(void) x2;
+	(void) i;
 	linemode = 0;
 	if (substdio_put(&smtpto, "DATA\r\n", 6) == -1 ||
 			substdio_flush(&smtpto) == -1)
@@ -502,6 +505,8 @@ do_data(char *x1, char *x2, int i)
 int
 do_retr(char *arg, char *cmmd, int cmmdlen)
 {
+	(void) cmmd;
+	(void) cmmdlen;
 	linemode = 0;
 	if (substdio_put(&smtpto, "RETR ", 5) == -1 ||
 			substdio_puts(&smtpto, arg) ||
@@ -526,6 +531,8 @@ smtp_ehlo(char *arg, char *cmmd, int cmmdlen)
 	unsigned int    len, ilen = 0;
 	static stralloc save = { 0 };
 
+	(void) cmmd;
+	(void) cmmdlen;
 	if ((code = ehlo(arg, str_len(arg), &ilen)) != 250)
 		strerr_die2x(111, FATAL, "Greeting to server failed");
 	len = capakw.len;
@@ -581,12 +588,18 @@ smtp_ehlo(char *arg, char *cmmd, int cmmdlen)
 int
 do_tls(char *x1, char *x2, int i)
 {
+	(void) x1;
+	(void) x2;
+	(void) i;
 	return 1;
 }
 
 int
 do_quit(char *x1, char *x2, int i)
 {
+	(void) x1;
+	(void) x2;
+	(void) i;
 	if (substdio_put(&smtpto, "quit\r\n",  6) == -1 ||
 			substdio_flush(&smtpto) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
@@ -597,6 +610,9 @@ do_quit(char *x1, char *x2, int i)
 int
 do_logout(char *x1, char *x2, int i)
 {
+	(void) x1;
+	(void) x2;
+	(void) i;
 	if (substdio_put(&smtpto, "a logout\r\n",  10) == -1 ||
 			substdio_flush(&smtpto) == -1)
 		strerr_die2sys(111, FATAL, "write: ");
@@ -608,6 +624,7 @@ do_logout(char *x1, char *x2, int i)
 int
 func_unimpl(char *arg, char *cmd, int cmdlen)
 {
+	(void) arg;
 	if (!*cmd)
 		return 0;
 	if (substdio_put(&smtpto, cmd, cmdlen) == -1 ||
@@ -623,6 +640,9 @@ pop3_capa(char *arg, char *cmmd, int cmmdlen)
 	int             match, len;
 	stralloc       *saptr;
 
+	(void) arg;
+	(void) cmmd;
+	(void) cmmdlen;
 	capatext.len = 0;
 	if (substdio_put(&smtpto, "CAPA\n", 5) == -1 ||
 			substdio_flush(&smtpto) == -1)
@@ -693,6 +713,7 @@ imap_capa(char *arg, char *cmmd, int cmmdlen)
 {
 	int             match, i;
 
+	(void) cmmdlen;
 	case_uppers(arg);
 	capatext.len = 0;
 	if (substdio_put(&smtpto, "A CAPABILITY\r\n", 14) == -1 ||
@@ -774,7 +795,7 @@ do_starttls(enum starttls stls, SSL *ssl, int clearin, int clearout)
 	char            inbuf[512], outbuf[1024], smtp_inbuf[512],
 	                smtp_outbuf[1024], buf[512];
 	int             ret, r, flagexitasap = 0, fd0_flag = 1;
-	size_t          n;
+	ssize_t         n;
 	struct timeval  timeout;
 
 	substdio_fdbuf(&ssin, do_read, 0, inbuf, sizeof(inbuf));                    /*- from client */
@@ -918,6 +939,7 @@ sigchld(int x)
 	int             i, wstat, pid;
 	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];
 
+	(void) x;
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		if (verbosity < 2)
 			continue;
@@ -974,7 +996,8 @@ main(int argc, char **argv)
 			break;
 		case 'C': /*- compatibility with original tcpclient */
 			tcpclient = 1;
-			/*- flow through */
+			client_mode = 1;
+			break;
 		case 'T':
 			client_mode = 1;
 			break;
@@ -1284,7 +1307,7 @@ main(int argc, char **argv)
 void
 getversion_dotls_c()
 {
-	const char     *x = "$Id: dotls.c,v 1.30 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dotls.c,v 1.31 2026-11-10 23:16:42+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
@@ -1308,6 +1331,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.31  2026-11-10 23:16:42+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.30  2026-11-10 16:20:15+05:30  mbhangui
  * fix set but unused variable warnings
  *

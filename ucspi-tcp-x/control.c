@@ -1,5 +1,5 @@
 /*
- * $Id: control.c,v 1.5 2025-01-21 23:53:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: control.c,v 1.6 2026-11-10 23:16:14+05:30 Cprogrammer Exp mbhangui $
  */
 #include <substdio.h>
 #include <stralloc.h>
@@ -16,7 +16,7 @@ static char     inbuf[64];
 static stralloc line = { 0 };
 
 int
-control_readint(int *i, const char *fn)
+control_readint(unsigned long *i, const char *fn)
 {
 	unsigned long   u;
 
@@ -93,6 +93,9 @@ striptrailingwhitespace(stralloc *sa)
 
 /*
  * $Log: control.c,v $
+ * Revision 1.6  2026-11-10 23:16:14+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.5  2025-01-21 23:53:18+05:30  Cprogrammer
  * Fixes for gcc14 errors
  *

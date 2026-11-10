@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_scan.c,v $
+ * Revision 1.7  2026-11-10 23:16:50+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.6  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -40,8 +43,8 @@ rblip6_scan(const char *s, char ip[16])
 	unsigned long   u;
 
 	char            suffix[16];
-	int             prefixlen = 0;
-	int             suffixlen = 0;
+	unsigned int    prefixlen = 0;
+	unsigned int    suffixlen = 0;
 
 	if ((i = rblip4_scan(s, ip + 12))) {
 		unsigned char *c = V4mappedprefix;

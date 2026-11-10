@@ -1,5 +1,8 @@
 /*
  * $Log: socket_conn.c,v $
+ * Revision 1.10  2026-11-10 23:17:00+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.9  2021-07-19 12:55:31+05:30  Cprogrammer
  * fixed compiler warning on alpine linux
  *
@@ -60,8 +63,9 @@ socket_connected(int s)
 
 	dummy = sizeof sa;
 	if (getpeername(s, (struct sockaddr *) &sa, &dummy) == -1) {
-		if (read(s, &ch, 1) == -1)
+		if (read(s, &ch, 1) == -1) {
 			; /*- sets errno */
+		}
 		return 0;
 	}
 	return 1;

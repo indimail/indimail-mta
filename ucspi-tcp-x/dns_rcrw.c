@@ -1,5 +1,8 @@
 /*
  * $Log: dns_rcrw.c,v $
+ * Revision 1.5  2026-11-10 23:16:36+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -28,13 +31,13 @@ init(stralloc * rules)
 {
 	char            host[256];
 	const char     *x;
-	int             i, j, k;
+	unsigned int    i, j, k;
 
 	if (!stralloc_copys(rules, ""))
 		return -1;
 	if (!(x = env_get("DNSREWRITEFILE")))
 		x = "/etc/dnsrewrite";
-	if ((i = openreadclose(x, &data, 64)) == -1)
+	if ((int) (i = openreadclose(x, &data, 64)) == -1)
 		return -1;
 	if (i) {
 		if (!stralloc_append(&data, "\n"))
@@ -81,7 +84,7 @@ init(stralloc * rules)
 			return -1;
 		return 0;
 	}
-	if ((i = openreadclose("/etc/resolv.conf", &data, 64)) == -1)
+	if ((int) (i = openreadclose("/etc/resolv.conf", &data, 64)) == -1)
 		return -1;
 	if (i) {
 		if (!stralloc_append(&data, "\n"))

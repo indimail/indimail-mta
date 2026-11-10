@@ -1,5 +1,8 @@
 /*
  * $Log: ip4_bit.c,v $
+ * Revision 1.6  2026-11-10 23:16:44+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.5  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -29,8 +32,8 @@
 int
 getaddressasbit(char *ip, int prefix, stralloc *ip4string)
 {
-	int             count, i, sufcount = 0, pos = 0, len, posl;
-	unsigned long   num;
+	int             i, sufcount = 0, pos = 0, len, posl;
+	unsigned int    count, num;
 #ifdef BITSUBSTITUTION
 	const char     *letterarray = "abcdefghijklmnopqrstuvwxyz123456";
 #endif
@@ -43,12 +46,12 @@ getaddressasbit(char *ip, int prefix, stralloc *ip4string)
 		count = 1;
 		i = ip[pos + posl];
 		ip[pos + posl] = 0;
-		if (!scan_ulong(ip + pos, &num)) {
+		if (!scan_uint(ip + pos, &num)) {
 			ip[pos + posl] = i;
 			return (2);
 		}
 		ip[pos + posl] = i;
-		if (num > 255 || num < 0)
+		if (num > 255)
 			return (2);
 		for (i = 1; i < 9; i++) {
 			if (sufcount >= prefix)

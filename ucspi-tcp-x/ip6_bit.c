@@ -1,5 +1,8 @@
 /*
  * $Log: ip6_bit.c,v $
+ * Revision 1.5  2026-11-10 23:16:47+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.4  2020-08-03 17:24:14+05:30  Cprogrammer
  * use qmail library
  *
@@ -37,7 +40,8 @@ ip6tobitstring(char *ip6address, stralloc *ip6string, unsigned int prefix)
 {
 	char            ip6[16];
 	int             bit, octettbitpos, number, shiftedvalue;
-	int             i, slashpos, ip6len;
+	unsigned int    i;
+	int             slashpos, ip6len;
 	stralloc        ip6addr = { 0 };
 #ifdef BITSUBSTITUTION
 	char            subvalueforbitone[1];

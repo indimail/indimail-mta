@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.99 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $
+ * $Id: tcpserver.c,v 1.100 2026-11-10 23:17:09+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -284,12 +284,13 @@ doit_unix(int t, const char *hostname)
 void
 doit_tcp(int t, const char *hostname)
 {
-	int             j;
+	unsigned int    j;
 #ifdef IPV6
 	int             fakev4 = 0;
 	uint32          scope_id;
 #endif
 
+	(void) hostname;
 #ifdef IPV6
 	if (!forcev6 && ip6_isv4mapped(remoteip))
 		fakev4 = 1;
@@ -528,7 +529,7 @@ matchinet(const char *ip, const char *token)
 	char            field1[8], field2[8];
 	char           *ptr, *ptr1, *ptr2, *cptr;
 	unsigned long   lnum, hnum, t;
-	int             idx1, idx2, match;
+	unsigned int    idx1, idx2, match;
 #if defined(LIBC_HAS_IP6) && defined(IPV6)
 	struct addrinfo hints = {0}, *addr_res = 0, *addr_res0 = 0;
 	struct sockaddr     sa;
@@ -1062,7 +1063,7 @@ printstatus(const char *str, pid_t pid, pid_t childpid)
 void
 init_ip()
 {
-	int             i;
+	unsigned int    i;
 	IPTABLE       **iptable;
 
 	if (!IpTable) {
@@ -1084,7 +1085,7 @@ init_ip()
 void
 add_ip(pid_t pid)
 {
-	int             i;
+	unsigned int    i;
 #ifdef IPV6
 	int             fakev4 = 0;
 #endif
@@ -1124,7 +1125,7 @@ add_ip(pid_t pid)
 unsigned long
 check_ip()
 {
-	int             i, count;
+	unsigned int    i, count;
 	IPTABLE       **iptable;
 
 	if (!(numchildren && numchildren <= limit))
@@ -1150,7 +1151,7 @@ check_ip()
 void
 remove_ip(pid_t pid)
 {
-	int             i;
+	unsigned int    i;
 	IPTABLE       **iptable;
 
 	if (!IpTable)
@@ -1166,7 +1167,7 @@ remove_ip(pid_t pid)
 void
 print_ip()
 {
-	int             i;
+	unsigned int    i;
 #ifdef IPV6
 	int             fakev4 = 0;
 #endif
@@ -1203,6 +1204,7 @@ print_ip()
 no_return void
 sigterm(int i)
 {
+	(void) i;
 	if (verbosity >= 2)
 		printstatus("shutdown", getpid(), -1);
 	if (af_unix)
@@ -1213,16 +1215,18 @@ sigterm(int i)
 void
 siguser1(int i)
 {
+	(void) i;
 	print_ip();
 }
 
 void
 sighangup(int x)
 {
-	int             i, tmpLimit;
+	unsigned long   i, tmpLimit;
 	IPTABLE       **iptable1, **iptable2, **tmpTable;
 	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];
 
+	(void) x;
 	if (!IpTable)
 		init_ip();
 	if (tcpserver_plugin(environ, 0))
@@ -1261,6 +1265,7 @@ sigchld(int x)
 	int             i, wstat, pid;
 	char            tmp1[FMT_ULONG], tmp2[FMT_ULONG];
 
+	(void) x;
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		if (verbosity >= 2) {
 			tmp1[fmt_ulong(tmp1, pid)] = 0;
@@ -1374,8 +1379,8 @@ main(int argc, char **argv, char **envp)
 	const char     *dbfile = NULL;
 #endif
 	struct servent *se;
-	unsigned long   port, ipcount = -1;
-	int             sfd, asd, opt, tmpLimit;
+	unsigned long   port, ipcount = -1, tmpLimit;
+	int             sfd, asd, opt;
 	pid_t           pid;
 #ifdef IPV6
 	int             fakev4 = 0;
@@ -1838,13 +1843,13 @@ do_socket:
 		if (setuserid(user, 1, groups) == -1)
 			strerr_die2sys(111, FATAL, "unable to set user: ");
 	} else {
-		if (gid == -1) {
+		if ((int) gid == -1) {
 			if (groups && set_additional_groups(groups, 1) == -1)
 				strerr_die2sys(111, FATAL, "unable to add additional groups: ");
 		} else
 		if (prot_gid(gid) == -1)
 			strerr_die2sys(111, FATAL, "unable to set gid: ");
-		if (uid != -1 && prot_uid(uid) == -1)
+		if ((int) uid != -1 && prot_uid(uid) == -1)
 			strerr_die2sys(111, FATAL, "unable to set uid: ");
 	}
 	if (tcpserver_plugin(envp, 1))
@@ -1927,6 +1932,8 @@ do_socket:
 			strerr_warn2(DROP, "unable to fork: ", &strerr_sys);
 			--numchildren;
 			printstatus("Failure", getpid(), -1);
+			close(asd);
+			continue;
 		case 0:
 			close(sfd);
 #if defined(HAS_MYSQL)
@@ -1941,7 +1948,7 @@ do_socket:
 			sig_uncatch(sig_term);
 			sig_uncatch(sig_pipe);
 			if (maxperip) {
-				if (ipcount == -1)
+				if ((int) ipcount == -1)
 					ipcount = check_ip();
 				if (ipcount >= maxperip) {
 					strnum2[fmt_ulong(strnum2, ipcount)] = 0;
@@ -2023,13 +2030,16 @@ do_socket:
 void
 getversion_tcpserver_c()
 {
-	const char    *x = "$Id: tcpserver.c,v 1.99 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	const char    *x = "$Id: tcpserver.c,v 1.100 2026-11-10 23:17:09+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.100  2026-11-10 23:17:09+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.99  2026-11-10 16:20:15+05:30  mbhangui
  * fix set but unused variable warnings
  *

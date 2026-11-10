@@ -1,5 +1,5 @@
 /*
- * $Id: rblsmtpd.c,v 1.29 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $
+ * $Id: rblsmtpd.c,v 1.30 2026-11-10 23:16:57+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <byte.h>
@@ -284,35 +284,38 @@ delay(unsigned long delay)
 void
 reject(const char *x)
 {
+	(void) x;
 	substdio_putflush(&out, message.s, message.len);
 }
 
 void
 accept(const char *x)
 {
-  substdio_put(&out, "250 ", 4);
-  substdio_puts(&out, rbl_greeting);
-  substdio_putsflush(&out, "\r\n");
+	(void) x;
+	substdio_put(&out, "250 ", 4);
+	substdio_puts(&out, rbl_greeting);
+	substdio_putsflush(&out, "\r\n");
 }
 
 void
 smtp_ehlo(const char *x)
 {
-  if (rbl_ehlo) {
-  substdio_put(&out, "250-", 4);
-  substdio_puts(&out, rbl_greeting);
-  substdio_putsflush(&out,
-    "\r\n250-PIPELINING\r\n250-8BITMIME\r\n250-STARTTLS\r\n250 HELP\r\n");
-  } else
-    accept((char *) 0);
+	(void) x;
+	if (rbl_ehlo) {
+		substdio_put(&out, "250-", 4);
+		substdio_puts(&out, rbl_greeting);
+		substdio_putsflush(&out, "\r\n250-PIPELINING\r\n250-8BITMIME\r\n250-STARTTLS\r\n250 HELP\r\n");
+	} else
+		accept((char *) 0);
 }
 
 void
 verify(const char *x)
 {
-  substdio_put(&out, "252 ", 4);
-  substdio_puts(&out, rbl_greeting);
-  substdio_putsflush(&out, "\r\n");
+	(void) x;
+	substdio_put(&out, "252 ", 4);
+	substdio_puts(&out, rbl_greeting);
+	substdio_putsflush(&out, "\r\n");
 }
 
 static int
@@ -424,18 +427,21 @@ greet()
   substdio_putsflush(&out, "\r\n");
 }
 
+no_return
 void
-no_return quit(const char *x)
+quit(const char *x)
 {
-  substdio_put(&out, "221 ", 4);
-  substdio_puts(&out, rbl_greeting);
-  substdio_putsflush(&out, "\r\n");
-  _exit(0);
+	(void) x;
+	substdio_put(&out, "221 ", 4);
+	substdio_puts(&out, rbl_greeting);
+	substdio_putsflush(&out, "\r\n");
+	_exit(0);
 }
 
 no_return void
 drop(int i)
 {
+	(void) i;
 	_exit(0);
 }
 
@@ -454,7 +460,7 @@ struct commands rbl_smtpcommands[] = {
 no_return void
 rblsmtpd_f(void)
 {
-	int             i;
+	unsigned int    i;
 
 	if (flagmustnotbounce || (decision == 2)) {
 		if (!stralloc_copys(&message, "451 "))
@@ -602,13 +608,16 @@ main(int argc, char **argv, char **envp)
 void
 getversion_rblsmtpd_c()
 {
-	const char     *x = "$Id: rblsmtpd.c,v 1.29 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: rblsmtpd.c,v 1.30 2026-11-10 23:16:57+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.30  2026-11-10 23:16:57+05:30  Cprogrammer
+ * fix compiler warning with -Wextra
+ *
  * Revision 1.29  2026-11-10 16:20:15+05:30  mbhangui
  * fix set but unused variable warnings
  *
