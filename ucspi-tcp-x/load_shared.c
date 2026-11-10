@@ -1,5 +1,8 @@
 /*
  * $Log: load_shared.c,v $
+ * Revision 1.22  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.21  2026-03-25 22:47:48+05:30  Cprogrammer
  * fix for Solaris
  *
@@ -200,7 +203,6 @@ load_shared(char *file, char **argv, char **envp)
 void
 getversion_load_shared_c()
 {
-	const char     *x = "$Id: load_shared.c,v 1.21 2026-03-25 22:47:48+05:30 Cprogrammer Exp mbhangui $";
-	if (x)
-		x++;
+	const char     *x = "$Id: load_shared.c,v 1.22 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }

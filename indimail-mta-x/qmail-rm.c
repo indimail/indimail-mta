@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-rm.c,v 1.29 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-rm.c,v 1.30 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  *
  * COPYRIGHT INFORMATION - DO NOT REMOVE
  *
@@ -664,7 +664,7 @@ remove_file(int oldfd, int newfd, const char *filename)
 		substdio_putsflush(&sserr, "remove_file: no filename\n");
 		return -1;
 	}
-	if (!(my_name = strrchr(filename, '/')))
+	if (!(my_name = (char *) strrchr(filename, '/')))
 		my_name = (char *) filename;
 	else
 		my_name++;
@@ -776,7 +776,7 @@ expire_file(const char *filename)
 		substdio_putsflush(&sserr, "expire_file: no filename\n");
 		return -1;
 	}
-	if (!(my_name = strrchr(filename, '/')))
+	if (!(my_name = (char *) strrchr(filename, '/')))
 		my_name = (char *) filename;
 	else
 		my_name++;
@@ -943,7 +943,7 @@ delete_file(int fd, const char *filename)
 		substdio_putsflush(&sserr, "expire_file: no filename\n");
 		return -1;
 	}
-	my_name = strrchr(filename, '/');
+	my_name = (char *) strrchr(filename, '/');
 	if (my_name == NULL)
 		my_name = (char *) filename;
 	else
@@ -1046,13 +1046,16 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	const char     *x = "$Id: qmail-rm.c,v 1.29 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-rm.c,v 1.30 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.30  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.29  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: mbox2maildir.c,v 1.8 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: mbox2maildir.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  *
  * mbox2maildir.c
  * Author: Nikola Vladov
@@ -338,13 +338,16 @@ usage:
 void
 getversion_mbox2maildir_c()
 {
-	const char     *x = "$Id: mbox2maildir.c,v 1.8 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: mbox2maildir.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: mbox2maildir.c,v $
+ * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.8  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

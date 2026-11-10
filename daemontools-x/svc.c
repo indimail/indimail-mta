@@ -1,5 +1,5 @@
 /*
- * $Id: svc.c,v 1.15 2026-07-07 22:19:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svc.c,v 1.16 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -174,18 +174,19 @@ main(int argc, char **argv)
 	_exit(exit_stat);
 }
 
-void dummy(const char *x){}
-
 void
 getversion_svc_c()
 {
-	const char     *x = "$Id: svc.c,v 1.15 2026-07-07 22:19:45+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: svc.c,v 1.16 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummy(x);
+	(void) x;
 }
 
 /*
  * $Log: svc.c,v $
+ * Revision 1.16  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.15  2026-07-07 22:19:45+05:30  Cprogrammer
  * fixed incorrect assignment of errno due to typo
  *

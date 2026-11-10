@@ -1,5 +1,5 @@
 /*
- * $Id: qhpsi.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qhpsi.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <dlfcn.h>
@@ -106,12 +106,15 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	const char     *x = "$Id: qhpsi.c,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
-	x++;
+	const char     *x = "$Id: qhpsi.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }
 
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

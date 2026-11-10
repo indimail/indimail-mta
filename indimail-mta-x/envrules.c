@@ -1,5 +1,5 @@
 /*
- * $Id: envrules.c,v 1.25 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: envrules.c,v 1.26 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <error.h>
 #include <stralloc.h>
@@ -103,13 +103,16 @@ domainqueue(const char *email, const char *domainqueue_f, const char *domainqueu
 void
 getversion_envrules_c()
 {
-	const char     *x = "$Id: envrules.c,v 1.25 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: envrules.c,v 1.26 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: envrules.c,v $
+ * Revision 1.26  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.25  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

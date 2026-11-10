@@ -1,5 +1,5 @@
 /*
- * $Id: setuidgid.c,v 1.13 2026-06-05 09:21:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: setuidgid.c,v 1.14 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -103,18 +103,19 @@ main(int argc, char **argv)
 	strerr_die4sys(111, FATAL, "unable to run ", *child, ": ");
 }
 
-void dummy(const char *x) {}
-
 void
 getversion_setuidgid_c()
 {
-	const char     *x = "$Id: setuidgid.c,v 1.13 2026-06-05 09:21:45+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: setuidgid.c,v 1.14 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummy(x);
+	(void) x;
 }
 
 /*
  * $Log: setuidgid.c,v $
+ * Revision 1.14  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.13  2026-06-05 09:21:45+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *

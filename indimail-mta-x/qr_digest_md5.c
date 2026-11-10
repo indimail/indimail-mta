@@ -1,5 +1,8 @@
 /*
  * $Log: qr_digest_md5.c,v $
+ * Revision 1.4  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -109,8 +112,8 @@ qr_digest_md5(char *user, int ulen, char *realm, int rlen, char *pass, int plen,
 void
 getversion_qr_digest_md5_c()
 {
-	const char     *x = "$Id: qr_digest_md5.c,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qr_digest_md5.c,v 1.4 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 	x=sccsidmd5h;
 	x=sccsidglobalh;
-	x++;
+	(void) x;
 }

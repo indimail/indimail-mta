@@ -1,5 +1,5 @@
 /*
- * $Id: envuidgid.c,v 1.7 2026-06-05 09:21:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: envuidgid.c,v 1.8 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <pwd.h>
@@ -40,18 +40,19 @@ main(int argc, char **argv)
 	strerr_die4sys(111, FATAL, "unable to run ", *argv, ": ");
 }
 
-void dummy(const char *x) {}
-
 void
 getversion_envuidgid_c()
 {
-	const char     *x = "$Id: envuidgid.c,v 1.7 2026-06-05 09:21:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: envuidgid.c,v 1.8 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummy(x);
+	(void) x;
 }
 
 /*
  * $Log: envuidgid.c,v $
+ * Revision 1.8  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.7  2026-06-05 09:21:09+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *

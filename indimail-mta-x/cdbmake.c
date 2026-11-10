@@ -1,5 +1,8 @@
 /*
  * $Log: cdbmake.c,v $
+ * Revision 1.5  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.4  2026-10-27 21:37:35+05:30  Cprogrammer
  * fix for CYGWIN
  *
@@ -164,7 +167,7 @@ main(int argc, char **argv)
 void
 getversion_cdbmake_c()
 {
-	const char     *x = "$Id: cdbmake.c,v 1.4 2026-10-27 21:37:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cdbmake.c,v 1.5 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

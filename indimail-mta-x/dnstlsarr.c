@@ -1,5 +1,5 @@
 /*
- * $Id: dnstlsarr.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: dnstlsarr.c,v 1.20 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include "substdio.h"
 #include "subfd.h"
@@ -228,16 +228,19 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	const char     *x = "$Id: dnstlsarr.c,v 1.19 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dnstlsarr.c,v 1.20 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
 #endif
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.20  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.19  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

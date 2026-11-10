@@ -1,5 +1,8 @@
 /*
  * $Log: ipalloc.c,v $
+ * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.10  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -39,7 +42,7 @@ GEN_ALLOC_append(ipalloc, struct ip_mx, ix, len, a, 10, ipalloc_readyplus, ipall
 void
 getversion_ipalloc_c()
 {
-	const char     *x = "$Id: ipalloc.c,v 1.10 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ipalloc.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

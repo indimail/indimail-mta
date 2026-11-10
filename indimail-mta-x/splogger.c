@@ -1,5 +1,8 @@
 /*
  * $Log: splogger.c,v $
+ * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.7  2024-10-19 23:15:17+05:30  Cprogrammer
  * converted main to ansic
  *
@@ -103,7 +106,7 @@ main(int argc, char **argv)
 void
 getversion_splogger_c()
 {
-	const char     *x = "$Id: splogger.c,v 1.7 2024-10-19 23:15:17+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: splogger.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

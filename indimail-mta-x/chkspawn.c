@@ -1,5 +1,8 @@
 /*
  * $Log: chkspawn.c,v $
+ * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -69,7 +72,7 @@ limit in conf-spawn be at most ");
 void
 getversion_chkspawn_c()
 {
-	const char     *x = "$Id: chkspawn.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: chkspawn.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-start.c,v 1.29 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-start.c,v 1.30 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  * RCS log at bottom
  */
 #include <sys/types.h>
@@ -379,13 +379,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_start_c()
 {
-	const char     *x = "$Id: qmail-start.c,v 1.29 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-start.c,v 1.30 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: qmail-start.c,v $
+ * Revision 1.30  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.29  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

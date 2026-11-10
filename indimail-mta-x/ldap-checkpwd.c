@@ -1,5 +1,5 @@
 /*
- * $Id: ldap-checkpwd.c,v 1.15 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: ldap-checkpwd.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  *
  * ldap-checkpwd.c
  *
@@ -524,12 +524,15 @@ main(int argc, char **argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	const char     *x = "$Id: ldap-checkpwd.c,v 1.15 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ldap-checkpwd.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.16  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.15  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

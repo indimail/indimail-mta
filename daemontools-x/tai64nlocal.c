@@ -1,5 +1,8 @@
 /*
  * $Log: tai64nlocal.c,v $
+ * Revision 1.7  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.6  2026-06-05 09:22:24+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *
@@ -110,12 +113,10 @@ main()
 	return 0;
 }
 
-void dummy(const char *x) {}
-
 void
 getversion_tai64nlocal_c()
 {
-	const char     *x = "$Id: tai64nlocal.c,v 1.6 2026-06-05 09:22:24+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tai64nlocal.c,v 1.7 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummy(x);
+	(void) x;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: dns_text.c,v 1.17 2026-11-09 23:22:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dns_text.c,v 1.18 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <netdb.h>
 #include <sys/types.h>
@@ -194,13 +194,16 @@ dns_text(char *dn)
 void
 getversion_dns_text_c()
 {
-	const char     *x = "$Id: dns_text.c,v 1.17 2026-11-09 23:22:09+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dns_text.c,v 1.18 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 // vim: shiftwidth=2:tabstop=4:softtabstop=4
 /*
  * $Log: dns_text.c,v $
+ * Revision 1.18  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.17  2026-11-09 23:22:09+05:30  Cprogrammer
  * BUGFIX: subsequent calls to dns_text() returned the same string with new record appended
  *

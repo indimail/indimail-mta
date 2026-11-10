@@ -1,5 +1,5 @@
 /*
- * $Id: rrforward.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rrforward.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -127,13 +127,16 @@ main(int argc, char **argv)
 void
 getversion_rrforward_c()
 {
-	const char     *x = "$Id: rrforward.c,v 1.13 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rrforward.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: rrforward.c,v $
+ * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.13  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: envdir.c,v 1.11 2026-06-05 09:21:06+05:30 Cprogrammer Exp mbhangui $
+ * $Id: envdir.c,v 1.12 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sgetopt.h>
@@ -75,20 +75,19 @@ main(int argc, char **argv)
 	strerr_warn4(FATAL, "unable to run ", argv[optind + 1], ": ", &strerr_sys);
 }
 
-void dummy(const char *x)
-{
-}
-
 void
 getversion_envdir_main_c()
 {
-	const char     *x = "$Id: envdir.c,v 1.11 2026-06-05 09:21:06+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: envdir.c,v 1.12 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummy(x);
+	(void) x;
 }
 
 /*
  * $Log: envdir.c,v $
+ * Revision 1.12  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.11  2026-06-05 09:21:06+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *

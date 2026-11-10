@@ -1,5 +1,5 @@
 /*
- * $Id: mailfilter.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: mailfilter.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -82,15 +82,18 @@ mailfilter(int argc, char **argv, char *filterargs)
 void
 getversion_mailfilter_c()
 {
-	const char     *x = "$Id: mailfilter.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mailfilter.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmktempfileh;
-	x++;
+	(void) x;
 }
 #endif
 
 /*
  * $Log: mailfilter.c,v $
+ * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

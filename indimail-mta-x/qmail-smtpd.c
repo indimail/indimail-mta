@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-smtpd.c,v $
+ * Revision 1.18  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.17  2024-05-13 22:10:56+05:30  Cprogrammer
  * added HOSTACCESS to list of env variables used
  *
@@ -284,7 +287,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_smtpd_c()
 {
-	const char     *x = "$Id: qmail-smtpd.c,v 1.17 2024-05-13 22:10:56+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-smtpd.c,v 1.18 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

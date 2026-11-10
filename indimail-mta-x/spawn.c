@@ -1,5 +1,5 @@
 /*
- * $Id: spawn.c,v 1.37 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn.c,v 1.38 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -485,9 +485,9 @@ QSPAWN(int argc, char **argv)
 static void /*- for ident command */
 getversion_spawn_c()
 {
-	const char     *x = "$Id: spawn.c,v 1.37 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spawn.c,v 1.38 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 int
@@ -500,6 +500,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: spawn.c,v $
+ * Revision 1.38  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.37  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

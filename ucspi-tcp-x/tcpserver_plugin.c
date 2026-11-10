@@ -1,5 +1,8 @@
 /*
  *  $Log: tcpserver_plugin.c,v $
+ *  Revision 1.20  2026-11-10 16:20:15+05:30  mbhangui
+ *  fix set but unused variable warnings
+ *
  *  Revision 1.19  2026-09-04 07:56:04+05:30  Cprogrammer
  *  fix compiler warning for GCC16
  *
@@ -212,7 +215,6 @@ tcpserver_plugin(char **envp)
 void
 getversion_tcpserver_plugin_c()
 {
-	const char    *x = "$Id: tcpserver_plugin.c,v 1.19 2026-09-04 07:56:04+05:30 Cprogrammer Exp mbhangui $";
-	if (x)
-		x++;
+	const char    *x = "$Id: tcpserver_plugin.c,v 1.20 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }

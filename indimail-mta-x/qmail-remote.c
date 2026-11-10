@@ -1,5 +1,5 @@
 /*-
- * $Id: qmail-remote.c,v 1.178 2026-10-27 21:40:03+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.179 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -3813,13 +3813,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	const char     *x = "$Id: qmail-remote.c,v 1.178 2026-10-27 21:40:03+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-remote.c,v 1.179 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.179  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.178  2026-10-27 21:40:03+05:30  Cprogrammer
  * fix compiler warnings
  *

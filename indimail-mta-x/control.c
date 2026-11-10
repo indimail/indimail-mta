@@ -1,5 +1,5 @@
 /*
- * $Id: control.c,v 1.25 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: control.c,v 1.26 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <open.h>
@@ -545,16 +545,17 @@ control_readcmd(stralloc *sa, const char *fn)
 void
 getversion_control_c()
 {
-	const char     *x = "$Id: control.c,v 1.25 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: control.c,v 1.26 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
-	x = sccsidmakeargsh;
-	x++;
+	(void) x;
 }
 #endif
 
 /*
  * $Log: control.c,v $
+ * Revision 1.26  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.25  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: cdb-database.c,v 1.6 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: cdb-database.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -111,12 +111,15 @@ main(int argc, char **argv)
 void
 getversion_cdb_database_c()
 {
-	const char     *x = "$Id: cdb-database.c,v 1.6 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: cdb-database.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: cdb-database.c,v $
+ * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.6  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

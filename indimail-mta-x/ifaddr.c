@@ -1,5 +1,5 @@
 /*
- * $Id: ifaddr.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: ifaddr.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -140,13 +140,16 @@ main(int argc, char **argv)
 void
 getversion_ifaddr_c()
 {
-	const char     *x = "$Id: ifaddr.c,v 1.7 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ifaddr.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: ifaddr.c,v $
+ * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.7  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

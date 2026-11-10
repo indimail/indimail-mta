@@ -1,5 +1,8 @@
 /*
  * $Log: yearcal.c,v $
+ * Revision 1.4  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.3  2025-07-24 10:30:10+05:30  Cprogrammer
  * convert function prototype to ansic
  *
@@ -70,7 +73,7 @@ main(int argc, char **argv)
 void
 getversion_yearcal_c()
 {
-	const char     *x = "$Id: yearcal.c,v 1.3 2025-07-24 10:30:10+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: yearcal.c,v 1.4 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

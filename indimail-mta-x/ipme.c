@@ -1,5 +1,5 @@
 /*
- * $Id: ipme.c,v 1.28 2026-10-27 21:39:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: ipme.c,v 1.29 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <errno.h>
 #include <sys/types.h>
@@ -173,7 +173,6 @@ ipme_init()
 	sockaddr_in6   *sin6;
 #endif
 	struct ifaddrs *ifaddr, *ifa;
-	int             n;
 	char            host[NI_MAXHOST];
 #else
 	struct ifconf   ifc;
@@ -257,7 +256,7 @@ ipme_init()
 	 * walk through linked list, maintaining head pointer so we
 	 * can free list later
 	 */
-	for (ifa = ifaddr, n = 0; ifa != NULL; ifa = ifa->ifa_next, n++) {
+	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
 		if (ifa->ifa_addr == NULL)
 			continue;
 		family = ifa->ifa_addr->sa_family;
@@ -414,12 +413,14 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	const char     *x = "$Id: ipme.c,v 1.28 2026-10-27 21:39:29+05:30 Cprogrammer Exp mbhangui $";
-
-	x++;
+	const char     *x = "$Id: ipme.c,v 1.29 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }
 /*
  * $Log: ipme.c,v $
+ * Revision 1.29  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.28  2026-10-27 21:39:29+05:30  Cprogrammer
  * fix for cygwin
  *

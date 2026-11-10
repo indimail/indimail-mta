@@ -1,5 +1,5 @@
 /*-
- * $Id: queue-fix.c,v 1.35 2024-09-01 08:19:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: queue-fix.c,v 1.36 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  *
  * adapted from queue-fix 1.4
  * by Eric Huss
@@ -1135,13 +1135,16 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	const char     *x = "$Id: queue-fix.c,v 1.35 2024-09-01 08:19:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: queue-fix.c,v 1.36 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.36  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.35  2024-09-01 08:19:59+05:30  Cprogrammer
  * bug - tcpto buffer size was unitialized
  *

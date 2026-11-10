@@ -1,5 +1,8 @@
 /*
  * $Log: fmtqfn.c,v $
+ * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -61,7 +64,7 @@ fmtqfn(char *s, const char *dirslash, unsigned long id, int flagsplit)
 void
 getversion_fmtqfn_c()
 {
-	const char     *x = "$Id: fmtqfn.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: fmtqfn.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

@@ -1,6 +1,6 @@
 /*-
  *
- * $Id: tai64n2tai.c,v 1.6 2026-06-05 09:22:18+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tai64n2tai.c,v 1.7 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
  *
  * tai64n2tai -- Convert TAI64N timestamps to older TAI format
  * Copyright (C) 2000 Bruce Guenter <bruceg@em.ca>
@@ -113,18 +113,19 @@ main(int argc, char **argv)
 	return 0;
 }
 
-void dummy(const char *x) {}
-
 void
 getversion_tai64n2tai_c()
 {
-	const char     *x = "$Id: tai64n2tai.c,v 1.6 2026-06-05 09:22:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tai64n2tai.c,v 1.7 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummy(x);
+	(void) x;
 }
 
 /*
  * $Log: tai64n2tai.c,v $
+ * Revision 1.7  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.6  2026-06-05 09:22:18+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *

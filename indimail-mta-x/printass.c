@@ -1,5 +1,5 @@
 /*
- * $Id: printass.c,v 1.3 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: printass.c,v 1.4 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -176,14 +176,17 @@ main(int argc, char **argv)
 void
 getversion_printass_c()
 {
-	const char     *x = "$Id: printass.c,v 1.3 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: printass.c,v 1.4 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 #endif
 
 /*
  * $Log: printass.c,v $
+ * Revision 1.4  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.3  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: ofmipd.c,v 1.28 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: ofmipd.c,v 1.29 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -1173,12 +1173,15 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	const char     *x = "$Id: ofmipd.c,v 1.28 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ofmipd.c,v 1.29 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.29  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.28  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: maildirsize.c,v 1.15 2026-10-27 21:39:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: maildirsize.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
@@ -123,12 +123,15 @@ main(int argc, char **argv)
 void
 getversion_maildirsize_c()
 {
-	const char     *x = "$Id: maildirsize.c,v 1.15 2026-10-27 21:39:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildirsize.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: maildirsize.c,v $
+ * Revision 1.16  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.15  2026-10-27 21:39:36+05:30  Cprogrammer
  * fix for cygwin
  *

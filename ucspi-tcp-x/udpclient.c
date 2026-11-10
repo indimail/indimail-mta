@@ -1,5 +1,8 @@
 /*
  * $Log: udpclient.c,v $
+ * Revision 1.10  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.9  2026-10-27 11:00:00+05:30  Cprogrammer
  * fix compiler warning
  *
@@ -120,7 +123,7 @@ main(int argc, char **argv)
 void
 getversion_udpclient_c()
 {
-	const char     *x = "$Id: udpclient.c,v 1.9 2026-10-27 11:00:00+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: udpclient.c,v 1.10 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
 
-	if (x) x++;
+	(void) x;
 }

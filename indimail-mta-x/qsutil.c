@@ -1,5 +1,5 @@
 /*
- * $Id: qsutil.c,v 1.27 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qsutil.c,v 1.28 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -254,12 +254,15 @@ logsafe(const char *s, const char *argv0)
 void
 getversion_qsutil_c()
 {
-	const char     *x = "$Id: qsutil.c,v 1.27 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qsutil.c,v 1.28 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.28  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.27  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

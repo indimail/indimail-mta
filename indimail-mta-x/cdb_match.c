@@ -1,5 +1,5 @@
 /*
- * $Id: cdb_match.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: cdb_match.c,v 1.3 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -129,14 +129,17 @@ cdb_match(const char *fn, const char *addr, int len, char **result)
 void
 getversion_cdb_match_c()
 {
-	const char     *x = "$Id: cdb_match.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: cdb_match.c,v 1.3 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 #endif
 
 /*
  * $Log: cdb_match.c,v $
+ * Revision 1.3  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

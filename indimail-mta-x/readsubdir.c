@@ -1,5 +1,5 @@
 /*
- * $Id: readsubdir.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: readsubdir.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <stddef.h>
 #include "readsubdir.h"
@@ -78,12 +78,15 @@ readsubdir_next(readsubdir *rs, unsigned long *id)
 void
 getversion_readsubdir_c()
 {
-	const char     *x = "$Id: readsubdir.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: readsubdir.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: readsubdir.c,v $
+ * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.9  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

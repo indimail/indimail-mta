@@ -1,5 +1,5 @@
 /*
- * $Id: atrn.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: atrn.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <case.h>
 #include <sig.h>
@@ -124,13 +124,16 @@ atrn_queue(char *arg, char *remoteip)
 void
 getversion_atrn_c()
 {
-	const char     *x = "$Id: atrn.c,v 1.12 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: atrn.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: atrn.c,v $
+ * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.12  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

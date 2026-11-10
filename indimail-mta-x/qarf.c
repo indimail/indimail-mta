@@ -1,5 +1,5 @@
 /*
- * $Id: qarf.c,v 1.16 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qarf.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -378,7 +378,7 @@ main(int argc, char **argv)
 	my_putb("\"; ", 3);
 	my_puts(
 			"report-type=\"feedback-report\"\n"
-			"X-Mailer: qarf $Revision: 1.16 $\n");
+			"X-Mailer: qarf $Revision: 1.17 $\n");
 
 	/*- Body */
 	my_puts("\nThis is a multi-part message in MIME format\n\n");
@@ -422,7 +422,7 @@ main(int argc, char **argv)
 
 	my_puts(
 			"Feedback-Type: abuse\n"
-			"User-Agent: $Id: qarf.c,v 1.16 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $\n"
+			"User-Agent: $Id: qarf.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $\n"
 			"Version: 0.1\n");
 	if (email_from.len) {
 		my_putb("Original-Mail-From: ", 20);
@@ -482,12 +482,15 @@ main(int argc, char **argv)
 void
 getversion_qarf_c()
 {
-	const char     *x = "$Id: qarf.c,v 1.16 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qarf.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: qarf.c,v $
+ * Revision 1.17  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.16  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

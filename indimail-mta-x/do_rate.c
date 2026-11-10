@@ -1,5 +1,5 @@
 /*
- * $Id: do_rate.c,v 1.5 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: do_rate.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -212,14 +212,17 @@ is_rate_ok(const char *_file, const char *_rate_exp, unsigned long *e, double *c
 void
 getversion_do_rate_c()
 {
-	const char     *x = "$Id: do_rate.c,v 1.5 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: do_rate.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidevalh;
 	x = sccsidgetrateh;
-	x++;
+	(void) x;
 }
 /*
  * $Log: do_rate.c,v $
+ * Revision 1.6  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.5  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

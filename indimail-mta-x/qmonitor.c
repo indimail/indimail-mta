@@ -1,5 +1,5 @@
 /*
- * $Id: qmonitor.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
+ * $Id: qmonitor.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include "haslibrt.h"
 #ifdef HASLIBRT
@@ -89,13 +89,16 @@ main(int argc, char **argv)
 void
 getversion_qmonitor_c()
 {
-	const char     *x = "$Id: qmonitor.c,v 1.7 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmonitor.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*-
  * $Log: qmonitor.c,v $
+ * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.7  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: rpmattr.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rpmattr.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include "str.h"
 #include "strerr.h"
@@ -101,12 +101,15 @@ main(int argc, char **argv)
 void
 getversion_rpmattr_c()
 {
-	const char     *x = "$Id: rpmattr.c,v 1.9 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
-	x++;
+	const char     *x = "$Id: rpmattr.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }
 
 /*
  * $Log: rpmattr.c,v $
+ * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.9  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: greylist.c,v 1.16 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: greylist.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include "haveip6.h"
 #include "stralloc.h"
@@ -234,12 +234,15 @@ greylist(const char *gip, const char *connectingip, const char *from,
 void
 getversion_greylist_c()
 {
-	const char     *x = "$Id: greylist.c,v 1.16 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: greylist.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: greylist.c,v $
+ * Revision 1.17  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.16  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: dlnamespace.c,v $
+ * Revision 1.14  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.13  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -173,7 +176,6 @@ dlnamespace(const char *fn, unsigned long *id)
 void
 getversion_dlnamespace_c()
 {
-	const char     *x = "$Id: dlnamespace.c,v 1.13 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
-	if (x)
-		x++;
+	const char     *x = "$Id: dlnamespace.c,v 1.14 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }

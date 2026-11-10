@@ -1,5 +1,8 @@
 /*
  * $Log: fmt_xpid.c,v $
+ * Revision 1.4  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.3  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -46,7 +49,7 @@ fmt_xpid(register char *s, register pid_t u, const int n)
 void
 getversion_fmt_xpid_c()
 {
-	const char     *x = "$Id: fmt_xpid.c,v 1.3 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: fmt_xpid.c,v 1.4 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

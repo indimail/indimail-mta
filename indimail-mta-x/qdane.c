@@ -1,5 +1,5 @@
 /*
- * $Id: qdane.c,v 1.5 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qdane.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include "subfd.h"
 #include "sgetopt.h"
@@ -156,12 +156,15 @@ main(int argc, char **argv)
 void
 getversion_qdane_c()
 {
-	const char     *x = "$Id: qdane.c,v 1.5 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qdane.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: qdane.c,v $
+ * Revision 1.6  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.5  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

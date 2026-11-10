@@ -1,5 +1,8 @@
 /*
  * $Log: prioq.c,v $
+ * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.8  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -130,7 +133,7 @@ prioq_del(prioq *pq)
 void
 getversion_prioq_c()
 {
-	const char     *x = "$Id: prioq.c,v 1.8 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: prioq.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.45 2026-06-05 09:22:11+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.46 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -1047,18 +1047,19 @@ main(int argc, char **argv)
 	}
 }
 
-void dummy(const char *y) {}
-
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.45 2026-06-05 09:22:11+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.46 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummy(y);
+	(void) y;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.46  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.45  2026-06-05 09:22:11+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *

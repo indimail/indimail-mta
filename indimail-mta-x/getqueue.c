@@ -1,5 +1,5 @@
 /*
- * $Id: getqueue.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: getqueue.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fmt.h>
@@ -127,14 +127,17 @@ queueNo_from_env()
 void
 getversion_getqueue_c()
 {
-	const char     *x = "$Id: getqueue.c,v 1.6 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: getqueue.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 #endif
 
 /*
  * $Log: getqueue.c,v $
+ * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.6  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

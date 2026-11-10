@@ -1,5 +1,5 @@
 /*
- * $Id: rrt.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rrt.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <errno.h>
@@ -463,13 +463,16 @@ main(int argc, char **argv)
 void
 getversion_rr_c()
 {
-	const char     *x = "$Id: rrt.c,v 1.15 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rrt.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: rrt.c,v $
+ * Revision 1.16  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.15  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: load_mysql.c,v $
+ * Revision 1.14  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.13  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -264,7 +267,6 @@ initMySQLlibrary(const char *errstr[])
 void
 getversion_load_mysql_c()
 {
-	const char     *x = "$Id: load_mysql.c,v 1.13 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
-	if (x)
-		x++;
+	const char     *x = "$Id: load_mysql.c,v 1.14 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: run_init.c,v $
+ * Revision 1.10  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.9  2026-06-05 09:21:38+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *
@@ -145,12 +148,10 @@ run_init(char *service_dir)
 }
 #endif
 
-void dummyr(const char *x) {}
-
 void
 getversion_svrun_c()
 {
-	const char     *x = "$Id: run_init.c,v 1.9 2026-06-05 09:21:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: run_init.c,v 1.10 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummyr(x);
+	(void) x;
 }

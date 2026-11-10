@@ -1,5 +1,5 @@
 /*
- * $Id: recordio.c,v 1.7 2026-09-04 07:55:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: recordio.c,v 1.8 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -198,14 +198,16 @@ main(int argc, char **argv, char **envp)
 void
 getversion_recordio_c()
 {
-	const char     *x = "$Id: recordio.c,v 1.7 2026-09-04 07:55:49+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: recordio.c,v 1.8 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
 
-	if (x)
-		x++;
+	(void) x;
 }
 
 /*
  * $Log: recordio.c,v $
+ * Revision 1.8  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.7  2026-09-04 07:55:49+05:30  Cprogrammer
  * fix compiler warning for GCC16
  *

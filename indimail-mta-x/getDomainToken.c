@@ -1,5 +1,8 @@
 /*
  * $Log: getDomainToken.c,v $
+ * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.9  2024-05-23 17:16:18+05:30  Cprogrammer
  * renamed wildmat_internal to wildmat
  *
@@ -149,9 +152,9 @@ getDomainToken(const char *domain, stralloc *sa)
 void
 getversion_getdomaintoke_c()
 {
-	const char     *x = "$Id: getDomainToken.c,v 1.9 2024-05-23 17:16:18+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: getDomainToken.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidwildmath;
 	x = sccsidgetdomainth;
-	x++;
+	(void) x;
 }

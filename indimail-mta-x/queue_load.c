@@ -1,5 +1,5 @@
 /*
- * $Id: queue_load.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: queue_load.c,v 1.5 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include "haslibrt.h"
 
@@ -19,7 +19,7 @@
 void
 queue_load(const char *argv0, int *qcount, int *qconf, double total_load[2], QDEF **queue)
 {
-	int             shm, i, j, queue_count, queue_conf, len, x, min = -1, lcur = 0, rcur = 0;
+	int             shm, i, j, queue_count, queue_conf, len, x, min = -1;
 	double          load_l, load_r;
 	int             q[5];
 	QDEF           *qdef;
@@ -82,9 +82,7 @@ queue_load(const char *argv0, int *qcount, int *qconf, double total_load[2], QDE
 			continue;
 		}
 		qdef[j].lcur = q[0];
-		lcur += q[0];
 		qdef[j].rcur = q[1];
-		rcur += q[1];
 		qdef[j].lmax = q[2];
 		qdef[j].rmax = q[3];
 		qdef[j].flag = q[4];
@@ -104,14 +102,17 @@ queue_load(const char *argv0, int *qcount, int *qconf, double total_load[2], QDE
 void
 getversion_queue_load_c()
 {
-	const char     *x = "$Id: queue_load.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: queue_load.c,v 1.5 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 #endif
 
 /*-
  * $Log: queue_load.c,v $
+ * Revision 1.5  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

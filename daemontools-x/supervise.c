@@ -1,4 +1,4 @@
-/*- $Id: supervise.c,v 1.61 2026-09-27 11:11:30+05:30 Cprogrammer Exp mbhangui $ */
+/*- $Id: supervise.c,v 1.62 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $ */
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/types.h>
@@ -1392,20 +1392,19 @@ main(int argc, char **argv)
 	_exit(0);
 }
 
-void dummy(const char *x)
-{
-}
-
 void
 getversion_supervise_c()
 {
-	const char     *x = "$Id: supervise.c,v 1.61 2026-09-27 11:11:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: supervise.c,v 1.62 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummy(x);
+	(void) x;
 }
 
 /*
  * $Log: supervise.c,v $
+ * Revision 1.62  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.61  2026-09-27 11:11:30+05:30  Cprogrammer
  * Added oneshot service that executes once if dir/oneshot exists
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: rblsmtpd.c,v 1.28 2026-09-04 07:55:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rblsmtpd.c,v 1.29 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <byte.h>
@@ -602,14 +602,16 @@ main(int argc, char **argv, char **envp)
 void
 getversion_rblsmtpd_c()
 {
-	const char     *x = "$Id: rblsmtpd.c,v 1.28 2026-09-04 07:55:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: rblsmtpd.c,v 1.29 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
 
-	if (x)
-		x++;
+	(void) x;
 }
 
 /*
  * $Log: rblsmtpd.c,v $
+ * Revision 1.29  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.28  2026-09-04 07:55:47+05:30  Cprogrammer
  * fix compiler warning for GCC16
  *

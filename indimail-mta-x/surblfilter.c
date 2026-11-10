@@ -1,5 +1,5 @@
 /*
- * $Id: surblfilter.c,v 1.23 2026-10-27 21:40:47+05:30 Cprogrammer Exp mbhangui $
+ * $Id: surblfilter.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -971,13 +971,16 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	const char     *x = "$Id: surblfilter.c,v 1.23 2026-10-27 21:40:47+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: surblfilter.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.24  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.23  2026-10-27 21:40:47+05:30  Cprogrammer
  * fix compiler warnings
  *

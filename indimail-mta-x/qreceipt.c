@@ -1,5 +1,8 @@
 /*
  * $Log: qreceipt.c,v $
+ * Revision 1.18  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.17  2026-01-12 11:12:07+05:30  Cprogrammer
  * removed unused include file
  *
@@ -259,7 +262,7 @@ main(int argc, char **argv)
 void
 getversion_qreceipt_c()
 {
-	const char     *x = "$Id: qreceipt.c,v 1.17 2026-01-12 11:12:07+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qreceipt.c,v 1.18 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

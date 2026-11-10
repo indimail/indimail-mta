@@ -1,5 +1,8 @@
 /*
  * $Log: hfield.c,v $
+ * Revision 1.6  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -141,7 +144,7 @@ hfield_skipname(const char *s, int len)
 void
 getversion_hfield_c()
 {
-	const char     *x = "$Id: hfield.c,v 1.5 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: hfield.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: nowutc.c,v $
+ * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.11  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -76,7 +79,7 @@ main()
 void
 getversion_nowutc_c()
 {
-	const char     *z = "$Id: nowutc.c,v 1.11 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *z = "$Id: nowutc.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	z++;
+	(void) z;
 }

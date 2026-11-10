@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-multi.c,v 1.6 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-multi.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -43,14 +43,17 @@ main(int argc, char **argv)
 void
 getversion_qmail_multi_c()
 {
-	const char     *x = "$Id: qmail-multi.c,v 1.6 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-multi.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 #endif
 
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.6  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

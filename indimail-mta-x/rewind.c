@@ -1,5 +1,8 @@
 /*
  * $Log: rewind.c,v $
+ * Revision 1.5  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -24,7 +27,7 @@ main(void)
 void
 getversion_rewind_c()
 {
-	const char     *x = "$Id: rewind.c,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: rewind.c,v 1.5 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

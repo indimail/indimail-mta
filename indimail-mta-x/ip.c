@@ -1,5 +1,8 @@
 /*
  * $Log: ip.c,v $
+ * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.13  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *
@@ -354,7 +357,7 @@ ip6_scanbracket(const char *s, ip6_addr *ip6)
 void
 getversion_ip_c()
 {
-	const char     *x = "$Id: ip.c,v 1.13 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ip.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

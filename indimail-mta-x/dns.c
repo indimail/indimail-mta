@@ -1,5 +1,5 @@
 /*
- * $Id: dns.c,v 1.44 2026-10-27 21:39:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dns.c,v 1.45 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  * RCS log at bottom
  */
 #include <netdb.h>
@@ -1124,13 +1124,16 @@ dns_tlsarr(tlsarralloc *ta, stralloc *sa)
 void
 getversion_dns_c()
 {
-	const char     *x = "$Id: dns.c,v 1.44 2026-10-27 21:39:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dns.c,v 1.45 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: dns.c,v $
+ * Revision 1.45  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.44  2026-10-27 21:39:12+05:30  Cprogrammer
  * cygwin port
  *

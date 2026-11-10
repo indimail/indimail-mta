@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-pw2u.c,v 1.12 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-pw2u.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -483,12 +483,15 @@ main(int argc, char **argv)
 void
 getversion_qmail_pw2u_c()
 {
-	const char     *x = "$Id: qmail-pw2u.c,v 1.12 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-pw2u.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: qmail-pw2u.c,v $
+ * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.12  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

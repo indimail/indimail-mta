@@ -1,5 +1,5 @@
 /*
- * $Id: tcpclient.c,v 1.40 2026-10-26 01:46:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpclient.c,v 1.41 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -923,14 +923,16 @@ do_data:
 void
 getversion_tcpclient_c()
 {
-	const char    *x = "$Id: tcpclient.c,v 1.40 2026-10-26 01:46:28+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpclient.c,v 1.41 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
 
-	if (x)
-		x++;
+	(void) x;
 }
 
 /*
  * $Log: tcpclient.c,v $
+ * Revision 1.41  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.40  2026-10-26 01:46:28+05:30  Cprogrammer
  * fix for cygwin
  *

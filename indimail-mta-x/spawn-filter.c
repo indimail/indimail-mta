@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.92 2026-01-12 11:12:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.93 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -689,17 +689,20 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	const char     *x = "$Id: spawn-filter.c,v 1.92 2026-01-12 11:12:25+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spawn-filter.c,v 1.93 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
 	x = sccsidmakeargsh;
-	x++;
+	(void) x;
 }
 #endif
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.93  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.92  2026-01-12 11:12:25+05:30  Cprogrammer
  * corrected line length
  *

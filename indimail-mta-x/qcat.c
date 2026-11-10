@@ -1,5 +1,5 @@
 /*
- * $Id: qcat.c,v 1.13 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qcat.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  *
  * qcat -- concatenate files and print on the standard output.
  * Copyright (C) 1988-2024 Free Software Foundation, Inc.
@@ -237,13 +237,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_cat_c()
 {
-	const char     *x = "$Id: qcat.c,v 1.13 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qcat.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: qcat.c,v $
+ * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.13  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

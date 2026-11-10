@@ -1,5 +1,8 @@
 /*
  * $Log: tcdlmopen.c,v $
+ * Revision 1.5  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.4  2024-05-09 22:55:54+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -45,7 +48,6 @@ extern void write(int, char *, int);
 void
 getversion_tcdlmopen_c()
 {
-	const char     *x = "$Id: tcdlmopen.c,v 1.4 2024-05-09 22:55:54+05:30 mbhangui Exp mbhangui $";
-	if (x)
-		x++;
+	const char     *x = "$Id: tcdlmopen.c,v 1.5 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }

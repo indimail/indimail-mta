@@ -1,5 +1,5 @@
 /*
- * $Id: filterit_sub.c,v 1.10 2026-10-27 21:39:20+05:30 Cprogrammer Exp mbhangui $
+ * $Id: filterit_sub.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -652,13 +652,14 @@ void
 getversion_filterit_c()
 {
 	const char *x = sccsidevalh;
-	x++;
-	x = sccsidmakeargsh;
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.10  2026-10-27 21:39:20+05:30  Cprogrammer
  * fixed compiler warning
  *

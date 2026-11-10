@@ -1,5 +1,5 @@
 /*
- * $Id: auto-uid.c,v 1.13 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auto-uid.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -45,11 +45,14 @@ main(int argc, char **argv)
 void
 getversion_auto_uid_c()
 {
-	const char     *x = "$Id: auto-uid.c,v 1.13 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
-	x++;
+	const char     *x = "$Id: auto-uid.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }
 /*
  * $Log: auto-uid.c,v $
+ * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.13  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

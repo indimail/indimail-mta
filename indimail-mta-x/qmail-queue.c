@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.96 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.97 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1193,14 +1193,17 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	const char     *x = "$Id: qmail-queue.c,v 1.96 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-queue.c,v 1.97 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmakeargsh;
-	x++;
+	(void) x;
 }
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.97  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.96  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

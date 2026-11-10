@@ -1,5 +1,8 @@
 /*
  * $Log: match.c,v $
+ * Revision 1.5  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.4  2026-06-05 09:21:21+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *
@@ -50,12 +53,10 @@ match(char *pattern, char *buf, unsigned int len)
 	}
 }
 
-void dummyz(const char *x){}
-
 void
 getversion_match_c()
 {
-	const char     *x = "$Id: match.c,v 1.4 2026-06-05 09:21:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: match.c,v 1.5 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummyz(x);
+	(void) x;
 }

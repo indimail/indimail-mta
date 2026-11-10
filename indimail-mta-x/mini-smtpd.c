@@ -1,5 +1,5 @@
 /*
- * $Id: mini-smtpd.c,v 1.11 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $
+ * $Id: mini-smtpd.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -714,13 +714,16 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	const char     *x = "$Id: mini-smtpd.c,v 1.11 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mini-smtpd.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.11  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *

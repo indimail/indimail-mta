@@ -1,5 +1,5 @@
 /*
- * $Id: maildirserial.c,v 1.23 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: maildirserial.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -540,13 +540,16 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	const char     *x = "$Id: maildirserial.c,v 1.23 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: maildirserial.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.24  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.23  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

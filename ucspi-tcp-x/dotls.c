@@ -1,5 +1,5 @@
 /*
- * $Id: dotls.c,v 1.29 2026-10-26 03:03:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dotls.c,v 1.30 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -1284,10 +1284,9 @@ main(int argc, char **argv)
 void
 getversion_dotls_c()
 {
-	const char     *x = "$Id: dotls.c,v 1.29 2026-10-26 03:03:44+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dotls.c,v 1.30 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
 
-	if (x)
-		x++;
+	(void) x;
 }
 #else
 #warning "not compiled with -DTLS"
@@ -1309,6 +1308,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: dotls.c,v $
+ * Revision 1.30  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.29  2026-10-26 03:03:44+05:30  Cprogrammer
  * fix compiler warning on cygwin
  *

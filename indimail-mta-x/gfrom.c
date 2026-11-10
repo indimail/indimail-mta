@@ -1,5 +1,8 @@
 /*
  * $Log: gfrom.c,v $
+ * Revision 1.6  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.5  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *
@@ -30,7 +33,7 @@ gfrom(char *s, int len)
 void
 getversion_gfrom_c()
 {
-	const char     *x = "$Id: gfrom.c,v 1.5 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: gfrom.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

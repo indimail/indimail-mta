@@ -1,11 +1,11 @@
 /*
- * $Id: qregex.c,v 1.39 2024-05-23 17:16:52+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qregex.c,v 1.40 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  *
  * qregex (v2)
  * Author  : Evan Borgstrom (evan at unixpimps dot org)
  * Created : 2001/12/14 23:08:16
- * Modified: $Date: 2024-05-23 17:16:52+05:30 $
- * Revision: $Revision: 1.39 $
+ * Modified: $Date: 2026-11-10 16:01:17+05:30 $
+ * Revision: $Revision: 1.40 $
  *
  * Do POSIX regex matching on addresses for anti-relay / spam control.
  * It logs to the maillog
@@ -239,14 +239,17 @@ regex_match(stralloc *addr, stralloc *map, const char *errStr[])
 void
 getversion_qregex_c()
 {
-	const char     *x = "$Id: qregex.c,v 1.39 2024-05-23 17:16:52+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qregex.c,v 1.40 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidwildmath;
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: qregex.c,v $
+ * Revision 1.40  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.39  2024-05-23 17:16:52+05:30  Cprogrammer
  * renamed wildmat_internal to wildmat
  *

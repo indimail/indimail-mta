@@ -1,5 +1,5 @@
 /*
- * $Id: query_skt.c,v 1.3 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: query_skt.c,v 1.4 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <errno.h>
 #include "error.h"
@@ -29,12 +29,15 @@ query_skt(int fd, const char *ipaddr, stralloc *queryp, char *responsep,
 void
 getversion_query_skt_c()
 {
-	const char     *x = "$Id: query_skt.c,v 1.3 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: query_skt.c,v 1.4 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: query_skt.c,v $
+ * Revision 1.4  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.3  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

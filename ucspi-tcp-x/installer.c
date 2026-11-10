@@ -1,5 +1,5 @@
 /*
- * $Id: installer.c,v 1.31 2026-03-25 22:32:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: installer.c,v 1.33 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
@@ -706,14 +706,16 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.31 2026-03-25 22:32:16+05:30 Cprogrammer Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.33 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
 
-	if (x)
-		x++;
+	(void) x;
 }
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.33  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.31  2026-03-25 22:32:16+05:30  Cprogrammer
  * fix compilation on Solaris
  *

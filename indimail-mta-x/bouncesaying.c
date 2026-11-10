@@ -1,5 +1,8 @@
 /*
  * $Log: bouncesaying.c,v $
+ * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.9  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *
@@ -66,7 +69,7 @@ main(int argc, char **argv)
 void
 getversion_bouncesaying_c()
 {
-	const char     *x = "$Id: bouncesaying.c,v 1.9 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: bouncesaying.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

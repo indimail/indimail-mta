@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-clean.c,v 1.16 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-clean.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -140,13 +140,16 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	const char     *x = "$Id: qmail-clean.c,v 1.16 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-clean.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: qmail-clean.c,v $
+ * Revision 1.17  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.16  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qscanq.c,v 1.16 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qscanq.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -162,13 +162,16 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	const char     *x = "$Id: qscanq.c,v 1.16 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qscanq.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.17  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.16  2025-01-22 00:30:34+05:30  Cprogrammer
  * Fixes for gcc14
  *

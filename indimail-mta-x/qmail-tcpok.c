@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-tcpok.c,v 1.31 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-tcpok.c,v 1.32 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <strerr.h>
@@ -96,6 +96,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: qmail-tcpok.c,v $
+ * Revision 1.32  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.31  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *
@@ -185,7 +188,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	const char     *x = "$Id: qmail-tcpok.c,v 1.31 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-tcpok.c,v 1.32 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: socket_local.c,v $
+ * Revision 1.7  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.6  2026-09-04 07:55:54+05:30  Cprogrammer
  * fix compiler warning for GCC16
  *
@@ -44,8 +47,6 @@ socket_local4(int s, char ip[4], uint16 * port)
 void
 getversion_socket_local4_c()
 {
-	const char     *x = "$Id: socket_local.c,v 1.6 2026-09-04 07:55:54+05:30 Cprogrammer Exp mbhangui $";
-	if (x)
-		x++;
-	return;
+	const char     *x = "$Id: socket_local.c,v 1.7 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }

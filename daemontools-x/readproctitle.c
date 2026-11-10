@@ -1,5 +1,8 @@
 /*
  * $Log: readproctitle.c,v $
+ * Revision 1.5  2026-11-10 16:12:27+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.4  2026-06-05 09:21:35+05:30  Cprogrammer
  * fix compiler warning for unused rcs variable
  *
@@ -52,12 +55,10 @@ main(int argc, char **argv)
 		}
 }
 
-void dummy(const char *x) {}
-
 void
 getversion_readproctitle_c()
 {
-	const char     *x = "$Id: readproctitle.c,v 1.4 2026-06-05 09:21:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: readproctitle.c,v 1.5 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
 
-	dummy(x);
+	(void) x;
 }

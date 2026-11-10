@@ -1,5 +1,8 @@
 /*
  * $Log: sorted.c,v $
+ * Revision 1.6  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.5  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *
@@ -60,7 +63,7 @@ sorted_insert(sorted *sl, stralloc *sa)
 void
 getversion_sorted_c()
 {
-	const char     *x = "$Id: sorted.c,v 1.5 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sorted.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

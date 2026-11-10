@@ -1,5 +1,8 @@
 /*
  * $Log: addcr.c,v $
+ * Revision 1.5  2026-11-10 16:20:15+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.4  2026-09-04 07:55:10+05:30  Cprogrammer
  * fix compiler warning for GCC16
  *
@@ -48,8 +51,6 @@ main()
 void
 getversion_addcr_c()
 {
-	const char     *x = "$Id: addcr.c,v 1.4 2026-09-04 07:55:10+05:30 Cprogrammer Exp mbhangui $";
-
-	if (x)
-		x++;
+	const char     *x = "$Id: addcr.c,v 1.5 2026-11-10 16:20:15+05:30 mbhangui Exp mbhangui $";
+	(void) x;
 }

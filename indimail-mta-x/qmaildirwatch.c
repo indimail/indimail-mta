@@ -1,5 +1,5 @@
 /*
- * $Id: qmaildirwatch.c,v 1.12 2026-01-12 11:11:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmaildirwatch.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -147,12 +147,15 @@ main()
 void
 getversion_qmaildirwatch_c()
 {
-	const char     *x = "$Id: qmaildirwatch.c,v 1.12 2026-01-12 11:11:45+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmaildirwatch.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: qmaildirwatch.c,v $
+ * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.12  2026-01-12 11:11:45+05:30  Cprogrammer
  * removed unused include file
  *

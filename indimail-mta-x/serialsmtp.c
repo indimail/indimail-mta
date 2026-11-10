@@ -1,5 +1,5 @@
 /*
- * $Id: serialsmtp.c,v 1.12 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $
+ * $Id: serialsmtp.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <strerr.h>
@@ -382,13 +382,16 @@ main(int argc, char **argv)
 void
 getversion_serialsmtp_c()
 {
-	const char     *x = "$Id: serialsmtp.c,v 1.12 2025-01-22 00:30:34+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: serialsmtp.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: serialsmtp.c,v $
+ * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.12  2025-01-22 00:30:34+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: ctrlenv.c,v $
+ * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.7  2026-10-27 21:37:42+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -313,7 +316,7 @@ main(int argc, char **argv)
 void
 getversion_ctrlenv_c()
 {
-	const char     *x = "$Id: ctrlenv.c,v 1.7 2026-10-27 21:37:42+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: ctrlenv.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

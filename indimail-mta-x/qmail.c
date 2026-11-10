@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.39 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail.c,v 1.40 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -312,14 +312,17 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	const char     *x = "$Id: qmail.c,v 1.39 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail.c,v 1.40 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmakeargsh;
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.40  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.39  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

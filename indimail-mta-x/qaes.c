@@ -1,5 +1,5 @@
 /*
- * $Id: qaes.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qaes.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  *
  * AES encryption/decryption demo program using OpenSSL EVP apis
  * gcc -Wall openssl_aes.c -lcrypto
@@ -326,12 +326,15 @@ main(int argc, char **argv)
 void
 getversion_qaes_c()
 {
-	const char     *x = "$Id: qaes.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qaes.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: qaes.c,v $
+ * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.9  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

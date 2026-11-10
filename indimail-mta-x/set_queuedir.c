@@ -1,5 +1,8 @@
 /*
  * $Log: set_queuedir.c,v $
+ * Revision 1.3  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.2  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -51,8 +54,8 @@ set_queuedir(const char *argv0, const char *queue)
 void
 getversion_set_queuedir_c()
 {
-	const char     *x = "$Id: set_queuedir.c,v 1.2 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: set_queuedir.c,v 1.3 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 #endif

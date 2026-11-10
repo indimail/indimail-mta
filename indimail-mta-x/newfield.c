@@ -1,5 +1,8 @@
 /*
  * $Log: newfield.c,v $
+ * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.8  2024-05-12 00:20:03+05:30  mbhangui
  * fix function prototypes
  *
@@ -137,7 +140,7 @@ newfield_msgidmake(char *idhost, int idhostlen, datetime_sec when)
 void
 getversion_newfield_c()
 {
-	const char     *x = "$Id: newfield.c,v 1.8 2024-05-12 00:20:03+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: newfield.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }

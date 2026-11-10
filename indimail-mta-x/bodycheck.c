@@ -1,5 +1,5 @@
 /*
- * $Id: bodycheck.c,v 1.8 2026-10-27 21:37:21+05:30 Cprogrammer Exp mbhangui $
+ * $Id: bodycheck.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include "substdio.h"
 #include "alloc.h"
@@ -194,12 +194,15 @@ bodycheck_free()
 void
 getversion_bodycheck_c()
 {
-	const char     *x = "$Id: bodycheck.c,v 1.8 2026-10-27 21:37:21+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: bodycheck.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: bodycheck.c,v $
+ * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.8  2026-10-27 21:37:21+05:30  Cprogrammer
  * fixed compiler warnings
  *

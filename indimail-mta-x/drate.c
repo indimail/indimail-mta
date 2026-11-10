@@ -1,5 +1,5 @@
 /*
- * $Id: drate.c,v 1.27 2025-05-06 22:44:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: drate.c,v 1.28 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -676,15 +676,18 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	const char     *x = "$Id: drate.c,v 1.27 2025-05-06 22:44:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: drate.c,v 1.28 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
 	x = sccsidgetrateh;
-	x++;
+	(void) x;
 }
 /*
  * $Log: drate.c,v $
+ * Revision 1.28  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.27  2025-05-06 22:44:28+05:30  Cprogrammer
  * remove domain name check for special domain .global
  *

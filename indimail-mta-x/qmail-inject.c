@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-inject.c,v 1.54 2026-01-12 11:11:54+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-inject.c,v 1.55 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1075,13 +1075,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	const char     *x = "$Id: qmail-inject.c,v 1.54 2026-01-12 11:11:54+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-inject.c,v 1.55 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.55  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.54  2026-01-12 11:11:54+05:30  Cprogrammer
  * removed unused include file
  *

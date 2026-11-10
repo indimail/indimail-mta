@@ -1,5 +1,5 @@
 /*
- * $Id: sys-checkpwd.c,v 1.23 2024-07-16 00:18:31+05:30 Cprogrammer Exp mbhangui $
+ * $Id: sys-checkpwd.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  *
  * Test method
  * printf "login\0pass\0\0\x01\0" >/tmp/input
@@ -327,15 +327,18 @@ main(int argc, char **argv)
 void
 getversion_sys_checkpwd_c()
 {
-	const char     *x = "$Id: sys-checkpwd.c,v 1.23 2024-07-16 00:18:31+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: sys-checkpwd.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
 	x = sccsidmakeargsh;
-	x++;
+	(void) x;
 }
 #endif
 
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.24  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.23  2024-07-16 00:18:31+05:30  Cprogrammer
  * changed variable name tmpbuf to authstr
  *

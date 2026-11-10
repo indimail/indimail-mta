@@ -1,5 +1,5 @@
 /*
- * $Id: addrlist.c,v 1.5 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: addrlist.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -101,12 +101,15 @@ main()
 void
 getversion_addrlist_c()
 {
-	const char     *x = "$Id: addrlist.c,v 1.5 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: addrlist.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
 
-	x++;
+	(void) x;
 }
 /*
  * $Log: addrlist.c,v $
+ * Revision 1.6  2026-11-10 16:01:17+05:30  mbhangui
+ * fix set but unused variable warnings
+ *
  * Revision 1.5  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *
