@@ -1,5 +1,8 @@
 /*
  * $Log: qquote.c,v $
+ * Revision 1.6  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.5  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -38,6 +41,7 @@ main(int argc, char **argv)
 	stralloc        addr = { 0 };
 	char           *comment = 0;
 
+	(void) argc;
 	if (!stralloc_copys(&addr, "@"))
 		nomem();
 
@@ -66,7 +70,7 @@ main(int argc, char **argv)
 void
 getversion_qquote_c()
 {
-	const char     *x = "$Id: qquote.c,v 1.5 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qquote.c,v 1.6 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

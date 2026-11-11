@@ -1,5 +1,8 @@
 /*
  * $Log: qscheduler.h,v $
+ * Revision 1.2  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.1  2022-04-16 21:45:55+05:30  Cprogrammer
  * Initial revision
  *
@@ -30,7 +33,7 @@ typedef enum {
 typedef struct
 {
 	pid_t           pid;
-	int             split;
+	unsigned int    split;
 	ino_t           inum;      /*- inode number */
 } q_msg;
 

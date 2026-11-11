@@ -1,5 +1,8 @@
 /*
  * $Log: ctrlenv.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -219,7 +222,8 @@ main(int argc, char **argv)
 {
 	static stralloc ctrl = {0};
 	char           *fn = (char *) 0, *ptr, *env_name = (char *) 0, *addr = (char *) 0, *result;
-	int             i, j, opt, token_len, len, t;
+	unsigned int    len;
+	int             i, j, opt, token_len, t;
 
 	while ((opt = getopt(argc, argv, "cf:e:a:")) != opteof) {
 		switch (opt)
@@ -316,7 +320,7 @@ main(int argc, char **argv)
 void
 getversion_ctrlenv_c()
 {
-	const char     *x = "$Id: ctrlenv.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ctrlenv.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

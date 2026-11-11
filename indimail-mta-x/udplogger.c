@@ -1,5 +1,5 @@
 /*
- * $Id: udplogger.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: udplogger.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdlib.h>
 #include <strings.h>
@@ -111,6 +111,7 @@ logerrf(const char *str)
 void
 sighup(int x)
 {
+	(void) x;
 	sig_block(SIGHUP);
 	logerrf("Received SIGHUP\n");
 	seqno = 1;
@@ -120,6 +121,7 @@ sighup(int x)
 void
 sigusr1(int x)
 {
+	(void) x;
 	sig_block(SIGUSR1);
 	logerrf("Received SIGUSR1\n");
 	sig_unblock(SIGUSR1);
@@ -129,6 +131,7 @@ sigusr1(int x)
 no_return void
 sigterm(int x)
 {
+	(void) x;
 	sig_block(SIGTERM);
 	logerrf("ARGH!! Committing suicide on SIGTERM\n");
 	flush();
@@ -376,13 +379,16 @@ main(int argc, char **argv)
 void
 getversion_udplogger_c()
 {
-	const char     *x = "$Id: udplogger.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: udplogger.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: udplogger.c,v $
+ * Revision 1.12  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-inject.c,v 1.55 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-inject.c,v 1.56 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -261,7 +261,7 @@ exitnicely()
 	if (!flagqueue)
 		substdio_flush(subfdout);
 	if (flagqueue) {
-		int             i;
+		unsigned int    i;
 
 		if (!stralloc_0(&sender))
 			die_nomem();
@@ -342,7 +342,7 @@ savedh_append(stralloc *h)
 void
 savedh_print()
 {
-	int             i;
+	unsigned int    i;
 
 	for (i = 0; i < savedh.len; ++i)
 		put(savedh.sa[i].s, savedh.sa[i].len);
@@ -362,7 +362,7 @@ rwroute(token822_alloc *addr)
 void
 rwextraat(token822_alloc *addr)
 {
-	int             i;
+	unsigned int    i;
 
 	if (addr->t[0].type == TOKEN822_AT) {
 		--addr->len;
@@ -374,7 +374,7 @@ rwextraat(token822_alloc *addr)
 void
 rwextradot(token822_alloc *addr)
 {
-	int             i;
+	unsigned int    i;
 
 	if (addr->t[0].type == TOKEN822_DOT) {
 		--addr->len;
@@ -386,8 +386,8 @@ rwextradot(token822_alloc *addr)
 void
 rwnoat(token822_alloc *addr)
 {
-	int             i;
-	int             shift;
+	unsigned int    i, shift;
+	int             j;
 
 	for (i = 0; i < addr->len; ++i) {
 		if (addr->t[i].type == TOKEN822_AT)
@@ -396,8 +396,8 @@ rwnoat(token822_alloc *addr)
 	shift = defaulthost.len;
 	if (!token822_readyplus(addr, shift))
 		die_nomem();
-	for (i = addr->len - 1; i >= 0; --i)
-		addr->t[i + shift] = addr->t[i];
+	for (j = addr->len - 1; j >= 0; --j)
+		addr->t[j + shift] = addr->t[j];
 	addr->len += shift;
 	for (i = 0; i < shift; ++i)
 		addr->t[i] = defaulthost.t[shift - 1 - i];
@@ -406,8 +406,8 @@ rwnoat(token822_alloc *addr)
 void
 rwnodot(token822_alloc *addr)
 {
-	int             i;
-	int             shift;
+	unsigned int    i, shift;
+	int             j;
 
 	for (i = 0; i < addr->len; ++i) {
 		if (addr->t[i].type == TOKEN822_DOT)
@@ -424,8 +424,8 @@ rwnodot(token822_alloc *addr)
 	shift = defaultdomain.len;
 	if (!token822_readyplus(addr, shift))
 		die_nomem();
-	for (i = addr->len - 1; i >= 0; --i)
-		addr->t[i + shift] = addr->t[i];
+	for (j = addr->len - 1; j >= 0; --j)
+		addr->t[j + shift] = addr->t[j];
 	addr->len += shift;
 	for (i = 0; i < shift; ++i)
 		addr->t[i] = defaultdomain.t[shift - 1 - i];
@@ -769,7 +769,7 @@ mft_init()
 void
 finishmft()
 {
-	int             i;
+	unsigned int    i;
 	static stralloc sa = { 0 };
 	static stralloc sa2 = { 0 };
 
@@ -941,7 +941,7 @@ getcontrols()
 	if (databytes > 0) {
 		if (fstat(0, &statbuf))
 			die_stat();
-		if (statbuf.st_size > databytes)
+		if ((unsigned long) statbuf.st_size > databytes)
 			die_size();
 	}
 }
@@ -1075,13 +1075,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_inject_c()
 {
-	const char     *x = "$Id: qmail-inject.c,v 1.55 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-inject.c,v 1.56 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-inject.c,v $
+ * Revision 1.56  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.55  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

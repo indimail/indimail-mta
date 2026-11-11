@@ -1,5 +1,5 @@
 /*-
- * $Id: qmail-remote.c,v 1.179 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-remote.c,v 1.180 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -240,7 +240,7 @@ int
 run_script(char code, int succ)
 {
 	const char     *prog, *str;
-	char            remote_code[2] = "\0\0";
+	char            remote_code[2] = {0};
 	char          **args;
 	int             child, wstat, i;
 
@@ -335,7 +335,7 @@ zero()
 void
 outsafe(stralloc *sa)
 {
-	int             i;
+	unsigned int    i;
 	char            ch;
 
 	for (i = 0; i < sa->len; ++i) {
@@ -808,6 +808,7 @@ saferead(int fd, char *buf, size_t len)
 {
 	int             r;
 
+	(void) fd;
 #ifdef TLS
 	if (ssl) {
 		if ((r = ssl_timeoutread(timeoutdata, smtpfd, smtpfd, ssl, buf, len)) < 0)
@@ -823,10 +824,11 @@ saferead(int fd, char *buf, size_t len)
 }
 
 ssize_t
-safewrite(int fd, char *buf, int len)
+safewrite(int fd, char *buf, size_t len)
 {
 	int             r;
 
+	(void) fd;
 #ifdef TLS
 	if (ssl) {
 		if ((r = ssl_timeoutwrite(timeoutdata, smtpfd, smtpfd, ssl, buf, len)) < 0)
@@ -911,7 +913,7 @@ smtpcode()
 }
 
 saa             ehlokw = { 0 };	/*- list of EHLO keywords and parameters */
-int             maxehlokwlen = 0;
+unsigned int    maxehlokwlen = 0;
 
 unsigned long
 ehlo()
@@ -980,7 +982,7 @@ ehlo()
 void
 outsmtptext()
 {
-	int             i;
+	unsigned int    i;
 
 	if (smtptext.s && smtptext.len) {
 		out("Remote host said: ");
@@ -1050,7 +1052,7 @@ va_dcl
 void
 blast()
 {
-	int             r, i, o, eom;
+	unsigned int    r, i, o, eom;
 	char            out[BUFSIZE_REMOTE * 2 + 1];
 
 	for (r = 0; r < qqeh.len; r++) {
@@ -1071,7 +1073,7 @@ blast()
 		 */
 		if (!(r = substdio_get(&ssin, inbuf, sizeof(inbuf))))
 			break;
-		if (r == -1)
+		if ((int) r == -1)
 			temp_read();
 		for (i = o = 0; i < r; ) {
 			if (eom && inbuf[i] == '.') {
@@ -1108,7 +1110,7 @@ containsutf8(const char *p, int l)
 	int             i = 0;
 
 	while (i < l)
-		if (p[i++] > 127)
+		if ((unsigned char) p[i++] > 127)
 			return 1;
 	return 0;
 }
@@ -1116,7 +1118,7 @@ containsutf8(const char *p, int l)
 void
 checkutf8message()
 {
-	int             pos, i, r, state;
+	unsigned int    pos, i, r, state;
 	char            ch;
 
 	if (containsutf8(smtp_sender.s, smtp_sender.len)) {
@@ -1139,7 +1141,7 @@ checkutf8message()
 		if (!(r = substdio_get(&ssin, &ch, 1)))
 			break;
 		else
-		if (r == -1)
+		if ((int) r == -1)
 			temp_read();
 		if (ch == '\n' && !stralloc_cats(&header, "\r"))
 			temp_nomem();
@@ -1160,13 +1162,13 @@ checkutf8message()
 				continue;
 			}
 			state = 0;
-			/*- FALL THROUGH */
+			/* FALL THROUGH */
 		case 0: /* start of header field */
 			if (ch == '\n')
 				return;
 			state = 1;
 			pos = 0;
-			/*- FALL THROUGH */
+			/* FALL THROUGH */
 		case 1: /* partway through "Received:" */
 			if (ch != "RECEIVED:"[pos] && ch != "received:"[pos]) {
 				state = 2;
@@ -1229,7 +1231,7 @@ no_return void
 tls_quit(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *saptr)
 {
 	char            ch;
-	int             i, state;
+	unsigned int    i, state;
 
 	out(s1);
 	out(s2);
@@ -2099,7 +2101,8 @@ auth_scram(int method, int use_size)
 void
 smtp_auth(const char *type, int use_size)
 {
-	int             i = 0, login_supp = 0, plain_supp = 0, cram_md5_supp = 0, cram_sha1_supp = 0,
+	unsigned int    i = 0;
+	int             login_supp = 0, plain_supp = 0, cram_md5_supp = 0, cram_sha1_supp = 0,
 					cram_sha224_supp, cram_sha256_supp = 0, cram_sha384_supp, cram_sha512_supp = 0,
 					cram_rmd_supp = 0, digest_md5_supp = 0;
 #ifdef AUTH_XOAUTH2
@@ -2385,7 +2388,7 @@ qmtp(stralloc *h, char *ip, int port_num)
 	struct stat     st;
 	unsigned long   len;
 	char           *x;
-	int             i, n, flagallok;
+	unsigned int    i, n, flagallok;
 	unsigned char   ch;
 	char            num[FMT_ULONG];
 
@@ -2531,11 +2534,13 @@ do_smtp(const char *fqdn)
 {
 	unsigned long   code;
 	int             flagbother;
-	int             i, use_size = 0, is_esmtp = 1, auth_capa = 0;
+	unsigned int    i;
+	int             use_size = 0, is_esmtp = 1, auth_capa = 0;
 #if defined(TLS) && defined(HASTLSA)
 	char           *err_str = NULL, *servercert = NULL;
 	int             tlsa_status, authfullMatch, authsha256, authsha512,
-					match0Or512, needtlsauth, usage, j;
+					match0Or512, needtlsauth, usage;
+	unsigned int    j;
 	char            hex[2], rbuf[2];
 	tlsarr         *rp;
 #endif
@@ -2862,7 +2867,7 @@ static int
 dmatch(const char *fn, stralloc *domain, stralloc *content,
 	CONSTMAP *ptrmap)
 {
-	int             x, len;
+	unsigned int    x, len;
 	char           *ptr;
 
 	if (fn) {
@@ -3026,7 +3031,7 @@ getcontrols()
 
 	senderdomain = 0;
 	if (smtp_sender.len) {
-		int             i;
+		unsigned int    i;
 
 		if ((i = str_rchr(smtp_sender.s, '@')))
 			senderdomain = smtp_sender.s + i + 1;
@@ -3306,7 +3311,8 @@ password_lookup(const char *addr, int addr_len)
 char           *
 get_relayhost(char **recips)
 {
-	int             i, j, k, cntrl_stat1, cntrl_stat2;
+	unsigned int    i, j, k;
+	int             cntrl_stat1, cntrl_stat2;
 	char           *relayhost;
 	const char     *x, *routes, *smtproutefile,
 				   *moresmtproutefile, *qmtproutefile;
@@ -3558,7 +3564,8 @@ int
 main(int argc, char **argv)
 {
 	static ipalloc  ip = { 0 };
-	int             i, j, t, errors, flagallaliases, flagalias, smtp_error, notls_orig;
+	unsigned int    i, j, t;
+	int             errors, flagallaliases, flagalias, smtp_error, notls_orig;
 	unsigned long   random, prefme;
 	char          **recips;
 	char           *relayhost, *x;
@@ -3633,7 +3640,7 @@ main(int argc, char **argv)
 	prefme = 100000;
 	for (i = 0; i < ip.len; ++i) {
 		if (ipme_is46(&ip.ix[i])) {
-			if (ip.ix[i].pref < prefme)
+			if ((unsigned int) ip.ix[i].pref < prefme)
 				prefme = ip.ix[i].pref;
 		}
 	}
@@ -3642,7 +3649,7 @@ main(int argc, char **argv)
 	if (flagallaliases)
 		prefme = 500000;
 	for (i = 0; i < ip.len; ++i) {
-		if (ip.ix[i].pref < prefme)
+		if ((unsigned int) ip.ix[i].pref < prefme)
 			break;
 	}
 	if (i >= ip.len)
@@ -3660,7 +3667,7 @@ main(int argc, char **argv)
 #ifdef MXPS
 		if (!mxps && qmtp_priority(ip.ix[i].pref))
 			mxps = 1;
-		if (!(protocol_t == 'q' || mxps == 1 || ip.ix[i].pref < prefme))
+		if (!(protocol_t == 'q' || mxps == 1 || (unsigned int) ip.ix[i].pref < prefme))
 			continue;
 #else
 		if (!(protocol_t == 'q' || ip.ix[i].pref < prefme))
@@ -3813,13 +3820,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_remote_c()
 {
-	const char     *x = "$Id: qmail-remote.c,v 1.179 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-remote.c,v 1.180 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 	x = sccsidqrdigestmd5h;
 	(void) x;
 }
 
 /*
  * $Log: qmail-remote.c,v $
+ * Revision 1.180  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.179  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

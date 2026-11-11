@@ -1,5 +1,8 @@
 /*
  * $Log: sortedtest.c,v $
+ * Revision 1.4  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.3  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -22,8 +25,9 @@ int
 main(int argc, char **argv)
 {
 	sorted          sl = { 0 };
-	int             i;
+	unsigned int    i;
 
+	(void) argc;
 	while (argv[1])
 	{
 		if (!stralloc_copys(&sa, argv[1]))
@@ -47,7 +51,7 @@ main(int argc, char **argv)
 void
 getversion_sortedtest_c()
 {
-	const char     *x = "$Id: sortedtest.c,v 1.3 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sortedtest.c,v 1.4 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

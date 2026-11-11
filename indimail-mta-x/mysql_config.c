@@ -1,5 +1,8 @@
 /*
  * $Log: mysql_config.c,v $
+ * Revision 1.7  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.6  2020-09-16 19:02:34+05:30  Cprogrammer
  * FreeBSD fix
  *
@@ -21,6 +24,7 @@
 int
 main(int argc, char **argv)
 {
+	(void) argc;
 	execv("/usr/bin/mysql_config", argv);
 	execv("/usr/local/bin/mysql_config", argv);
 	execv("/usr/local/mysql/bin/mysql_config", argv);

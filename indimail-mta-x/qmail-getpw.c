@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-getpw.c,v $
+ * Revision 1.11  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -54,7 +57,7 @@ userext()
 
 	extension = local + str_len(local);
 	for (;;) {
-		if (extension - local < sizeof(username)) {
+		if ((unsigned int) (extension - local) < sizeof(username)) {
 			if (!*extension || (*extension == *auto_break)) {
 				byte_copy(username, extension - local, local);
 				username[extension - local] = 0;
@@ -92,6 +95,7 @@ char            num[FMT_ULONG];
 int
 main(int argc, char **argv)
 {
+	(void) argc;
 	if (!(local = argv[1]))
 		_exit(100);
 	use_pwgr = env_get("USE_QPWGR") ? 1 : 0;
@@ -123,7 +127,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_getpw_c()
 {
-	const char     *x = "$Id: qmail-getpw.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-getpw.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

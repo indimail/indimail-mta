@@ -1,5 +1,5 @@
 /*
- * $Id: dnstlsarr.c,v 1.20 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: dnstlsarr.c,v 1.21 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include "substdio.h"
 #include "subfd.h"
@@ -36,7 +36,8 @@ static const char *usage_str =
 int
 main(int argc, char **argv)
 {
-	int             opt, k, j, i, query_mx = 0, verify = 0;
+	int             opt, query_mx = 0, verify = 0;
+	unsigned int    i, j, k;
 	const char     *port = "25", *host = (char *) 0;
 	char            hex[2];
 	unsigned long   r;
@@ -228,7 +229,7 @@ main()
 void
 getversion_dnstlsarr_c()
 {
-	const char     *x = "$Id: dnstlsarr.c,v 1.20 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dnstlsarr.c,v 1.21 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -238,6 +239,9 @@ getversion_dnstlsarr_c()
 
 /*
  * $Log: dnstlsarr.c,v $
+ * Revision 1.21  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.20  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

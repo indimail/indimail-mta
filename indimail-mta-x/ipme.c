@@ -1,5 +1,5 @@
 /*
- * $Id: ipme.c,v 1.29 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: ipme.c,v 1.30 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <errno.h>
 #include <sys/types.h>
@@ -51,7 +51,7 @@ ipalloc         ipme = { 0 };
 int
 ipme_is(ip_addr *ip)
 {
-	int             i;
+	unsigned int    i;
 	if (ipme_init() != 1)
 		return -1;
 	for (i = 0; i < ipme.len; ++i) {
@@ -64,7 +64,7 @@ ipme_is(ip_addr *ip)
 #ifdef IPV6
 int ipme_is6(ip6_addr *ip)
 {
-	int             i;
+	unsigned int    i;
 
 	if (ipme_init() != 1)
 		return -1;
@@ -145,7 +145,7 @@ ipme_readipfile(ipalloc *ipa, const char *fn)
 int
 ipme_append_unless(struct ip_mx *ix, struct ipalloc *notip)
 {
-	int             i;
+	unsigned int    i;
 	for (i = 0; i < notip->len; ++i) {
 #ifdef IPV6
 		if (notip->ix[i].af == AF_INET) {
@@ -178,12 +178,12 @@ ipme_init()
 	struct ifconf   ifc;
 	char           *x;
 	struct ifreq   *ifr;
-	int             len;
+	unsigned int    len;
 #endif /*- #ifdef HASIFADDR */
 #ifdef MOREIPME
 	ipalloc         notipme = { 0 };
 	ipalloc         moreipme = { 0 };
-	int             i;
+	unsigned int    i;
 #endif
 	struct ip_mx    ix;
 
@@ -413,11 +413,14 @@ ipme_init()
 void
 getversion_ipme_c()
 {
-	const char     *x = "$Id: ipme.c,v 1.29 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ipme.c,v 1.30 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 	(void) x;
 }
 /*
  * $Log: ipme.c,v $
+ * Revision 1.30  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.29  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: cdbmake.c,v $
+ * Revision 1.6  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.5  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -23,6 +26,7 @@
 #include "strerr.h"
 #include "cdb_make.h"
 #include "cdb.h"
+#include "noreturn.h"
 
 #define FATAL "cdbmake: fatal: "
 extern int rename (const char *, const char *);
@@ -30,25 +34,25 @@ extern int rename (const char *, const char *);
 char           *fn;
 char           *fntmp;
 
-void
+no_return void
 die_usage(void)
 {
 	strerr_die1x(100, "cdbmake: usage: cdbmake f ftmp");
 }
 
-void
+no_return void
 die_write(void)
 {
 	strerr_die4sys(111, FATAL, "unable to create ", fntmp, ": ");
 }
 
-void
+no_return void
 die_read(void)
 {
 	strerr_die2sys(111, FATAL, "unable to read input: ");
 }
 
-void
+no_return void
 die_readformat(void)
 {
 	strerr_die2x(111, FATAL, "unable to read input: bad format");
@@ -58,7 +62,7 @@ die_readformat(void)
 void
 get(char *ch)
 #else
-inline void
+void
 get(char *ch)
 #endif
 {
@@ -82,6 +86,7 @@ main(int argc, char **argv)
 	int             fd;
 	char            ch;
 
+	(void) argc;
 	if (!*argv)
 		die_usage();
 	if (!*++argv)
@@ -167,7 +172,7 @@ main(int argc, char **argv)
 void
 getversion_cdbmake_c()
 {
-	const char     *x = "$Id: cdbmake.c,v 1.5 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: cdbmake.c,v 1.6 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

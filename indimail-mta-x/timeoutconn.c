@@ -1,5 +1,8 @@
 /*
  * $Log: timeoutconn.c,v $
+ * Revision 1.20  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.19  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -314,8 +317,9 @@ timeoutconn6(int s, ip6_addr *ipr, union v46addr *ipl, unsigned int port, int ti
 		int             dummy;
 		dummy = sizeof(sa);
 		if (getpeername(s, (struct sockaddr *) &sa, (socklen_t *) &dummy) == -1) {
-			if (read(s, &ch, 1) == -1)
+			if (read(s, &ch, 1) == -1) {
 				;
+			}
 			return -1;
 		}
 		ndelay_off(s);
@@ -371,8 +375,9 @@ timeoutconn4(int s, ip_addr *ipr, union v46addr *ipl, unsigned int port, int tim
 		int             dummy;
 		dummy = sizeof(sin);
 		if (getpeername(s, (struct sockaddr *) &sin, (socklen_t *) &dummy) == -1) {
-			if (read(s, &ch, 1) == -1)
+			if (read(s, &ch, 1) == -1) {
 				;
+			}
 			return -1;
 		}
 		ndelay_off(s);
@@ -385,7 +390,7 @@ timeoutconn4(int s, ip_addr *ipr, union v46addr *ipl, unsigned int port, int tim
 void
 getversion_timeoutconn_c()
 {
-	const char     *x = "$Id: timeoutconn.c,v 1.19 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: timeoutconn.c,v 1.20 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

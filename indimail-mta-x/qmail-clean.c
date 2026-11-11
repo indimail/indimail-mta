@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-clean.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-clean.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -49,7 +49,7 @@ cleanuppid()
 		if (stat(line.s, &st) == -1)
 			continue;
 		getEnvConfiguLong(&ossified, "OSSIFIED", OSSIFIED);
-		if (tm < st.st_atime + ossified)
+		if ((unsigned long) tm < st.st_atime + ossified)
 			continue;
 		unlink(line.s);
 	}
@@ -77,7 +77,7 @@ main()
 	sig_pipeignore();
 
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	if (!stralloc_ready(&line, 200))
@@ -140,13 +140,16 @@ if (unlink(fnbuf) == -1) if (errno != error_noent) { respond("!"); continue; }
 void
 getversion_qmail_clean_c()
 {
-	const char     *x = "$Id: qmail-clean.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-clean.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-clean.c,v $
+ * Revision 1.18  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.17  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: 822headerfilter.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: 822headerfilter.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "error.h"
@@ -31,6 +31,7 @@ main(int argc, char **argv, char **envp)
 	int             pfi[2];
 	int             wstat;
 
+	(void) argc;
 	if (!argv[1])
 		strerr_die1x(100, "822headerfilter: usage: 822headerfilter program [ arg ... ]");
 	if (pipe(pfi) == -1)
@@ -89,12 +90,15 @@ main(int argc, char **argv, char **envp)
 void
 getversion_822headerfilter_c()
 {
-	const char     *x = "$Id: 822headerfilter.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822headerfilter.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: 822headerfilter.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

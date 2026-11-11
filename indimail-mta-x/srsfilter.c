@@ -1,5 +1,5 @@
 /*
- * $Id: srsfilter.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: srsfilter.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hassrs.h"
 #ifdef HAVESRS
@@ -64,6 +64,7 @@ mywrite(int fd, const char *buf, size_t len)
 {
 	int             i;
 
+	(void) fd;
 	if (flagbody) {
 		qmail_put(&qqt, buf, len);
 		return len;
@@ -132,6 +133,8 @@ main(int argc, char **argv)
 	substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
 	substdio        ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) mywrite, -1, outbuf, sizeof outbuf);
 
+	(void) argc;
+	(void) argv;
 	sig_pipeignore();
 	if (!(sender = env_get("SENDER")))
 		strerr_die2x(100, FATAL, "SENDER not set");
@@ -195,6 +198,8 @@ struct substdio sserr;
 int
 main(int argc, char **argv)
 {
+	(void) argc;
+	(void) argv;
 	substdio_fdbuf(&sserr, (ssize_t (*)(int,  char *, size_t)) write, 2, sserrbuf, sizeof(sserrbuf));
 	substdio_puts(&sserr, "not compiled with -DHAVESRS\n");
 	substdio_flush(&sserr);
@@ -205,13 +210,16 @@ main(int argc, char **argv)
 void
 getversion_srsfilter_c()
 {
-	const char     *x = "$Id: srsfilter.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: srsfilter.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: srsfilter.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

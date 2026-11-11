@@ -1,5 +1,5 @@
 /*
- * $Id: smtpd.c,v 1.335 2026-10-27 21:40:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.336 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -142,7 +142,7 @@ static int      err_noauth(const char *);
 static int      err_noauthallowed(const char *);
 #endif
 static int      addrrelay();
-int             atrn_queue(const char *, const char *);
+int             atrn_queue(const char *);
 no_return void _exit(int status);
 
 typedef struct passwd  PASSWD;
@@ -160,7 +160,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.335 $";
+static c_char  *revision = "$Revision: 1.336 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -200,8 +200,8 @@ static stralloc libfn = { 0 };
 static stralloc batvkey = { 0 };
 static c_char  *batvFn = NULL;
 static int      batvok;
-static int      batvkeystale = 7; /*- accept batvkey for a week */
-static int      batvkeystaleok;
+static uint     batvkeystale = 7; /*- accept batvkey for a week */
+static uint     batvkeystaleok;
 static stralloc nosignlocals = { 0 };
 static CONSTMAP mapnosignlocals;
 static stralloc nosignremote = { 0 };
@@ -236,7 +236,7 @@ static my_ulong BytesToOverflow = 0;
 
 static int      hasvirtual = 0;
 static int      liphostok = 0;
-static int      maxhops = MAXHOPS;
+static my_uint  maxhops = MAXHOPS;
 static int      timeout = 1200;
 static int      authd = 0;
 static int      seenhelo = 0;
@@ -365,7 +365,7 @@ static stralloc chksndr = { 0 };
 static CONSTMAP mapchksndr;
 
 /*- TARPIT Check Variables */
-static int      tarpitcount = 0;
+static my_uint  tarpitcount = 0;
 static int      tarpitdelay = 5;
 static int      tarpitcountok;
 static int      tarpitdelayok;
@@ -394,7 +394,7 @@ static c_char  *content_desc;
 #ifdef SMTP_PLUGIN
 PLUGIN        **plug = (PLUGIN **) 0;
 void          **plughandle;
-static int      plugin_count;
+static uint     plugin_count;
 #endif
 static int      logfd = 255;
 static int      old_client_bug = 0;
@@ -942,7 +942,7 @@ log_fifo(const char *arg1, const char *arg2, unsigned long size, stralloc *line)
 	 * to this fifo will be read by the qcat fifo logger service
 	 */
 	strnum1[fmt_ulong(strnum1, getpid())] = 0;
-	strnum2[fmt_ulong(strnum2, msg_size)] = 0;
+	strnum2[fmt_ulong(strnum2, size)] = 0;
 	substdio_fdbuf(&logfifo_out, (ssize_t (*)(int,  char *, size_t)) write, logfifo, fifobuf, sizeof (fifobuf));
 	if (substdio_puts(&logfifo_out, "qmail-smtpd: ") == -1 ||
 			substdio_puts(&logfifo_out, "pid ") == -1 ||
@@ -1299,7 +1299,7 @@ err_bmf(char *arg1)
 void
 err_spf()
 {
-	int             i, j;
+	unsigned int    i, j;
 
 	if (!spfinfo(&sa))
 		die_nomem();
@@ -1411,6 +1411,7 @@ smtp_badip()
 void
 smtp_badhost(const char *arg)
 {
+	(void) arg;
 	logerr(1, "BAD HOST ", remotehost, "\n", NULL);
 	logflush();
 	if (penalty > 0)
@@ -1608,6 +1609,7 @@ smtp_noop(const char *arg)
 void
 smtp_vrfy(const char *arg)
 {
+	(void) arg;
 	if (no_vrfy) {
 		err_unimpl("unimplimented");
 		return;
@@ -1826,6 +1828,7 @@ err_transaction(const char *arg)
 int
 err_noauth(const char *x)
 {
+	(void) x;
 	out("504 auth type unimplemented (#5.5.1)\r\n", NULL);
 	flush();
 	return -3;
@@ -1835,6 +1838,7 @@ err_noauth(const char *x)
 int
 err_noauthallowed(const char *x)
 {
+	(void) x;
 	out("538 Encryption required for requested authentication mechanism (#5.7.11)\r\n", NULL);
 	flush();
 	return -2;
@@ -1907,7 +1911,7 @@ void
 err_grey()
 {
 	char           *arg, *ptr;
-	int             idx;
+	unsigned int    idx;
 
 	arg = rcptto.s;
 	for (ptr = arg + 1, idx = 0; idx < rcptto.len; idx++) {
@@ -1932,7 +1936,8 @@ stralloc        Desc = { 0 };
 int
 sigscheck(stralloc *line, const char **desc, int in_header)
 {
-	int             i, j, k, len, pos1, pos2, header_check, body_check;
+	unsigned int    i, j, k, len, pos1, pos2;
+	int             header_check, body_check;
 	char           *ptr;
 
 	*desc = "unknown";
@@ -2117,6 +2122,7 @@ check_user_sql(char *rcpt, int len)
 	const char     *errstr;
 	void           *(*inquery) (char, const char *, const char *);
 
+	(void) len;
 	if (!(ptr = load_virtual()))
 		return -1;
 	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &errstr))) {
@@ -2232,7 +2238,7 @@ greet_extra()
 void
 smtp_respond(const char *code)
 {
-	int             i, j, do_greet;
+	unsigned int    i, j, do_greet;
 	static int      d = -1;
 
 	if (code[0] == '2' && code[1] == '2' && code[2] == '0')
@@ -2267,6 +2273,7 @@ smtp_respond(const char *code)
 no_return void
 sigterm(int x)
 {
+	(void) x;
 	smtp_respond("421 ");
 	logerr(1, "going down on SIGTERM\n", NULL);
 	logflush();
@@ -2280,6 +2287,7 @@ smtp_help(const char *arg)
 {
 	const char     *ptr;
 
+	(void) arg;
 	if (no_help) {
 		err_unimpl("help");
 		return;
@@ -2330,9 +2338,10 @@ no_return void
 smtp_quit(const char *arg)
 {
 #ifdef SMTP_PLUGIN
-	int             i;
+	unsigned int    i;
 #endif
 
+	(void) arg;
 	smtp_respond("221 ");
 	out(" closing connection\r\n", NULL);
 	flush();
@@ -2385,7 +2394,8 @@ badipcheck(const char *arg)
 int
 badhostcheck()
 {
-	int             i = 0, j = 0, x = 0, negate = 0;
+	unsigned int    i = 0, j = 0, negate = 0;
+	int             x = 0;
 	static stralloc curregex = { 0 };
 
 	curregex.len = 0;
@@ -2581,7 +2591,7 @@ open_control_files1()
 		die_control("timeoutsmtpd");
 	if (timeout <= 0)
 		timeout = 1;
-	if (control_readint(&maxhops, "maxhops") == -1)
+	if (control_readint((int *) &maxhops, "maxhops") == -1)
 		die_control("maxhops");
 	if (maxhops <= 0)
 		maxhops = MAXHOPS;
@@ -2729,7 +2739,7 @@ open_control_files2()
 				break;
 			}
 		}
-		open_control_once_int(&batvkeystale, &batvkeystaleok, "BATVKEYSTALE", "batvkeystale", 0);
+		open_control_once_int((int *) &batvkeystale, (int *) &batvkeystaleok, "BATVKEYSTALE", "batvkeystale", 0);
 	}
 #endif
 #ifdef HAVESRS
@@ -2768,7 +2778,7 @@ open_control_files2()
 		die_nomem();
 #endif
 	/*- TARPIT */
-	open_control_once_int(&tarpitcount, &tarpitcountok, "TARPITCOUNT", "tarpitcount", 0);
+	open_control_once_int((int *) &tarpitcount, (int *) &tarpitcountok, "TARPITCOUNT", "tarpitcount", 0);
 	open_control_once_int(&tarpitdelay, &tarpitdelayok, "TARPITDELAY", "tarpitdelay", 0);
 	/*- MAXRECPIENTS */
 	open_control_once_int(&maxrcptcount, &maxrcptcountok, "MAXRECIPIENTS", "maxrecipients", 0);
@@ -2935,7 +2945,8 @@ setup()
 int
 addrparse(const char *arg)
 {
-	int             i, flagesc, flagquoted;
+	int             flagesc, flagquoted;
+	unsigned int    i;
 	char            ch, terminator;
 	ip_addr         ip;
 
@@ -3623,7 +3634,8 @@ check_sender(void *(*inquery) (char, const char *, const char *), const char *li
 {
 	const char     *x;
 	PASSWD         *pw;
-	int             at, isLocal;
+	unsigned int    at;
+	int             isLocal;
 	int            *u_not_found, *i_inactive;
 	static stralloc t_addr = { 0 };
 
@@ -3811,7 +3823,8 @@ void
 smtp_mail(const char *arg)
 {
 	const char     *x, *ptr;
-	int             ret, i, in_rcpt1 = -1, in_rcpt2 = -1;
+	int             ret, in_rcpt1 = -1, in_rcpt2 = -1;
+	unsigned int    i;
 #ifdef SMTP_PLUGIN
 	char           *mesg;
 #endif
@@ -3912,7 +3925,7 @@ smtp_mail(const char *arg)
 	case AM_FILE_ERR:
 		die_control("from.envrules");
 	case AM_REGEX_ERR:
-		/*- flow through */
+		/* fall through */
 	case 0:
 		break;
 	default:
@@ -3948,7 +3961,7 @@ smtp_mail(const char *arg)
 	{
 	case 1:
 		err_bhsndr(addr.s); /*- This sets NULLQUEUE */
-		/*- flow through */
+		/* fall through */
 	case 0:
 		break;
 	case -1:
@@ -4106,15 +4119,19 @@ smtp_mail(const char *arg)
 			flush();
 			return;
 		case SPF_NONE:
+			/* fall through */
 		case SPF_UNKNOWN:
 			if (spfbehavior < 6)
 				break;
+			/* fall through */
 		case SPF_NEUTRAL:
 			if (spfbehavior < 5)
 				break;
+			/* fall through */
 		case SPF_SOFTFAIL:
 			if (spfbehavior < 4)
 				break;
+			/* fall through */
 		case SPF_FAIL:
 			if (spfbehavior < 3)
 				break;
@@ -4123,6 +4140,7 @@ smtp_mail(const char *arg)
 			if (spfbarfmsg.len > 1 && !stralloc_0(&spfbarfmsg))
 				die_nomem();
 			flagbarfspf = 1;
+			/* fall through */
 		}
 		if (flagbarfspf) {
 			err_spf();
@@ -4179,8 +4197,8 @@ smtp_mail(const char *arg)
 void
 smtp_rcpt(const char *arg)
 {
-	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, at,
-					isLocal;
+	int             allowed_rcpthosts = 0, isgoodrcpt = 0, result = 0, isLocal;
+	unsigned int    at;
 	char           *tmp;
 #ifdef HAVESRS
 	int             do_srs;
@@ -4190,7 +4208,7 @@ smtp_rcpt(const char *arg)
 #endif
 #ifdef SMTP_PLUGIN
 	char           *mesg;
-	int             i;
+	unsigned int    i;
 #endif
 
 	switch (setup_state)
@@ -4457,7 +4475,7 @@ smtp_rcpt(const char *arg)
 			}
 		}
 	} /* if (allowed_rcpthosts == 1 && (tmp = env_get("CHECKRECIPIENT"))) */
-	if (max_rcpt_errcount != -1 && rcpt_errcount >= max_rcpt_errcount) {
+	if (max_rcpt_errcount != -1 && rcpt_errcount >= (my_uint) max_rcpt_errcount) {
 		err_rcpt_errcount(mailfrom.s, rcpt_errcount);
 		return;
 	}
@@ -4468,7 +4486,7 @@ smtp_rcpt(const char *arg)
 		{
 		case 1:
 			err_bhrcpt(mailfrom.s, addr.s); /*- This sets sets NULLQUEUE */
-			/*- flow through */
+			/* fall through */
 		case 0:
 			break;
 		case -1:
@@ -4493,7 +4511,7 @@ smtp_rcpt(const char *arg)
 	}
 #endif
 	/*- Check on max. number of RCPTS */
-	if (maxrcptcount > 0 && (rcptcount + 1) > maxrcptcount) {
+	if (maxrcptcount > 0 && (rcptcount + 1) > (my_uint) maxrcptcount) {
 		err_mrc(mailfrom.s, arg);
 		return;
 	}
@@ -4511,7 +4529,7 @@ smtp_rcpt(const char *arg)
 	case AM_FILE_ERR:
 		die_control("domainqueue");
 	case AM_REGEX_ERR:
-		/*- flow through */
+		/* fall through */
 	case 0:
 		break;
 	default:
@@ -4711,7 +4729,7 @@ put(const char *ch)
 }
 
 int
-blast(int *hops)
+blast(unsigned int *hops)
 {
 	char            ch;
 	int             state, err;
@@ -4901,11 +4919,11 @@ create_logfilter()
 void
 smtp_data(const char *arg)
 {
-	int             hops, j;
+	unsigned int    hops, j;
 	unsigned long   qp;
 	const char     *qqx, *x;
 #ifdef SMTP_PLUGIN
-	int             i;
+	unsigned int    i;
 	char           *mesg;
 #endif
 
@@ -4933,7 +4951,7 @@ smtp_data(const char *arg)
 			break;
 		case 0:
 			err_grey();
-			/*- flow through */
+			/* fall through */
 		case -1:
 			return;
 		case -2:
@@ -4967,7 +4985,7 @@ smtp_data(const char *arg)
 		case AM_FILE_ERR:
 			die_control("auth.envrules");
 		case AM_REGEX_ERR:
-			/*- flow through */
+			/* fall through */
 		case 0:
 			break;
 		default:
@@ -5334,7 +5352,8 @@ auth_login(const char *arg)
 static int
 auth_plain(const char *arg)
 {
-	int             r, id = 0;
+	int             r;
+	unsigned int    id = 0;
 
 #ifdef TLS
 	if (secure_auth && !ssl)
@@ -5651,6 +5670,7 @@ gs_callback(Gsasl *ctx, Gsasl_session *sctx, Gsasl_property prop)
 	static char    *p;
 #endif
 
+	(void) ctx;
 	gs_callback_err = 0;
 	switch (prop)
 	{
@@ -6085,42 +6105,49 @@ auth_scram(int method)
 static int
 auth_cram_md5(const char *x)
 {
+	(void) x;
 	return (auth_cram(AUTH_CRAM_MD5));
 }
 
 static int
 auth_cram_sha1(const char *x)
 {
+	(void) x;
 	return (auth_cram(AUTH_CRAM_SHA1));
 }
 
 static int
 auth_cram_sha224(const char *x)
 {
+	(void) x;
 	return (auth_cram(AUTH_CRAM_SHA224));
 }
 
 static int
 auth_cram_sha256(const char *x)
 {
+	(void) x;
 	return (auth_cram(AUTH_CRAM_SHA256));
 }
 
 static int
 auth_cram_sha384(const char *x)
 {
+	(void) x;
 	return (auth_cram(AUTH_CRAM_SHA384));
 }
 
 static int
 auth_cram_sha512(const char *x)
 {
+	(void) x;
 	return (auth_cram(AUTH_CRAM_SHA512));
 }
 
 static int
 auth_cram_ripemd(const char *x)
 {
+	(void) x;
 	return (auth_cram(AUTH_CRAM_RIPEMD));
 }
 
@@ -6128,24 +6155,28 @@ auth_cram_ripemd(const char *x)
 static int
 auth_scram_sha1(const char *x)
 {
+	(void) x;
 	return (auth_scram(AUTH_SCRAM_SHA1));
 }
 
 static int
 auth_scram_sha1_plus(const char *x)
 {
+	(void) x;
 	return (auth_scram(AUTH_SCRAM_SHA1_PLUS));
 }
 
 static int
 auth_scram_sha256(const char *x)
 {
+	(void) x;
 	return (auth_scram(AUTH_SCRAM_SHA256));
 }
 
 static int
 auth_scram_sha256_plus(const char *x)
 {
+	(void) x;
 	return (auth_scram(AUTH_SCRAM_SHA256_PLUS));
 }
 
@@ -6153,12 +6184,14 @@ auth_scram_sha256_plus(const char *x)
 static int
 auth_scram_sha512(const char *x)
 {
+	(void) x;
 	return (auth_scram(AUTH_SCRAM_SHA512));
 }
 
 static int
 auth_scram_sha512_plus(const char *x)
 {
+	(void) x;
 	return (auth_scram(AUTH_SCRAM_SHA512_PLUS));
 }
 #endif
@@ -6217,6 +6250,7 @@ auth_digest_md5(const char *y)
 	int             i, r, len = 0; /*- qop = 1; */
 	static stralloc tmp = { 0 }, nonce = {0};
 
+	(void) y;
 	s = unique;
 	s += (i = fmt_uint((char *) s, getpid()));
 	len += i;
@@ -6465,6 +6499,7 @@ smtp_auth(const char *arg)
 	{
 	case 0: /* sets remoteinfo and relayclient */
 		relayclient = "";
+		/* fall through */
 	case 3:/*- sets remoteinfo but not relayclient, relaying is denied */
 		remoteinfo = user.s;
 		if (!env_unset("TCPREMOTEINFO"))
@@ -6680,7 +6715,8 @@ check_atrn_acc(const char *atrnaddr, char *domain_list)
 void
 mta_access(const char *atrnaddr, int *reject, int *temp)
 {
-	int             r, atpos, wildcard, len;
+	int             r;
+	unsigned int    atpos, wildcard, len;
 	const char     *ptr, *errstr;
 	char           *cptr;
 
@@ -6844,7 +6880,7 @@ smtp_atrn(const char *arg)
 		flush();
 		return;
 	}
-	switch ((status = atrn_queue(domain_ptr, remoteip)))
+	switch ((status = atrn_queue(domain_ptr)))
 	{
 	case 0:
 		log_atrn(remoteinfo, domain_ptr, NULL);
@@ -6986,6 +7022,7 @@ tls_verify()
 			SSL_set_verify(ssl, SSL_VERIFY_PEER | SSL_VERIFY_CLIENT_ONCE, NULL);
 			break;
 		}
+		/* fall through */
 	case 0:
 		alloc_free(clients.s);
 		return 0;
@@ -7125,7 +7162,7 @@ do_tls()
 		crlfile.len = 0;
 
 	if (!ciphers) {
-		int             i;
+		unsigned int    i;
 		/* - set cipher list */
 		if (!(ciphers = env_get(method < 7 ? "TLS_CIPHER_LIST" : "TLS_CIPHER_SUITE"))) {
 			if (control_readfile(&saciphers, method < 7 ? "servercipherlist" : "serverciphersuite", 0) == -1)
@@ -7259,9 +7296,10 @@ qmail_smtpd(int argc, char **argv, char **envp)
 {
 	const char     *ptr, *errstr;
 	struct commands *cmdptr;
-	int             i, port;
+	int             i;
+	unsigned int    port;
 #ifdef SMTP_PLUGIN
-	int             j, len;
+	unsigned int    j, len;
 	const char     *start_plugin, *plugin_symb, *plugindir;
 	static stralloc plugin = { 0 };
 #endif
@@ -7457,7 +7495,7 @@ qmail_smtpd(int argc, char **argv, char **envp)
 	if (!stralloc_cats(&plugin, ".so") ||
 			!stralloc_0(&plugin))
 		die_nomem();
-	for (i = j = 0; i < plugin_count;) {
+	for (i = j = 0; i < (int) plugin_count;) {
 		if (!j) {
 			if (access(plugin.s, R_OK)) { /*- smtpd-plugin.so */
 				if (errno != error_noent)
@@ -7534,6 +7572,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.336  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.335  2026-10-27 21:40:36+05:30  Cprogrammer
  * fixed compiler warnings
  *
@@ -7999,7 +8040,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.335 2026-10-27 21:40:36+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.336 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (0)

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-rm.c,v 1.30 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-rm.c,v 1.31 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  *
  * COPYRIGHT INFORMATION - DO NOT REMOVE
  *
@@ -171,7 +171,8 @@ typedef const char c_char;
 extern const char *__progname;
 static const char     *default_pattern = ".*";
 static unsigned long   read_bytes = 0;
-static int      regex_flags = 0, verbosity = 0, conf_split, remove_files = 0, delete_files = 0;
+static unsigned int conf_split;
+static int      regex_flags = 0, verbosity = 0, remove_files = 0, delete_files = 0;
 static c_char  *yank_dir = "trash";
 
 /*- if the eXpire option is specified on the command line, this will reflect that */
@@ -270,7 +271,8 @@ check_send(char *queuedir)
 int
 main(int argc, char **argv)
 {
-	int             fd = -1, ch, matches, tmp = 0;
+	int             fd = -1, ch, matches;
+	unsigned long   tmp = 0l;
 	int             idx, count, qcount, qstart;
 	char           *ptr, *pattern = NULL, *qbase = 0, *queuedir = 0;
 	const char     *format = "%a %b %d %H:%M:%S %Z %Y", *datearg = NULL;
@@ -278,7 +280,7 @@ main(int argc, char **argv)
 
 	if (argc < 2)
 		usage();
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	while ((ch = getopt(argc, argv, "deirvh?f:n:p:q:s:y:X:x:")) != opteof) {
@@ -286,6 +288,7 @@ main(int argc, char **argv)
 		{
 		case 'e':
 			regex_flags |= REG_EXTENDED;
+			break;
 		case 'i':
 			regex_flags |= REG_ICASE;
 			break;
@@ -375,7 +378,7 @@ main(int argc, char **argv)
 			errflush();
 			_exit(111);
 		}
-		expire_offset = (tmp == 0 ? expire_offset : tmp);
+		expire_offset = (tmp == 0 ? expire_offset : (time_t) tmp);
 		subprintf(&ssout, "Offsetting timestamps by %ld seconds\n", expire_offset);
 		flush();
 	}
@@ -471,7 +474,7 @@ usage(void)
 			"  -d            actually remove files not yank them, no -p will delete all the messages!\n"
 			"  -r            actually remove files, without this we'll only print them\n");
 	subprintf(&sserr,
-			"  -s <split>    specify your conf-split value if non-standard [default: %d]\n", auto_split);
+			"  -s <split>    specify your conf-split value if non-standard [default: %u]\n", auto_split);
 	subprintf(&sserr,
 			"  -v            increase verbosity (can be used more than once)\n"
 			"  -y <trash>    directory to put files removed from the queue [default: <queuedir>/trash]\n"
@@ -1046,13 +1049,16 @@ digits(unsigned long num)
 void
 getversion_qmail_rm_c()
 {
-	const char     *x = "$Id: qmail-rm.c,v 1.30 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-rm.c,v 1.31 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-rm.c,v $
+ * Revision 1.31  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.30  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

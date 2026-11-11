@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.27 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: spf.c,v 1.28 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef USE_SPF
 #include <sys/types.h>
@@ -34,7 +34,7 @@
  * this table and macro came from wget more or less
  * and was in turn stolen by me from libspf as is :)
  */
-const static unsigned char urlchr_table[256] = {
+static const unsigned char urlchr_table[256] = {
 	1, 1, 1, 1, 1, 1, 1, 1,  /*- NUL SOH STX ETX  EOT ENQ ACK BEL */
 	1, 1, 1, 1, 1, 1, 1, 1,  /*- BS  HT  LF  VT   FF  CR  SO  SI  */
 	1, 1, 1, 1, 1, 1, 1, 1,  /*- DLE DC1 DC2 DC3  DC4 NAK SYN ETB */
@@ -278,7 +278,7 @@ matchip(ip_addr *net, int mask, ip_addr *ipaddr)
 static void
 ssa_free(strsalloc *p)
 {
-	int             j;
+	unsigned int    j;
 
 	for (j = 0;j < p->len;++j) {
 		if (p->sa[j].a) {
@@ -292,7 +292,8 @@ ssa_free(strsalloc *p)
 int
 spfget(stralloc *spf, stralloc *domain_v)
 {
-	int             j, begin, pos, i, r = SPF_NONE;
+	unsigned int    begin, pos, r = SPF_NONE;
+	unsigned int    i, j;
 	strsalloc       ssa = { 0 };
 
 	if (!strsalloc_readyplus(&ssa, 32))
@@ -355,7 +356,8 @@ spfsubst(stralloc *expand, const char *spec, const char *domain_p)
 	char            ch;
 	const char     *split = ".";
 	int             digits = -1, urlencode = 0, reverse = 0,
-					start = expand->len, i, pos;
+					start = expand->len;
+	unsigned int    i, pos;
 
 	if (!stralloc_readyplus(&sa, 0))
 		return 0;
@@ -588,6 +590,7 @@ spf_include(const char *spec, const char *mask)
 	int             r;
 	static stralloc sa = { 0 };
 
+	(void) mask;
 	if (!stralloc_copys(&sa, spec))
 		return SPF_NOMEM;
 	switch ((r = spflookup(&sa)))
@@ -618,7 +621,8 @@ spf_a(const char *spec, const char *mask)
 #else
 	int             ipmask;
 #endif
-	int             r, j;
+	int             r;
+	unsigned int    j;
 
 #ifdef IPV6
 	if ((r = getipmask(mask, &ip4mask, &ip6mask)) < 0)
@@ -681,7 +685,8 @@ spf_mx(const char *spec, const char *mask)
 #else
 	int             ipmask = getipmask(mask, 1);
 #endif
-	int             random = now() + (getpid() << 16), r, j;
+	int             random = now() + (getpid() << 16), r;
+	unsigned int    j;
 
 #ifdef IPV6
 	if ((r = getipmask(mask, &ip4mask, &ip6mask)) < 0)
@@ -734,10 +739,12 @@ spf_mx(const char *spec, const char *mask)
 static int
 spf_ptr(const char *spec, const char *mask)
 {
-	int             len = str_len(spec), r, j, k, pos;
+	int             len = str_len(spec), r, pos;
+	unsigned int    j, k;
 	static ipalloc  ia = { 0 };
 	strsalloc       ssa = { 0 };
 
+	(void) mask;
 	/*- we didn't find host with the matching ip before */
 	if (sender_fqdn.len == 7 && str_equal(sender_fqdn.s, "unknown"))
 		return SPF_NONE;
@@ -903,6 +910,7 @@ spf_exists(const char *spec, const char *mask)
 	static ipalloc  ia = { 0 };
 	int             r;
 
+	(void) mask;
 	if (!stralloc_copys(&sa, spec) ||
 			!ipalloc_readyplus(&ia, 0))
 		return SPF_NOMEM;
@@ -953,7 +961,8 @@ static int
 spfmech(const char *mechanism, const char *spec, const char *mask, const char *domain_p)
 {
 	struct mechanisms *mech;
-	int             r, pos;
+	int             r;
+	unsigned int    pos;
 	static stralloc sa = { 0 };
 
 	for (mech = mechanisms; mech->mechanism; mech++) {
@@ -1009,8 +1018,9 @@ spflookup(stralloc *domain_s)
 	stralloc        spf_v = { 0 };
 	strsalloc       ssa = { 0 };
 	struct default_aliases *da;
-	int             Main = !recursion, local_pos = -1, r, q, begin, pos,
-					i, prefix, done, guessing = 0;
+	int             Main = !recursion, local_pos = -1, r, q,
+					prefix, done, guessing = 0;
+	unsigned int    i, pos, begin;
 	char           *p;
 
 	if (!stralloc_readyplus(&sa, 32))
@@ -1108,7 +1118,7 @@ redirect:
 		if (!spf_v.s[begin])
 			continue;
 		/*- in local ruleset?  */
-		if (!done && local_pos >= 0 && begin >= local_pos) {
+		if (!done && local_pos >= 0 && (int) begin >= local_pos) {
 			if (begin < (local_pos + spflocal.len))
 				expdomain.len = 0;
 			else
@@ -1254,7 +1264,7 @@ redirect:
 			case SPF_ERROR:
 				if (!guessing)
 					break;
-				if (local_pos >= 0 && begin >= local_pos)
+				if (local_pos >= 0 && (int) begin >= local_pos)
 					break;
 				hdr_none();
 				q = SPF_NONE;
@@ -1278,7 +1288,8 @@ redirect:
 int
 spfcheck(const char *remoteip)
 {
-	int             pos, r;
+	int             r;
+	unsigned int    pos;
 	static stralloc domain = {0};
 
 	if ((pos = byte_rchr(addr.s, addr.len, '@') + 1) < addr.len) {
@@ -1378,13 +1389,16 @@ spfinfo(stralloc *sa_p)
 void
 getversion_spf_c()
 {
-	const char     *x = "$Id: spf.c,v 1.27 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: spf.c,v 1.28 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: spf.c,v $
+ * Revision 1.28  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.27  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

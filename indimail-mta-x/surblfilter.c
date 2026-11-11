@@ -1,5 +1,5 @@
 /*
- * $Id: surblfilter.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: surblfilter.c,v 1.25 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -428,6 +428,7 @@ cachefunc(char *uri, size_t urilen, char **text, int flag)
 	struct stat     st;
 	substdio        ss;
 
+	(void) urilen;
 	if (!do_cache)
 		return (0);
 	if (uri[i = str_chr(uri, '/')]) {
@@ -571,7 +572,7 @@ l3check(char *arg, int len)
 static int
 checkwhitelist(char *hostname, int hostlen)
 {
-	int             len;
+	unsigned int    len;
 	char           *ptr;
 
 	for (ptr = whitelist.s, len = 0;len < whitelist.len;) {
@@ -824,7 +825,7 @@ setup()
 	case 0:
 		if (!stralloc_copys(&surbldomain, DEF_SURBL_DOMAIN))
 			die_nomem();
-		/*- flow through */
+		/* fall through */
 	case 1:
 		if (!stralloc_0(&surbldomain))
 			die_nomem();
@@ -846,7 +847,8 @@ main(int argc, char **argv)
 	stralloc        line = { 0 }, uri = {0};
 	stralloc       *ptr;
 	char           *x, *reason = 0;
-	int             opt, in_header = 1, i, total_bl = 0, blacklisted, match, html_plain_text,
+	unsigned int    i;
+	int             opt, in_header = 1, total_bl = 0, blacklisted, match, html_plain_text,
 					base64_decode, found_content_type = 0, errfd;
 
 	if (!(x = env_get("ERROR_FD")))
@@ -971,13 +973,16 @@ main(int argc, char **argv)
 void
 getversion_surblfilter_c()
 {
-	const char     *x = "$Id: surblfilter.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: surblfilter.c,v 1.25 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: surblfilter.c,v $
+ * Revision 1.25  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.24  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

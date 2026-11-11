@@ -1,5 +1,5 @@
 /*-
- * $Id: tcpto.c,v 1.18 2025-01-01 21:35:30+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpto.c,v 1.19 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/socket.h>
@@ -169,8 +169,9 @@ tcpto_err(struct ip_mx *ix, int flagerr, int max_tolerance)
 				when >>= 8;
 				record[11] = when;
 			}
-			if (seek_set(fdlock, i << 5) == 0 && write(fdlock, record, 32) < 32)
+			if (seek_set(fdlock, i << 5) == 0 && write(fdlock, record, 32) < 32) {
 				; /*XXX*/
+			}
 			close(fdlock);
 			return;
 		}
@@ -220,8 +221,9 @@ tcpto_err(struct ip_mx *ix, int flagerr, int max_tolerance)
 		when >>= 8;
 		record[11] = when;
 		record[4] = 1;
-		if (seek_set(fdlock, i << 5) == 0 && write(fdlock, record, 32) < 32)
+		if (seek_set(fdlock, i << 5) == 0 && write(fdlock, record, 32) < 32) {
 			; /*XXX*/
+		}
 	}
 	close(fdlock);
 }
@@ -229,7 +231,7 @@ tcpto_err(struct ip_mx *ix, int flagerr, int max_tolerance)
 void
 getversion_tcpto_c()
 {
-	const char     *x = "$Id: tcpto.c,v 1.18 2025-01-01 21:35:30+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: tcpto.c,v 1.19 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -237,6 +239,9 @@ getversion_tcpto_c()
 
 /*
  * $Log: tcpto.c,v $
+ * Revision 1.19  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.18  2025-01-01 21:35:30+05:30  Cprogrammer
  * use tcpto definitions from tcpto.h
  *

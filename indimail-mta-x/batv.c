@@ -1,5 +1,8 @@
 /*
  * $Log: batv.c,v $
+ * Revision 1.13  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -71,7 +74,7 @@
 
 stralloc        batvkey = {0};
 stralloc        nosign = {0};
-int             batvkeystale = 7; /*- accept batvkey for a week */
+unsigned int    batvkeystale = 7; /*- accept batvkey for a week */
 stralloc        newsender = { 0 };
 
 no_return void
@@ -293,7 +296,7 @@ main(int argc, char **argv)
 				die_nomem();
 			break;
 		case 't':
-			scan_int(optarg, &batvkeystale);
+			scan_uint(optarg, &batvkeystale);
 			break;
 		case 's':
 			signing = 1;
@@ -354,7 +357,7 @@ main(argc, argv)
 void
 getversion_batv_c()
 {
-	const char     *x = "$Id: batv.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: batv.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

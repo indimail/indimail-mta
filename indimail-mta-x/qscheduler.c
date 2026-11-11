@@ -1,5 +1,5 @@
 /*
- * $Id: qscheduler.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qscheduler.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -38,7 +38,7 @@
 #define ERROR_INTERVAL 5
 
 typedef const char c_char;
-static int      qstart, qcount;
+static uint     qstart, qcount;
 static char    *qbase;
 static stralloc envQueue = {0}, QueueBase = {0};
 static int      flagexitasap = 0;
@@ -47,7 +47,7 @@ static char  **prog_argv;
 static char     strnum1[FMT_ULONG];
 static int      bigtodo;
 #ifdef HASLIBRT
-static int      qconf, qmax, threshold, error_interval = ERROR_INTERVAL;
+static uint     qconf, qmax, threshold, error_interval = ERROR_INTERVAL;
 static q_type   qtype = fixed;
 static char    *msgbuf;
 static int      msgbuflen;
@@ -61,7 +61,7 @@ static char     strnum2[FMT_ULONG], strnum3[FMT_ULONG];
 #endif
 static char     ssoutbuf[512];
 static substdio ssout = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) write, 1, ssoutbuf, sizeof(ssoutbuf));
-int             conf_split;
+unsigned int    conf_split;
 static qtab    *queue_table;
 static c_char  *(qsargs[]) = { "qmail-start", "-s", "./Mailbox", 0};
 static c_char  *(qfargs[]) = { "queue-fix", "-s", 0, 0, 0};
@@ -142,8 +142,8 @@ queuenum_to_dir(int queue_no)
 no_return void
 die(int how)
 {
-	int             i, child, wstat;
-	pid_t           pid;
+	unsigned int    i;
+	pid_t           pid, child, wstat;
 	char           *qptr;
 
 	flagexitasap = how ? 1 : 2;
@@ -230,6 +230,7 @@ die_chdir(const char *s)
 void
 sigterm(int x)
 {
+	(void) x;
 	flagexitasap = 2;
 	sig_ignore(sig_child);
 	sig_block(sig_term);
@@ -239,10 +240,11 @@ sigterm(int x)
 void
 sigalrm(int x)
 {
-	int             i;
+	unsigned int    i;
 	pid_t           pid;
 	char           *qptr;
 
+	(void) x;
 	sig_block(sig_alarm);
 	if ((pid = getpid()) != selfpid)
 		_exit(0);
@@ -266,10 +268,11 @@ sigalrm(int x)
 void
 sighup(int x)
 {
-	int             i;
+	unsigned int    i;
 	pid_t           pid;
 	char           *qptr;
 
+	(void) x;
 	sig_block(sig_hangup);
 	if ((pid = getpid()) != selfpid)
 		_exit(0);
@@ -293,10 +296,11 @@ sighup(int x)
 void
 sigint(int x)
 {
-	int             i;
+	unsigned int    i;
 	pid_t           pid;
 	char           *qptr;
 
+	(void) x;
 	sig_block(sig_int);
 	if ((pid = getpid()) != selfpid)
 		_exit(0);
@@ -321,10 +325,12 @@ sigint(int x)
 void
 sigchld(int x)
 {
-	int             child, wstat, i;
+	pid_t           child, wstat;
+	unsigned int    i;
 	char           *qptr;
 	pid_t           pid;
 
+	(void) x;
 	sig_block(sig_child);
 	if ((pid = getpid()) != selfpid)
 		_exit(0);
@@ -381,10 +387,11 @@ sigchld(int x)
 void
 sigusr1(int x)
 {
-	int             i;
+	unsigned int    i;
 	pid_t           pid;
 	char           *qptr;
 
+	(void) x;
 	sig_block(sig_usr1);
 	if ((pid = getpid()) != selfpid)
 		_exit(0);
@@ -408,10 +415,11 @@ sigusr1(int x)
 void
 sigusr2(int x)
 {
-	int             i;
+	unsigned int    i;
 	pid_t           pid;
 	char           *qptr;
 
+	(void) x;
 	sig_block(sig_usr2);
 	if ((pid = getpid()) != selfpid)
 		_exit(0);
@@ -484,7 +492,7 @@ is_queue_empty(const char *qptr)
 void
 start_send(int queueNum, pid_t pid)
 {
-	int             i, queue_no, count;
+	unsigned int    i, queue_no, count;
 	pid_t           qspid;
 	char           *qptr;
 
@@ -548,15 +556,15 @@ void
 set_queue_variables()
 {
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
-	getEnvConfigInt(&qcount, "QUEUE_COUNT", QUEUE_COUNT);
-	getEnvConfigInt(&qstart, "QUEUE_START", QUEUE_START);
+	getEnvConfigInt((int *) &qcount, "QUEUE_COUNT", QUEUE_COUNT);
+	getEnvConfigInt((int *) &qstart, "QUEUE_START", QUEUE_START);
 #ifdef HASLIBRT
-	getEnvConfigInt(&qmax,   "QUEUE_MAX",   QUEUE_MAX);
-	getEnvConfigInt(&threshold,  "QUEUE_LOAD",  QUEUE_LOAD);
-	getEnvConfigInt(&error_interval, "ERROR_INTERVAL", ERROR_INTERVAL);
+	getEnvConfigInt((int *) &qmax,   "QUEUE_MAX",   QUEUE_MAX);
+	getEnvConfigInt((int *) &threshold,  "QUEUE_LOAD",  QUEUE_LOAD);
+	getEnvConfigInt((int *) &error_interval, "ERROR_INTERVAL", ERROR_INTERVAL);
 #endif
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
@@ -581,7 +589,8 @@ set_queue_variables()
 no_return void
 static_queue()
 {
-	int             i, wstat, child, nqueue;
+	unsigned int    i, nqueue;
+	pid_t           wstat, child;
 	char           *qptr;
 
 	if (env_get("SPAMFILTER")) {
@@ -709,7 +718,7 @@ queue_fix(char *queuedir)
 
 #ifdef HASLIBRT
 void
-create_ipc(int *msgqueue_len, int *msgqueue_size)
+create_ipc(unsigned int *msgqueue_len, unsigned int *msgqueue_size)
 {
 	char            ipc_name[FMT_ULONG + 6];
 #ifdef LINUX
@@ -717,21 +726,21 @@ create_ipc(int *msgqueue_len, int *msgqueue_size)
 					mq_dev_name[FMT_ULONG + 6 + 11]; /*- /queue + /dev/mqueue */
 #endif
 	char           *s;
-	int             i, j;
+	unsigned int    i, j;
 	struct mq_attr  attr;
 	mqd_t           mq_queue;
 
-	if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_uids == -1 || auto_gidq == -1) {
+	if (uidinit(1, 0) == -1 || (int) auto_uidq == -1 || (int) auto_uids == -1 || (int) auto_gidq == -1) {
 		strerr_warn1("alert: qscheduler: failed to get uids, gids: ", &strerr_sys);
 		die(1);
 	}
-	if ((i = control_readint(msgqueue_len, "msgqueuelen")) == -1) {
+	if ((int) (i = control_readint((int *) msgqueue_len, "msgqueuelen")) == -1) {
 		strerr_warn1("alert: qscheduler: failed to open control file msgqueuelen: ", &strerr_sys);
 		die(1);
 	} else
 	if (!i)
 		*msgqueue_len = 65534;
-	if ((i = control_readint(msgqueue_size, "msgqueuesize")) == -1) {
+	if ((int) (i = control_readint((int *) msgqueue_size, "msgqueuesize")) == -1) {
 		strerr_warn1("alert: qscheduler: failed to open control file msgqueuelen: ", &strerr_sys);
 		die(1);
 	} else
@@ -941,7 +950,8 @@ dynamic_queue()
 {
 	struct mq_attr  attr;
 	unsigned int    priority, total_load;
-	int             i, r, nqueue, qlen, qsize, child, wstat;
+	unsigned int    i, r, qlen, qsize, nqueue;
+	pid_t           child, wstat;
 	char           *qptr;
 
 	qsargs[1] = compat_mode ? "-cd" : "-d";
@@ -978,7 +988,7 @@ dynamic_queue()
 	 * if this qcount is lesser than the value in 'qcount'
 	 * control file, set it to the value in the control file
 	 */
-	if ((r = control_readint(&i, "qcount")) == -1) {
+	if ((int) (r = control_readint((int *) &i, "qcount")) == -1) {
 		strerr_warn1("alert: qscheduler: failed to open control file qcount: ", &strerr_sys);
 		die(1);
 	}
@@ -1070,7 +1080,7 @@ dynamic_queue()
 		msgbuflen = attr.mq_msgsize;
 		priority = 0;
 		for (;;) {
-			if ((i = mq_receive(mq_sch, msgbuf, msgbuflen, &priority)) == -1) {
+			if ((int) (i = mq_receive(mq_sch, msgbuf, msgbuflen, &priority)) == -1) {
 				if (errno == error_intr)
 					continue;
 				strerr_warn1("alert: qscheduler: unable to read message queue: ", &strerr_sys);
@@ -1078,7 +1088,7 @@ dynamic_queue()
 			}
 			break;
 		}
-		if (i == -1)
+		if ((int) i == -1)
 			continue;
 		if (keep_qcount) { /*- just log a warning */
 			strerr_warn1("alert: qscheduler: deferring qmonitor msg to update load as -n option in effect", 0);
@@ -1262,13 +1272,16 @@ main(int argc, char **argv)
 void
 getversion_queue_scheduler_c()
 {
-	const char     *x = "$Id: qscheduler.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qscheduler.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qscheduler.c,v $
+ * Revision 1.15  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

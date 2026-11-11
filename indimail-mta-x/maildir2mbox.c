@@ -1,5 +1,5 @@
 /*
- * $Id: maildir2mbox.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: maildir2mbox.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -100,7 +100,7 @@ main()
 					if (!stralloc_copys(&ufline, "From MAILER-DAEMON "))
 						die_nomem();
 				} else {
-					int             i;
+					unsigned int    i;
 					if (!stralloc_ready(&ufline, line.len) ||
 							!stralloc_copys(&ufline, "From "))
 						die_nomem();
@@ -156,13 +156,16 @@ main()
 void
 getversion_maildir2mbox_c()
 {
-	const char     *x = "$Id: maildir2mbox.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: maildir2mbox.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	(void) x;
 }
 /*
  * $Log: maildir2mbox.c,v $
+ * Revision 1.13  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

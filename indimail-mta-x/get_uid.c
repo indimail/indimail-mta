@@ -1,5 +1,8 @@
 /*
  * $Log: get_uid.c,v $
+ * Revision 1.8  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -36,10 +39,10 @@
 #include <qgetpwgr.h>
 #include "auto_uids.h"
 
-#define DO_UID(v, w, x, y, z) v = ((w = get_uid(x, y)) == -2) ? -1 : w; \
-		if (w == -2) z = 1;
-#define DO_GID(v, w, x, y, z) v = ((w = get_gid(x, y)) == -2) ? -1 : w; \
-		if (w == -2) z = 1;
+#define DO_UID(v, w, x, y, z) v = ((int) (w = get_uid(x, y)) == -2) ? -1 : (int) w; \
+		if ((int) w == -2) z = 1;
+#define DO_GID(v, w, x, y, z) v = ((int) (w = get_gid(x, y)) == -2) ? -1 : (int) w; \
+		if ((int) w == -2) z = 1;
 #define GET_USER(x, y, z) if (x == y) return z;
 #define GET_GROUP(x, y, z) if (x == y) return z;
 
@@ -96,12 +99,12 @@ get_uid(const char *user, int exit_on_error)
 		}
 		if (exit_on_error) {
 			for (i = 0; uid_a[i].user; i++) {
-				if (uid_a[i].uid == -1)
+				if ((int) uid_a[i].uid == -1)
 					strerr_die3sys(111, "qgetpwent: ", uid_a[i].user, ": No such user: ");
 			}
 		}
 		first++;
-		return (found == -1 ? -2 : found);
+		return ((int) found == -1 ? -2 : (int) found);
 	}
 	for (i = 0; uid_a[i].user; i++) {
 		len = str_len(user);
@@ -137,12 +140,12 @@ get_gid(const char *group, int exit_on_error)
 		}
 		if (exit_on_error) {
 			for (i = 0; gid_a[i].group; i++) {
-				if (gid_a[i].gid == -1)
+				if ((int) gid_a[i].gid == -1)
 					strerr_die3sys(111, "qgetgrent: ", gid_a[i].group, ": No such group: ");
 			}
 		}
 		first++;
-		return (found == -1 ? -2 : found);
+		return ((int) found == -1 ? -2 : (int) found);
 	}
 	for (i = 0; gid_a[i].group; i++) {
 		len = str_len(group);
@@ -187,11 +190,11 @@ uidinit(int closeflag, int exit_on_error)
 		return -1;
 	if (exit_on_error) {
 		for (i = 0; uid_a[i].user; i++) {
-			if (uid_a[i].uid == -1)
+			if ((int) uid_a[i].uid == -1)
 				strerr_die3sys(111, "qgetpwent: ", uid_a[i].user, ": No such user: ");
 		}
 		for (i = 0; gid_a[i].group; i++) {
-			if (gid_a[i].gid == -1)
+			if ((int) gid_a[i].gid == -1)
 				strerr_die3sys(111, "qgetgrent: ", gid_a[i].group, ": No such group: ");
 		}
 	}
@@ -246,7 +249,7 @@ get_group(gid_t gid)
 void
 getversion_get_uid_c()
 {
-	const char     *x = "$Id: get_uid.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: get_uid.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

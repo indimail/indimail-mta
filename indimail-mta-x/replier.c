@@ -1,5 +1,5 @@
 /*
- * $Id: replier.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: replier.c,v 1.17 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -58,6 +58,7 @@ static struct qmail qq;
 ssize_t
 mywrite(int fd, const char *buf, size_t len)
 {
+	(void) fd;
 	qmail_put(&qq, buf, len);
 	return len;
 }
@@ -77,6 +78,7 @@ myputs(const char *buf)
 no_return void
 sigalrm(int x)
 {
+	(void) x;
 	strerr_die1x(111, "Timeout on maildir delivery. (#4.3.0)");
 }
 
@@ -92,10 +94,12 @@ main(int argc, char **argv)
 	char           *dir, *addr, *sender, *local, *action;
 	const char     *qqx;
 	char          **e;
-	int             flagmlwasthere, match, i, flaginheader, flagbadfield, pid, wstat,
-					tmperrno;
+	unsigned int    i;
+	int             flagmlwasthere, match, flaginheader, flagbadfield, tmperrno;
+	pid_t           pid, wstat;
 	int             pf[2];
 
+	(void) argc;
 	if (!(dir = argv[1]) ||
 			!(addr = argv[2]))
 		usage();
@@ -244,13 +248,16 @@ main(int argc, char **argv)
 void
 getversion_replier_c()
 {
-	const char     *x = "$Id: replier.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: replier.c,v 1.17 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: replier.c,v $
+ * Revision 1.17  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.16  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: autoresponder.c,v 1.46 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: autoresponder.c,v 1.47 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  *
  * This is a simple program to automatically respond to emails.
  *
@@ -100,12 +100,12 @@ struct header
 struct header header = {
 	0,
 	0,
-	{0, 0},
-	{0, 0},
-	{0, 0},
-	{0, 0},
-	{0, 0},
-	{0, 0},
+	{0},
+	{0},
+	{0},
+	{0},
+	{0},
+	{0},
 	0,
 	0,
 	"unknown",
@@ -189,7 +189,8 @@ stralloc        addr = { 0 }; /*- will be 0-terminated, if addrparse returns 1 *
 int
 addrparse(const char *arg)
 {
-	int             i, flagesc, flagquoted;
+	int             flagesc, flagquoted;
+	unsigned int    i;
 	ip_addr         ip;
 	char            ch, terminator;
 
@@ -271,7 +272,7 @@ int
 match_addr(stralloc *addrlist, const char *email_addr)
 {
 	char           *ptr;
-	int             len;
+	unsigned int    len;
 	stralloc        quoted = { 0 };
 
 	if (!addrlist->s)
@@ -419,7 +420,7 @@ get_arguments(int argc, char *argv[])
 			break;
 		case 't':
 			opt_timelimit = strtoul(optarg, &ptr, 10);
-			if ((opt_timelimit == ULONG_MAX && errno == ERANGE)
+			if (((unsigned long) opt_timelimit == ULONG_MAX && errno == ERANGE)
 				|| (!opt_timelimit && ptr == optarg) || *ptr) {
 				substdio_puts(subfderr, "Invalid number ");
 				if (*ptr) {
@@ -946,7 +947,8 @@ main(int argc, char *argv[])
 {
 	int             fdout, match;
 #ifdef HAVESRS
-	int             len, do_srs = 0, at;
+	unsigned int    len, at;
+	int             do_srs = 0;
 #endif
 	const char     *sender, *dtrecip, *host, *ptr;
 	char            dbuf[DATE822FMT];
@@ -1253,13 +1255,16 @@ main(int argc, char *argv[])
 void
 getversion_qmail_autoresponder_c()
 {
-	const char     *x = "$Id: autoresponder.c,v 1.46 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: autoresponder.c,v 1.47 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: autoresponder.c,v $
+ * Revision 1.47  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.46  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*-
- * $Id: queue-fix.c,v 1.36 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: queue-fix.c,v 1.37 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  *
  * adapted from queue-fix 1.4
  * by Eric Huss
@@ -68,7 +68,7 @@ static uid_t    qmails_uid;
 static uid_t    qmailr_uid;
 static gid_t    qmail_gid;
 static int      queueError = 0;
-static int      split;
+static uint     split;
 static int      bigtodo;
 static uint     tcpto_size = TCPTO_BUFSIZ;
 
@@ -303,7 +303,7 @@ check_item(const char *name, const char *owner, const char *group,
 			return -1;
 		}
 		/*- check the values */
-		if (st.st_uid != uid || (st.st_gid != gid && gid != -1)) {
+		if (st.st_uid != uid || (st.st_gid != gid && (int) gid != -1)) {
 			queueError++;
 			if (!flag_permfix && flag_interactive) {
 				strmsg_out1("It looks like some permissions are wrong, should I fix them? (Y/N) - ");
@@ -395,7 +395,7 @@ check_item(const char *name, const char *owner, const char *group,
 			return -1;
 		}
 		/*- check the values */
-		if (st.st_uid != uid || (st.st_gid != gid && gid != -1)) {
+		if (st.st_uid != uid || (st.st_gid != gid && (int) gid != -1)) {
 			queueError++;
 			if (!flag_permfix && flag_interactive) {
 				strmsg_out1("It looks like some permissions are wrong, should I fix them? (Y/N) - ");
@@ -474,7 +474,7 @@ check_item(const char *name, const char *owner, const char *group,
 			return -1;
 		}
 		/*- check the values */
-		if (st.st_uid != uid || (st.st_gid != gid && gid != -1)) {
+		if (st.st_uid != uid || (st.st_gid != gid && (int) gid != -1)) {
 			queueError++;
 			if (!flag_permfix && flag_interactive) {
 				strmsg_out1("It looks like some permissions are wrong, should I fix them? (Y/N) - ");
@@ -572,7 +572,7 @@ check_splits(const char *directory, const char *owner, const char *group,
 {
 	DIR            *dir;
 	direntry       *d;
-	int             i;
+	unsigned int    i;
 
 	for (i = 0; i < split; i++) {
 		name_num[fmt_ulong(name_num, i)] = 0;
@@ -674,7 +674,7 @@ fix_part(char *part, int part_num)
 	struct stat     st;
 	char            inode[FMT_ULONG];
 	char            new_part[FMT_ULONG];
-	int             old_inode;
+	ino_t           old_inode;
 	int             correct_part_num;
 
 	if (!stralloc_copy(&mess_dir, &queue_dir) ||
@@ -704,7 +704,7 @@ fix_part(char *part, int part_num)
 		 * check that filename==inode number
 		 * check that inode%auto_split==part_num
 		 */
-		scan_int(d->d_name, &old_inode);
+		scan_ulong(d->d_name, &old_inode);
 		correct_part_num = st.st_ino % split;
 		if (st.st_ino != old_inode || part_num != correct_part_num) {
 			/*- rename */
@@ -786,7 +786,7 @@ clean_tmp(const char *directory, const char *part)
 int
 fix_names()
 {
-	int             i;
+	unsigned int    i;
 
 	if (!stralloc_copy(&check_dir, &queue_dir) ||
 			!stralloc_cats(&check_dir, "mess") ||
@@ -987,7 +987,7 @@ check_strays(char *directory)
 int
 check_stray_parts()
 {
-	int             i;
+	unsigned int    i;
 
 	for (i = 0; i < split; i++) {
 		name_num[fmt_ulong(name_num, i)] = 0;
@@ -1059,7 +1059,7 @@ main(int argc, char **argv)
 	}
 	set_environment(WARN, FATAL, 1);
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &split, "CONFSPLIT", auto_split);
 	if (split > auto_split)
 		split = auto_split;
 	while ((opt = getopt(argc, argv, "b:imNvtS:s:r")) != opteof) {
@@ -1081,7 +1081,7 @@ main(int argc, char **argv)
 			scan_uint(optarg, &tcpto_size);
 			break;
 		case 's':
-			scan_int(optarg, &split);
+			scan_uint(optarg, &split);
 			break;
 		case 'm':
 			flag_qmta = 1;
@@ -1104,14 +1104,14 @@ main(int argc, char **argv)
 		if (!stralloc_append(&queue_dir, "/"))
 			strerr_die2x(111, FATAL, "out of memory");
 	}
-	if (uidinit(1, 0) == -1 || auto_uidq == -1 || auto_gidq == -1) {
+	if (uidinit(1, 0) == -1 || (int) auto_uidq == -1 || (int) auto_gidq == -1) {
 		strerr_warn2(WARN, "Unable to get uids/gids: ", &strerr_sys);
 		_exit (111);
 	}
 	/*- prepare the uid and gid */
 	qmailq_uid = auto_uidq;
-	qmails_uid = (flag_qmta || auto_uids == -1) ? auto_uidq : auto_uids; /*- qmta */
-	qmailr_uid = auto_uidr == -1 ? auto_uidq : auto_uidr; /*- qmta */
+	qmails_uid = (flag_qmta || (int) auto_uids == -1) ? auto_uidq : auto_uids; /*- qmta */
+	qmailr_uid = (int) auto_uidr == -1 ? auto_uidq : auto_uidr; /*- qmta */
 	qmail_gid = auto_gidq;
 	/*- check that all the proper directories exist with proper credentials */
 	if (check_dirs())
@@ -1135,13 +1135,16 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	const char     *x = "$Id: queue-fix.c,v 1.36 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: queue-fix.c,v 1.37 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.37  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.36  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

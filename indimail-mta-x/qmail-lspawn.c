@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-lspawn.c,v 1.47 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-lspawn.c,v 1.48 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <pwd.h>
 #include <unistd.h>
@@ -71,12 +71,13 @@ static char *setup_qgargs()
 void
 initialize_SPAWN(int argc, char **argv)
 {
+	(void) argc;
 	aliasempty = argv[1];
 	if (!aliasempty)
 		_exit (100);
 }
 
-int             truncreport_SPAWN = 3000;
+unsigned int    truncreport_SPAWN = 3000;
 
 void
 report_SPAWN(substdio *ss, int wstat, char *s, int len)
@@ -314,6 +315,7 @@ set_pwstruct(char *recip, int at, const char *libptr, void *phandle, int (*isvir
 	int            *u_not_found, *i_inactive;
 	struct passwd*  (*sql_getpw) (char *, char *);
 
+	(void) isvirtualdomain;
 	if (env_get("QUERY_CACHE")) {
 		f = str_len(recip + at + 1);
 		if (!(inquery = getlibObject(libptr, &phandle, "inquery", 0)))
@@ -382,6 +384,7 @@ SPAWN(int fdmess, int fdout, unsigned long msgsize, char *sender, char *qqeh, ch
 	int             (*isvirtualdomain) (const char *);
 #endif
 
+	(void) msgsize;
 	if (!env_unset("QMAILREMOTE"))
 		_exit (-1);
 #ifdef ENABLE_VIRTUAL_PKG
@@ -468,12 +471,11 @@ noauthself: /*- deliver to local user in control/locals */
 #endif
 	if (!(f = fork())) {
 		char           *(args[12]);
+		char           *x;
 		unsigned long   u;
-		int             n;
+		unsigned int    n, xlen;
 		uid_t           uid;
 		gid_t           gid;
-		char           *x;
-		unsigned int    xlen;
 
 #ifdef ENABLE_VIRTUAL_PKG
 		closeLibrary(&phandle);
@@ -566,7 +568,7 @@ noauthself: /*- deliver to local user in control/locals */
 void
 getversion_qmail_lspawn_c()
 {
-	const char     *x = "$Id: qmail-lspawn.c,v 1.47 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-lspawn.c,v 1.48 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -574,6 +576,9 @@ getversion_qmail_lspawn_c()
 
 /*
  * $Log: qmail-lspawn.c,v $
+ * Revision 1.48  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.47  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

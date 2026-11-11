@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-direct.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-direct.c,v 1.17 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -74,13 +74,16 @@ die(int e, const char *str)
 
 no_return void
 sigalrm(int x)
-{	/* thou shalt not clean up here */
+{
+	(void) x;
+	/* thou shalt not clean up here */
 	die(52, "timer expired");
 }
 
 no_return void
 sigbug(int x)
 {
+	(void) x;
 	die(81, "internal bug");
 }
 
@@ -178,7 +181,7 @@ mailopen(uid_t uid, gid_t gid)
 	char            strnum[FMT_ULONG], host_a[64];
 	char           *s;
 	struct stat     st;
-	int             loop, i;
+	unsigned int    loop, i;
 	struct timeval  cur;
 	pid_t           pid;
 
@@ -302,6 +305,8 @@ main(int argc, char **argv)
 	struct passwd  *pw;
 	char            ch;
 
+	(void) argc;
+	(void) argv;
 	sig_blocknone();
 	umask(033);
 	if (!(ptr = env_get("FASTQUEUE")))
@@ -537,13 +542,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_direct_c()
 {
-	const char     *x = "$Id: qmail-direct.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-direct.c,v 1.17 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-direct.c,v $
+ * Revision 1.17  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.16  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

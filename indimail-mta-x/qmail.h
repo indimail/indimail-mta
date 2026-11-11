@@ -1,9 +1,10 @@
 /*
- * $Id: qmail.h,v 1.13 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail.h,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #ifndef QMAIL_H
 #define QMAIL_H
 
+#include <sys/types.h>
 #include "substdio.h"
 #include "buffer_defs.h"
 
@@ -17,7 +18,7 @@
 struct qmail
 {
 	int             flagerr;
-	unsigned long   pid;
+	pid_t           pid;
 	int             fdm; /*- fd message */
 	int             fde; /*- fd envelope */
 	int             fdc; /*- fd custom */
@@ -101,6 +102,9 @@ unsigned long   qmail_qp(struct qmail *);
 
 /*
  * $Log: qmail.h,v $
+ * Revision 1.14  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.13  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

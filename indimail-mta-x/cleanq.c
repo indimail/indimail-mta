@@ -1,5 +1,5 @@
 /*
- * $Id: cleanq.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: cleanq.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -170,6 +170,7 @@ tryclean(int fd, const char *d)
 no_return void
 sigterm(int x)
 {
+	(void) x;
 	if (flaglog)
 		strerr_warn2(WARNING, "going down on SIGTERM", 0);
 	_exit(0);
@@ -256,13 +257,16 @@ main(int argc, char **argv)
 void
 getversion_cleanq_c()
 {
-	const char     *x = "$Id: cleanq.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: cleanq.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: cleanq.c,v $
+ * Revision 1.18  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.17  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: tablematch.c,v $
+ * Revision 1.13  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -202,14 +205,15 @@ matchinet(const char *ip, const char *token, char flag)
 int
 tablematch(const char *filename, const char *ip, const char *domain)
 {
-	int             len, count, nullflag, dmatch, imatch, exact_domain_match, exact_ip_match;
+	unsigned int    len, count;
+	int             nullflag, dmatch, imatch, exact_domain_match, exact_ip_match;
 	const char     *x;
 	char           *ptr, *cptr;
 	static stralloc hostacc = { 0 };
 
 	if (!(x = env_get("HOSTACCESS")))
 		x = filename;
-	if ((count = control_readfile(&hostacc, x, 0)) == -1)
+	if ((int) (count = control_readfile(&hostacc, x, 0)) == -1)
 		return (-1);
 	if (!count) /*- allow access if control file is absent */
 		return (1);
@@ -261,7 +265,7 @@ tablematch(const char *filename, const char *ip, const char *domain)
 void
 getversion_tablematch_c()
 {
-	const char     *x = "$Id: tablematch.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tablematch.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

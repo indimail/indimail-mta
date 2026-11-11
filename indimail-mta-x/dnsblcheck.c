@@ -1,5 +1,8 @@
 /*
  * $Log: dnsblcheck.c,v $
+ * Revision 1.4  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.3  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -48,6 +51,7 @@ dnsblcheck(char **mesg, char *remoteip)
 	char            x[IPFMT];
 	int             len;
 
+	(void) mesg;
 	ch = remoteip;
 	if (!stralloc_copys(&dnsblrev, ""))
 		die_nomem();
@@ -150,7 +154,7 @@ main(int argc, char **argv)
 void
 getversion_dnsblcheck_c()
 {
-	const char     *x = "$Id: dnsblcheck.c,v 1.3 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dnsblcheck.c,v 1.4 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: matchup.c,v 1.19 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: matchup.c,v 1.20 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -154,7 +154,7 @@ msg_kill(int i)
 }
 
 int
-del_find(unsigned long d, int _qid)
+del_find(unsigned long d, unsigned long _qid)
 {
 	int             i;
 
@@ -165,7 +165,7 @@ del_find(unsigned long d, int _qid)
 }
 
 int
-del_add(unsigned long d, int _qid)
+del_add(unsigned long d, unsigned long _qid)
 {
 	int             i;
 
@@ -539,7 +539,7 @@ stralloc        outline = { 0 };
 int
 main()
 {
-	int             i, j;
+	unsigned int    i, j;
 	char            ch;
 
 	if (!stralloc_copys(&pool, "") ||
@@ -674,12 +674,15 @@ main()
 void
 getversion_matchup_c()
 {
-	const char     *x = "$Id: matchup.c,v 1.19 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: matchup.c,v 1.20 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: matchup.c,v $
+ * Revision 1.20  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.19  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

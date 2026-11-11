@@ -1,5 +1,5 @@
 /*
- * $Id: maildirserial.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: maildirserial.c,v 1.25 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -309,7 +309,7 @@ hasprefix(int fd)
 int
 usable(const char *filename)
 {
-	int             i;
+	unsigned int    i;
 	int             fd;
 
 	i = 0;
@@ -326,7 +326,7 @@ usable(const char *filename)
 		strerr_warn4(WARNING, "unable to open ", filename, ": ", &strerr_sys);
 		return 0;
 	}
-	if ((i = hasprefix(fd)) == -1)
+	if ((int) (i = hasprefix(fd)) == -1)
 		strerr_warn4(WARNING, "unable to read ", filename, ": ", &strerr_sys);
 	close(fd);
 	return i == 1;
@@ -470,7 +470,7 @@ main(int argc, char **argv)
 				if (stat(fn.s, &st) == -1)
 					strerr_warn4(WARNING, "assuming message is still alive; unable to stat ", fn.s, ": ", &strerr_sys);
 				else
-				if (now() > st.st_mtime + lifetime) {
+				if ((unsigned int) now() > st.st_mtime + lifetime) {
 					status = 'D';
 					flagtimeout = 1;
 				}
@@ -540,13 +540,16 @@ main(int argc, char **argv)
 void
 getversion_maildirserial_c()
 {
-	const char     *x = "$Id: maildirserial.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: maildirserial.c,v 1.25 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: maildirserial.c,v $
+ * Revision 1.25  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.24  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

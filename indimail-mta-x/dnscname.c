@@ -1,5 +1,8 @@
 /*
  * $Log: dnscname.c,v $
+ * Revision 1.11  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -34,6 +37,7 @@ stralloc        sa = { 0 };
 int
 main(int argc, char **argv)
 {
+	(void) argc;
 	if (!argv[1])
 		_exit(100);
 
@@ -51,7 +55,7 @@ main(int argc, char **argv)
 void
 getversion_dnscname_c()
 {
-	const char     *x = "$Id: dnscname.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dnscname.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

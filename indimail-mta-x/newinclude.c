@@ -1,5 +1,5 @@
 /*
- * $Id: newinclude.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: newinclude.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/stat.h>
@@ -71,7 +71,7 @@ out(const char *s, int len)
 }
 
 void
-doincl(const char *buf, int len)
+doincl(const char *buf, unsigned int len)
 {
 	if (!len)
 		strerr_die2x(111, FATAL, "empty :include: filenames not permitted");
@@ -86,7 +86,7 @@ doincl(const char *buf, int len)
 }
 
 void
-dorecip(char *buf, int len)
+dorecip(char *buf, unsigned int len)
 {
 	if (!len)
 		strerr_die2x(111, FATAL, "empty recipient addresses not permitted");
@@ -152,8 +152,7 @@ gotincl()
 void
 gotaddr()
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 	int             flaghasat;
 
 	token822_reverse(&tokaddr);
@@ -301,6 +300,7 @@ main(int argc, char **argv)
 {
 	int             fd;
 
+	(void) argc;
 	umask(033);
 	readcontrols();
 	if (!(fnlist = argv[1]))
@@ -342,12 +342,15 @@ main(int argc, char **argv)
 void
 getversion_newinclude_c()
 {
-	const char     *x = "$Id: newinclude.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: newinclude.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: newinclude.c,v $
+ * Revision 1.11  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: srs.c,v $
+ * Revision 1.8  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -134,8 +137,7 @@ srsforward(const char *address)
 	int             x = 0;
 	char            srsaddress[1000];
 	srs_t          *srs;
-	int             i = 0;
-	int             j = 0;
+	unsigned int    i = 0, j = 0;
 
 	/*- Return if setup was unsucessfull */
 	if ((x = srs_setup(1)) < 1)
@@ -185,8 +187,7 @@ srsreverse(const char *srsaddress)
 	int             x = 0;
 	char            address[1000];
 	srs_t          *srs;
-	int             i = 0;
-	int             j = 0;
+	unsigned int    i = 0, j = 0;
 
 	/*- Return if setup was unsucessfull */
 	if ((x = srs_setup(0)) < 1)
@@ -227,7 +228,7 @@ srsreverse(const char *srsaddress)
 void
 getversion_srs_c()
 {
-	const char     *x = "$Id: srs.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: srs.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

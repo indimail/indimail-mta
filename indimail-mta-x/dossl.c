@@ -1,5 +1,5 @@
 /*
- * $Id: dossl.c,v 1.9 2026-07-07 20:42:49+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dossl.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(TLS) || defined(TLSA)
@@ -41,6 +41,8 @@ extern substdio smtpto;
 int
 verify_cb(int preverify_ok, X509_STORE_CTX *ctx_dummy)
 {
+	(void) preverify_ok;
+	(void) ctx_dummy;
 	return 1;
 }
 
@@ -187,7 +189,8 @@ do_tls(SSL **ssl, int pkix, int smtps, int smtpfd, int *needtlsauth,
 		saa *ehlokw,
 		int verbose)
 {
-	int             code, i = 0, _needtlsauth = 0, method;
+	int             code, _needtlsauth = 0, method;
+	unsigned int    i = 0;
 	static char     ssl_initialized;
 	const char     *ciphers = NULL;
 	const char     *t, *servercert = NULL, *certfile;
@@ -540,8 +543,8 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 	unsigned char   md_value[EVP_MAX_MD_SIZE];
 	unsigned char  *ptr;
 	char           *cp;
-	int             i, len, e;
-	unsigned int    md_len;
+	int             len, e;
+	unsigned int    i, md_len;
 
 	if (!ssl)
 		return (-1);
@@ -549,12 +552,12 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 	{
 	/*- Trust anchor */
 	case 0: /*- PKIX-TA(0) maps to DANE-TA(2) */
-		/*- flow through */
+		/* fall through */
 	case 2: /*- DANE-TA(2) */
 		usage = 2;
 		break;
 	case 1: /*- PKIX-EE(1) maps to DANE-EE(3) */
-		/*- flow through */
+		/* fall through */
 	case 3: /*- DANE-EE(3) */
 		usage = 3;
 		break;
@@ -746,13 +749,16 @@ tlsa_vrfy_records(SSL *ssl, char *certDataField, int usage, int selector,
 const char *
 getversion_dossl_c()
 {
-	const char     *x = "$Id: dossl.c,v 1.9 2026-07-07 20:42:49+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: dossl.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	return x;
 }
 
 /*
  * $Log: dossl.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-07-07 20:42:49+05:30  Cprogrammer
  * fix for opaque versions of openssl 1.1.0 and higher
  *

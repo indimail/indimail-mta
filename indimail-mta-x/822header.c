@@ -1,5 +1,8 @@
 /*
  * $Log: 822header.c,v $
+ * Revision 1.11  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -51,7 +54,8 @@ int             match;
 int
 main(int argc, char **argv)
 {
-	int             opt, len, token_len, include = 0, exclude = 0, keep_continue = 0;
+	int             opt, token_len, include = 0, exclude = 0, keep_continue = 0;
+	unsigned int    len;
 	char           *ptr;
 
 	while ((opt = getopt(argc, argv, "I:X:")) != opteof) {
@@ -140,7 +144,7 @@ main(int argc, char **argv)
 void
 getversion_822header_c()
 {
-	const char     *x = "$Id: 822header.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822header.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

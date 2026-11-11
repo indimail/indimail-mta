@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-send.c,v 1.121 2026-10-27 21:40:12+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-send.c,v 1.122 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -148,6 +148,7 @@ static void     exit_todo();
 static void
 sigterm(int x)
 {
+	(void) x;
 	flagexitsend = 1;
 	slog(1, "alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
 	exit_todo();
@@ -156,6 +157,7 @@ sigterm(int x)
 static void
 sigalrm(int x)
 {
+	(void) x;
 	flagrunasap = 1;
 	slog(1, "alert: ", argv0, ": pid ", mypid, " got ALRM: ", queuedesc, "\n", NULL);
 }
@@ -163,6 +165,7 @@ sigalrm(int x)
 static void
 sighup(int x)
 {
+	(void) x;
 	flagreadasap = 1;
 	slog(1, "alert: ", argv0, ": pid ", mypid, " got HUP: ", queuedesc, "\n", NULL);
 }
@@ -184,6 +187,7 @@ chdir_toqueue()
 static void
 sigint(int x)
 {
+	(void) x;
 	if (loglock_fd == -1) {
 		if (chdir(auto_qmail) == -1) {
 			slog(1, "alert: ", argv0, ": ", queuedesc,
@@ -216,7 +220,7 @@ exit_todo()
 
 	if (!flagtodoalive)
 		return;
-	if (write(todofdo, "X", 1)) ; /*- keep compiler happy */
+	if (write(todofdo, "X", 1)) {;} /*- keep compiler happy */
 	r = read(todofdi, todobuf, sizeof (todobuf));
 	if (r > 0 && todobuf[0] == 'L')
 		slog(1, todobuf + 1, NULL);
@@ -426,7 +430,7 @@ comm_canwrite(int c)
  * recipient
  */
 static void
-comm_write(int c, int delnum, unsigned long id, char *sender, char *qqeh, char *envh, char *recip)
+comm_write(int c, unsigned int delnum, unsigned long id, char *sender, char *qqeh, char *envh, char *recip)
 {
 	char            ch;
 
@@ -555,7 +559,7 @@ cleanup_do()
 	if (stat(fn1.s, &st) == -1)
 		return;	/*- probably qmail-queue deleted it */
 	getEnvConfiguLong(&ossified, "OSSIFIED", OSSIFIED);
-	if (recent <= st.st_atime + ossified)
+	if ((unsigned long) recent <= st.st_atime + ossified)
 		return;
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == 0)
@@ -702,7 +706,7 @@ pqfinish()
 static void
 pqrun()
 {
-	int             c, i;
+	unsigned int    c, i;
 
 	for (c = 0; c < CHANNELS; ++c) {
 		if (pqchan[c].p && pqchan[c].len) {
@@ -849,7 +853,8 @@ static int      orig_recip_len;
 static void
 addbounce(unsigned long id, char *recip, char *report)
 {
-	int             fd, pos, w;
+	int             fd, w;
+	unsigned int    pos;
 
 	while (!stralloc_copyb(&bouncetext, "<", 1))
 		nomem(argv0);
@@ -1218,8 +1223,8 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		if ((fd = open_read(fn1.s)) == -1)
 			qmail_fail(&qqt);
 		else {
-			int             bytestogo = bouncemaxbytes;
-			int             bytestoget = (bytestogo < sizeof buf) ? bytestogo : sizeof buf;
+			unsigned int    bytestogo = bouncemaxbytes;
+			unsigned int    bytestoget = (bytestogo < sizeof buf) ? bytestogo : sizeof buf;
 			substdio_fdbuf(&ssread, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof (inbuf));
 			while (bytestoget > 0 && (r = substdio_get(&ssread, buf, bytestoget)) > 0) {
 				qmail_put(&qqt, buf, r);
@@ -1323,7 +1328,7 @@ del_status()
 static void
 del_init()
 {
-	int             c, i;
+	unsigned int    c, i;
 
 	for (c = 0; c < CHANNELS; ++c) {
 		flagspawnalive[c] = 1;
@@ -1363,7 +1368,7 @@ del_avail(int c)
 static void
 del_start(int j, seek_pos mpos, char *recip)
 {
-	int             i, c;
+	unsigned int    i, c;
 #ifdef HASLIBRT
 	int             q, offset;
 #endif
@@ -1456,7 +1461,7 @@ del_dochan(int c)
 	int             q, offset;
 #endif
 
-	if ((r = read(chanfdin[c], delbuf, sizeof (delbuf))) == -1)
+	if ((int) (r = read(chanfdin[c], delbuf, sizeof (delbuf))) == -1)
 		return;
 	if (r == 0) {
 		spawndied(c);
@@ -1475,7 +1480,7 @@ del_dochan(int c)
 		if (!ch && (dline[c].len > 2)) {
 			delnum = (unsigned int) (unsigned char) dline[c].s[0];
 			delnum += (unsigned int) ((unsigned int) dline[c].s[1]) << 8;
-			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
+			if ((delnum < 0) || ((unsigned int) delnum >= concurrency[c]) || !del[c][delnum].used)
 				slog(1, "warn: ", argv0, ": ", queuedesc, ": internal error: delivery report out of range\n", NULL);
 			else {
 				if (dline[c].s[2] == 'Z') {
@@ -1856,6 +1861,7 @@ pass_do()
 static void
 sigusr1(int x)
 {
+	(void) x;
 	if (flagdetached)
 		return;
 	sig_block(sig_usr1);
@@ -1891,6 +1897,7 @@ sigusr1(int x)
 static void
 sigusr2(int x)
 {
+	(void) x;
 	if (flagdetached == 0)
 		return;
 	sig_block(sig_usr2);
@@ -1939,10 +1946,10 @@ todo_init()
 }
 
 static void
-todo_selprep(int *nfds, fd_set *rfds, datetime_sec *wakeup)
+todo_selprep(int *nfds, fd_set *rfds)
 {
 	if (flagexitsend && flagtodoalive) {
-		if (write(todofdo, "X", 1)) ; /*- keep compiler happy */
+		if (write(todofdo, "X", 1)) {;} /*- keep compiler happy */
 		flagtodoalive = 0;
 	}
 	if (flagtodoalive) {
@@ -2220,8 +2227,8 @@ static void
 regetcontrols()
 {
 	int             r;
-	int             c; /*NJL*/
-	int             newholdjobs[CHANNELS] = { 0, 0 }; /*NJL*/
+	unsigned int    c; /*NJL*/
+	unsigned int    newholdjobs[CHANNELS] = { 0, 0 }; /*NJL*/
 
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
@@ -2242,11 +2249,11 @@ regetcontrols()
 		return;
 	}
 	/*- Add "holdlocal/holdremote" flags - NJL 1998/05/03 */
-	if (control_readint(&newholdjobs[0], "holdlocal") == -1) {
+	if (control_readint((int *) &newholdjobs[0], "holdlocal") == -1) {
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdlocal\n", NULL);
 		return;
 	}
-	if (control_readint(&newholdjobs[1], "holdremote") == -1) {
+	if (control_readint((int *) &newholdjobs[1], "holdremote") == -1) {
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdremote\n", NULL);
 		return;
 	}
@@ -2472,7 +2479,7 @@ main(int argc, char **argv)
 #endif
 	qident = env_get("QIDENT");
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
@@ -2570,7 +2577,7 @@ main(int argc, char **argv)
 	/*- read 2 bytes from qmail-lspawn, qmail-rspawn to get concurrency */
 	for (c = 0; c < CHANNELS; ++c) {
 		char            ch1, ch2;
-		int             u;
+		unsigned int    u;
 		int             r;
 
 		do {
@@ -2646,7 +2653,7 @@ main(int argc, char **argv)
 		 * prepare readfd for select
 		 * set todofdi = 8 for select: read end from todo-proc pi8[0]
 		 */
-		todo_selprep(&nfds, &rfds, &wakeup);
+		todo_selprep(&nfds, &rfds);
 		/*- set wakeup */
 		cleanup_selprep(&wakeup);
 		if (wakeup <= recent)
@@ -2727,7 +2734,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_send_c()
 {
-	const char     *x = "$Id: qmail-send.c,v 1.121 2026-10-27 21:40:12+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-send.c,v 1.122 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -2737,6 +2744,9 @@ getversion_qmail_send_c()
 
 /*
  * $Log: qmail-send.c,v $
+ * Revision 1.122  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.121  2026-10-27 21:40:12+05:30  Cprogrammer
  * fix compiler warnings
  *

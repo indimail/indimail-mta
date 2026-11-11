@@ -1,5 +1,5 @@
 /*
- * $Id: qscanq-stdin.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qscanq-stdin.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -60,6 +60,7 @@ err(const char *s) /*- was named puts, but Solaris pwd.h includes stdio.h. dorks
 void
 alarm_handler(int sig)
 {
+	(void) sig;
 	if (cmd_pid)
 		kill(cmd_pid, SIGKILL);
 	else
@@ -174,7 +175,7 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_stdin_c()
 {
-	const char     *x = "$Id: qscanq-stdin.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qscanq-stdin.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
@@ -182,6 +183,9 @@ getversion_qscanq_stdin_c()
 
 /*
  * $Log: qscanq-stdin.c,v $
+ * Revision 1.12  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

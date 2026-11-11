@@ -1,5 +1,5 @@
 /*
- * $Id: iftoccfrom.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: iftoccfrom.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -41,7 +41,8 @@ check(char *addr)
 int
 main(int argc, char **argv)
 {
-	int             i, j, match;
+	unsigned int    i, j;
+	int             match;
 	stralloc        addrlist = { 0 }, line = { 0 };
 	char            ssinbuf[BUFSIZE_IN];
 	substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
@@ -53,6 +54,7 @@ main(int argc, char **argv)
 		{ 0, 0, 0, 0, 0, 0 }
 	};
 
+	(void) argc;
 	recipient = env_get("RECIPIENT");
 	recips = argv + 1;
 	if (*recips)
@@ -86,13 +88,16 @@ main(int argc, char **argv)
 void
 getversion_iftoccfrom_c()
 {
-	const char     *x = "$Id: iftoccfrom.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: iftoccfrom.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: iftoccfrom.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

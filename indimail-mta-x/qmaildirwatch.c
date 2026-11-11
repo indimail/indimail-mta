@@ -1,5 +1,5 @@
 /*
- * $Id: qmaildirwatch.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmaildirwatch.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -45,7 +45,7 @@ dobody(stralloc *h)
 void
 doheader(stralloc *h)
 {
-	int             i;
+	unsigned int    i;
 	switch (hfield_known(h->s, h->len))
 	{
 	case H_SUBJECT:
@@ -86,7 +86,7 @@ main()
 {
 	struct prioq_elt pe;
 	int             fd;
-	int             i;
+	unsigned int    i;
 
 	if (maildir_chdir() == -1)
 		strerr_die1(111, FATAL, &maildir_chdir_err);
@@ -147,12 +147,15 @@ main()
 void
 getversion_qmaildirwatch_c()
 {
-	const char     *x = "$Id: qmaildirwatch.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmaildirwatch.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: qmaildirwatch.c,v $
+ * Revision 1.14  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

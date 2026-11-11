@@ -1,5 +1,5 @@
 /*
- * $Id: drate.c,v 1.28 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: drate.c,v 1.29 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -219,12 +219,13 @@ delete_domain(const char *domain, int force)
 	struct dirent  *dp;
 	struct stat     statbuf;
 	char            buf[128], strnum[FMT_ULONG];
-	int             len, found;
+	unsigned int    len;
+	int             found;
 
 	if (lstat(domain, &statbuf) == -1)
 		strerr_die4sys(111, FATAL, "lstat: ", domain, ": ");
 	if (S_ISLNK(statbuf.st_mode)) {
-		if ((len = readlink(domain, buf, sizeof(buf))) == -1)
+		if ((int) (len = readlink(domain, buf, sizeof(buf))) == -1)
 			strerr_die4sys(111, FATAL, "readlink: ", domain, ": ");
 		if (len < sizeof(buf))
 			buf[len] = '\0';
@@ -248,7 +249,7 @@ delete_domain(const char *domain, int force)
 		if (lstat(dp->d_name, &statbuf) == -1)
 			strerr_die4sys(111, FATAL, "lstat: ", dp->d_name, ": ");
 		if (S_ISLNK(statbuf.st_mode)) {
-			if ((len = readlink(dp->d_name, buf, sizeof(buf))) == -1)
+			if ((int) (len = readlink(dp->d_name, buf, sizeof(buf))) == -1)
 				strerr_die4sys(111, FATAL, "readlink: ", dp->d_name, ": ");
 			if (len < sizeof(buf))
 				buf[len] = '\0';
@@ -292,7 +293,7 @@ do_list(int display)
 	struct dirent  *dp;
 	struct stat     statbuf;
 	char            buf[128];
-	int             len;
+	unsigned int    len;
 
 	if (!(dir = opendir(".")))
 		strerr_die1sys(111, "opendir: ");
@@ -304,7 +305,7 @@ do_list(int display)
 		if (lstat(dp->d_name, &statbuf) == -1)
 			strerr_die4sys(111, FATAL, "lstat: ", dp->d_name, ": ");
 		if (S_ISLNK(statbuf.st_mode)) {
-			if ((len = readlink(dp->d_name, buf, sizeof(buf))) == -1)
+			if ((int) (len = readlink(dp->d_name, buf, sizeof(buf))) == -1)
 				strerr_die4sys(111, FATAL, "readlink: ", dp->d_name, ": ");
 			if (len < sizeof(buf))
 				buf[len] = '\0';
@@ -418,7 +419,7 @@ new:
 		strerr_die4sys(111, FATAL, "unable to write to file ", domain, ": ");
 	if (lock_ex(wfd) == -1)
 		cleanup(domain, "unable to lock", t);
-	if (uidinit(1, 0) == -1 || auto_uids == -1 || auto_gidq == -1)
+	if (uidinit(1, 0) == -1 || (int) auto_uids == -1 || (int) auto_gidq == -1)
 		strerr_die2sys(111, FATAL, "unable to initialize uids/gids: ");
 	if (fchown(wfd, auto_uids, auto_gidq))
 		cleanup(domain, "unable to chown", t);
@@ -676,7 +677,7 @@ main(int argc, char **argv)
 void
 getversion_drate_c()
 {
-	const char     *x = "$Id: drate.c,v 1.28 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: drate.c,v 1.29 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidgetdomainth;
 	x = sccsidevalh;
@@ -685,6 +686,9 @@ getversion_drate_c()
 }
 /*
  * $Log: drate.c,v $
+ * Revision 1.29  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.28  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

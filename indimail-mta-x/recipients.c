@@ -1,5 +1,5 @@
 /*
- * $Id: recipients.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: recipients.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <cdb.h>
@@ -101,9 +101,10 @@ recipients_init()
 }
 
 static int
-parse_recips(char *rhost, int rlen, char *addr, char *rkey, int klen, char *vaddr, char *v_key, int vlen)
+parse_recips(char *rhost, unsigned int rlen, char *addr, char *rkey, int klen, char *vaddr, char *v_key, int vlen)
 {
-	int             len, r, i, j, k, seenhost = 0;
+	int             r, seenhost = 0;
+	unsigned int    i, j, k, len;
 	uint32          dlen;
 	char           *p;
 
@@ -250,7 +251,7 @@ recipients(char *buf, int len)
 void
 getversion_recipients_c()
 {
-	const char     *x = "$Id: recipients.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: recipients.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	x = sccsidmakeargsh;
@@ -259,6 +260,9 @@ getversion_recipients_c()
 
 /*
  * $Log: recipients.c,v $
+ * Revision 1.15  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: rrforward.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: rrforward.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -42,6 +42,7 @@ die_nomem()
 ssize_t
 qqtwrite(int fd, const char *buf, size_t len)
 {
+	(void) fd;
 	qmail_put(&qqt, buf, len);
 	return len;
 }
@@ -109,7 +110,7 @@ main(int argc, char **argv)
 		pos = 0;
 	else
 		pos++;
-	if (pos >= argc)
+	if ((int) pos >= argc)
 		pos = 0;
 	r = fmt_ulong(strpos, pos);
 	strpos[r] = '\n';
@@ -127,13 +128,16 @@ main(int argc, char **argv)
 void
 getversion_rrforward_c()
 {
-	const char     *x = "$Id: rrforward.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: rrforward.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: rrforward.c,v $
+ * Revision 1.15  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

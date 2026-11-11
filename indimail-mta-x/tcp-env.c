@@ -1,5 +1,8 @@
 /*
  * $Log: tcp-env.c,v $
+ * Revision 1.17  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.16  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -169,6 +172,7 @@ main(int argc, char **argv)
 			case DNS_SOFT:
 				if (!stralloc_copys(&localname, "softdnserror"))
 					die();
+				/* fall through */
 			case 0:
 #ifdef USE_SPF
 				if (!stralloc_copy(&localname, &ssa.sa[0]))
@@ -183,6 +187,7 @@ main(int argc, char **argv)
 			default:
 				if (!env_unset("TCPLOCALHOST"))
 					die();
+				/* fall through */
 			}
 			break;
 #ifdef IPV6
@@ -211,6 +216,7 @@ main(int argc, char **argv)
 			case DNS_SOFT:
 				if (!stralloc_copys(&localname, "softdnserror"))
 					die();
+				/* fall through */
 			case 0:
 #ifdef USE_SPF
 				if (!stralloc_copy(&localname, &ssa.sa[0]))
@@ -256,6 +262,7 @@ main(int argc, char **argv)
 			case DNS_SOFT:
 				if (!stralloc_copys(&remotename, "softdnserror"))
 					die();
+				/* fall through */
 			case 0:
 #ifdef USE_SPF
 				if (!stralloc_copy(&remotename, &ssa.sa[0]))
@@ -296,6 +303,7 @@ main(int argc, char **argv)
 			case DNS_SOFT:
 				if (!stralloc_copys(&remotename, "softdnserror"))
 					die();
+				/* fall through */
 			case 0:
 #ifdef USE_SPF
 				if (!stralloc_copy(&remotename, &ssa.sa[0]))
@@ -339,7 +347,7 @@ main(int argc, char **argv)
 void
 getversion_tcp_env_c()
 {
-	const char     *x = "$Id: tcp-env.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tcp-env.c,v 1.17 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

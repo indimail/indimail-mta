@@ -1,5 +1,8 @@
 /*
  * $Log: 822field.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -52,6 +55,7 @@ main(int argc, char **argv)
 		{0, 0, 0, 0, 0, 0}
 	};
 
+	(void) argc;
 	if (argv[1]) {
 		if (*argv[1] == '+') {
 			t = 1;
@@ -86,7 +90,7 @@ main(int argc, char **argv)
 void
 getversion_822field_c()
 {
-	const char     *x = "$Id: 822field.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822field.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

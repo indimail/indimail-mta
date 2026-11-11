@@ -1,5 +1,5 @@
 /*
- * $Id: filterto.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: filterto.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -28,6 +28,7 @@ struct qmail    qqt;
 ssize_t
 mywrite(int fd, const char *buf, size_t len)
 {
+	(void) fd;
 	qmail_put(&qqt, buf, len);
 	return len;
 }
@@ -48,6 +49,7 @@ main(int argc, char **argv, char **envp)
 	const char     *qqx;
 	int             pf[2];
 
+	(void) argc;
 	if (!argv[1] || !argv[2])
 		strerr_die1x(100, "filterto: usage: filterto newaddress program [ arg ... ]");
 	sig_ignore(SIGPIPE);
@@ -106,13 +108,16 @@ main(int argc, char **argv, char **envp)
 void
 getversion_filterto_c()
 {
-	const char     *x = "$Id: filterto.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: filterto.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: filterto.c,v $
+ * Revision 1.18  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.17  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: bodycheck.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: bodycheck.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include "substdio.h"
 #include "alloc.h"
@@ -23,7 +23,8 @@ int
 bodycheck(stralloc *body, stralloc *line, const char **desc, int in_header)
 {
 	char            errbuf[512];
-	int             len, tmp_len, count, retval, header_check, body_check;
+	unsigned int    len, tmp_len, count;
+	int             retval, header_check, body_check;
 	char           *pos1, *pos2, *ptr, *cptr;
 	static stralloc tmpLine = { 0 };
 
@@ -194,12 +195,15 @@ bodycheck_free()
 void
 getversion_bodycheck_c()
 {
-	const char     *x = "$Id: bodycheck.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: bodycheck.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: bodycheck.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

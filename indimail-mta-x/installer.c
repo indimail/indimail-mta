@@ -1,5 +1,5 @@
 /*
- * $Id: installer.c,v 1.32 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $
+ * $Id: installer.c,v 1.33 2026-11-10 21:59:41+05:30 Cprogrammer Exp mbhangui $
  * taken from ezmlm-0.54
  */
 #include <sys/types.h>
@@ -84,14 +84,14 @@ print_info(const char *str, const char *source, const char *dest,
 #else
 	subprintf(subfdout, "%s %s", str, dest);
 #endif
-	if (gid != -1) {
+	if ((int) gid != -1) {
 		if (!(gr = getgrgid(gid))) {
 			strnum[fmt_ulong(strnum, gid)] = 0;
 			strerr_warn4(WARN, "unable to get gid entry for ", strnum, ": ", &strerr_sys);
 		}
 		group = gr->gr_name;
 	}
-	if (uid != -1) {
+	if ((int) uid != -1) {
 		if (!(pw = getpwuid(uid))) {
 			strnum[fmt_ulong(strnum, uid)] = 0;
 			strerr_warn4(WARN, "unable to get uid entry for ", strnum, ": ", &strerr_sys);
@@ -105,7 +105,7 @@ print_info(const char *str, const char *source, const char *dest,
 #endif
 	}
 #ifdef NETQMAIL
-	if (gid != -1) {
+	if ((int) gid != -1) {
 		substdio_puts(subfdout, " -group ");
 		substdio_puts(subfdout, group);
 	}
@@ -118,7 +118,7 @@ print_info(const char *str, const char *source, const char *dest,
 		substdio_puts(subfdout, source);
 	}
 #else
-	if (gid != -1)
+	if ((int) gid != -1)
 		subprintf(subfdout, " -group %s", group);
 	if (mode != -1)
 		subprintf(subfdout, " -mode %s", get_octal(mode));
@@ -126,27 +126,27 @@ print_info(const char *str, const char *source, const char *dest,
 		subprintf(subfdout, " -source %s", source);
 #endif
 #ifdef NETQMAIL
-	if (size != -1) {
+	if ((int) size != -1) {
 		substdio_puts(subfdout, " -size ");
 		strnum[fmt_ulong(strnum, size)] = 0;
 		substdio_puts(subfdout, strnum);
 	}
-	if (maj != -1) {
+	if ((int) maj != -1) {
 		substdio_puts(subfdout, " -major ");
 		strnum[fmt_ulong(strnum, maj)] = 0;
 		substdio_puts(subfdout, strnum);
 	}
-	if (min != -1) {
+	if ((int) min != -1) {
 		substdio_puts(subfdout, " -minor ");
 		strnum[fmt_ulong(strnum, min)] = 0;
 		substdio_puts(subfdout, strnum);
 	}
 #else
-	if (size != -1)
+	if ((int) size != -1)
 		subprintf(subfdout, " -size %lu", size);
-	if (maj != -1)
+	if ((int) maj != -1)
 		subprintf(subfdout, " -major %u", maj);
-	if (min != -1)
+	if ((int) min != -1)
 		subprintf(subfdout, " -minor %u", min);
 #endif
 	substdio_puts(subfdout, "\n");
@@ -206,7 +206,7 @@ qchmod(const char *name, mode_t mode)
 
 void
 set_perms(char type, char *dest, char *uidstr, char *gidstr, char *modestr,
-		uid_t uid, gid_t gid, int mode, int check)
+		uid_t uid, gid_t gid, mode_t mode, int check)
 {
 	struct stat     st;
 	struct passwd  *pw;
@@ -215,7 +215,7 @@ set_perms(char type, char *dest, char *uidstr, char *gidstr, char *modestr,
 	if (lstat(dest, &st) == -1)
 		strerr_die4sys(111, FATAL, "lstat: ", dest, ": ");
 	if (check) {
-		if (uid != -1 && st.st_uid != uid) {
+		if ((int) uid != -1 && st.st_uid != uid) {
 			if (!(pw = getpwuid(st.st_uid))) {
 				strnum[fmt_ulong(strnum, uid)] = 0;
 				strerr_warn4(WARN, "unable to get uid entry for ", strnum, ": ", &strerr_sys);
@@ -223,7 +223,7 @@ set_perms(char type, char *dest, char *uidstr, char *gidstr, char *modestr,
 			if (!dofix)
 				strerr_warn7(WARN, dest, " has wrong owner [", pw->pw_name, "] should be [", uidstr, "]", 0);
 		}
-		if (gid != -1 && st.st_gid != gid) {
+		if ((int) gid != -1 && st.st_gid != gid) {
 			if (!(gr = getgrgid(st.st_gid))) {
 				strnum[fmt_ulong(strnum, gid)] = 0;
 				strerr_warn4(WARN, "unable to get gid entry for ", strnum, ": ", &strerr_sys);
@@ -231,7 +231,7 @@ set_perms(char type, char *dest, char *uidstr, char *gidstr, char *modestr,
 			if (!dofix)
 				strerr_warn7(WARN, dest, " has wrong group [", gr->gr_name, "] should be [", gidstr, "]", 0);
 		}
-		if (mode != -1 && (st.st_mode & 07777) != mode) {
+		if ((int) mode != -1 && (st.st_mode & 07777) != mode) {
 			if (!dofix)
 				strerr_warn7(WARN, dest, " has wrong mode  [", get_octal(st.st_mode & 07777), "] should be [", modestr, "]", 0);
 		}
@@ -240,8 +240,8 @@ set_perms(char type, char *dest, char *uidstr, char *gidstr, char *modestr,
 	}
 	if (!dofix && my_uid)
 		return;
-	if (!my_uid && ((uid != -1 && st.st_uid != uid) || (gid != -1 && st.st_gid != gid))) {
-		if (dofix && uid != -1 && st.st_uid != uid) {
+	if (!my_uid && (((int) uid != -1 && st.st_uid != uid) || ((int) gid != -1 && st.st_gid != gid))) {
+		if (dofix && (int) uid != -1 && st.st_uid != uid) {
 			if (!(pw = getpwuid(st.st_uid))) {
 				strnum[fmt_ulong(strnum, uid)] = 0;
 				strerr_warn4(WARN, "unable to get uid entry for ", strnum, ": ", &strerr_sys);
@@ -257,7 +257,7 @@ set_perms(char type, char *dest, char *uidstr, char *gidstr, char *modestr,
 			subprintf(subfdout, "  chown %s %s\n", uidstr, dest);
 #endif
 		}
-		if (dofix && gid != -1 && st.st_gid != gid) {
+		if (dofix && (int) gid != -1 && st.st_gid != gid) {
 			if (!(gr = getgrgid(st.st_gid))) {
 				strnum[fmt_ulong(strnum, gid)] = 0;
 				strerr_warn4(WARN, "unable to get gid entry for ", strnum, ": ", &strerr_sys);
@@ -280,7 +280,7 @@ set_perms(char type, char *dest, char *uidstr, char *gidstr, char *modestr,
 				strerr_die4sys(111, FATAL, "lstat: ", dest, ": ");
 		}
 	}
-	if (mode != -1 && (st.st_mode & 07777) != mode) {
+	if ((int) mode != -1 && (st.st_mode & 07777) != mode) {
 		if (dofix)
 			strerr_warn7(WARN, dest, " has wrong mode  [", get_octal(st.st_mode & 07777), "], will change it to [", modestr, "]", 0);
 #ifdef NETQMAIL
@@ -509,7 +509,7 @@ doit(stralloc *line, int uninstall, int check)
 					strerr_die4sys(111, FATAL, "mknod ", target.s, ": ");
 			}
 		}
-		if (uid != -1 || gid != -1 || mode != -1)
+		if ((int) uid != -1 || (int) gid != -1 || (int) mode != -1)
 			set_perms(*type, target.s, uidstr, gidstr, modestr, uid, gid, mode, check);
 		break;
 	case 'p':
@@ -520,7 +520,7 @@ doit(stralloc *line, int uninstall, int check)
 					strerr_die4sys(111, FATAL, "fifo_make: ", target.s, ": ");
 			}
 		}
-		if (uid != -1 || gid != -1 || mode != -1)
+		if ((int) uid != -1 || (int) gid != -1 || (int) mode != -1)
 			set_perms(*type, target.s, uidstr, gidstr, modestr, uid, gid, mode, check);
 		break;
 	case 'l':/*- here name is target */
@@ -538,7 +538,7 @@ doit(stralloc *line, int uninstall, int check)
 					strerr_die4sys(111, FATAL, "unable to mkdir ", target.s, ": ");
 			}
 		}
-		if (uid != -1 || gid != -1 || mode != -1)
+		if ((int) uid != -1 || (int) gid != -1 || (int) mode != -1)
 			set_perms(*type, target.s, uidstr, gidstr, modestr, uid, gid, mode, check);
 		break;
 
@@ -624,13 +624,13 @@ doit(stralloc *line, int uninstall, int check)
 			if (*type == 'z') {
 				if (lstat(target.s, &st) == -1)
 					strerr_die4sys(111, FATAL, "lstat: ", target.s, ": ");
-				if (size != st.st_size) {
+				if ((off_t) size != st.st_size) {
 					strnum[fmt_ulong(strnum, size)] = 0;
 					strerr_warn5(WARN, target.s, " is not the right size (", strnum, ").", 0);
 				}
 			}
 		}
-		if (uid != -1 || gid != -1 || mode != -1)
+		if ((int) uid != -1 || (int) gid != -1 || (int) mode != -1)
 			set_perms(*type, target.s, uidstr, gidstr, modestr, uid, gid, mode, check);
 		break;
 
@@ -706,13 +706,16 @@ main(int argc, char **argv)
 void
 getversion_installer_c()
 {
-	static const char *x = "$Id: installer.c,v 1.32 2026-11-10 16:12:27+05:30 mbhangui Exp mbhangui $";
+	static const char *x = "$Id: installer.c,v 1.33 2026-11-10 21:59:41+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: installer.c,v $
+ * Revision 1.33  2026-11-10 21:59:41+05:30  Cprogrammer
+ * fix compiler warning
+ *
  * Revision 1.32  2026-11-10 16:12:27+05:30  mbhangui
  * fix set but unused variable warnings
  *

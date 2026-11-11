@@ -1,5 +1,5 @@
 /*
- * $Id: ofmipd.c,v 1.29 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: ofmipd.c,v 1.30 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -273,6 +273,7 @@ err_authrequired()
 int
 err_noauth(const char *x)
 {
+	(void) x;
 	out("504 auth type unimplemented (#5.5.1)\r\n");
 	return -1;
 }
@@ -335,6 +336,7 @@ die_config()
 no_return void
 smtp_quit(const char *x)
 {
+	(void) x;
 	out("221 ofmipd.local\r\n");
 	flush();
 	_exit(0);
@@ -343,24 +345,28 @@ smtp_quit(const char *x)
 void
 smtp_help(const char *x)
 {
+	(void) x;
 	out("214 qmail home page: http://pobox.com/~djb/qmail.html\r\n");
 }
 
 void
 smtp_noop(const char *x)
 {
+	(void) x;
 	out("250 ok\r\n");
 }
 
 void
 smtp_vrfy(const char *x)
 {
+	(void) x;
 	out("252 send some mail, i'll try my best\r\n");
 }
 
 void
 smtp_unimpl(const char *x)
 {
+	(void) x;
 	out("502 unimplemented (#5.5.1)\r\n");
 }
 
@@ -473,6 +479,7 @@ stralloc        rcptto = { 0 };
 void
 smtp_helo(const char *arg)
 {
+	(void) arg;
 	seenmail = 0;
 	out("250 ofmipd.local\r\n");
 }
@@ -480,6 +487,7 @@ smtp_helo(const char *arg)
 void
 smtp_ehlo(const char *arg)
 {
+	(void) arg;
 	seenmail = 0;
 	out("250-ofmipd.local\r\n");
 	if (auth_smtp) {
@@ -492,6 +500,7 @@ smtp_ehlo(const char *arg)
 void
 smtp_rset(const char *x)
 {
+	(void) x;
 	seenmail = 0;
 	out("250 flushed\r\n");
 }
@@ -513,10 +522,9 @@ smtp_mail(const char *arg)
 	}
 	name = 0;
 	if (fncdb) {
-		uint32          dlen;
-		int             r;
+		uint32          dlen, r;
 
-		if ((r = cdb_seek(fdcdb, rwaddr.s, rwaddr.len, &dlen)) == -1) {
+		if ((int) (r = cdb_seek(fdcdb, rwaddr.s, rwaddr.len, &dlen)) == -1) {
 			err_cdb();
 			return;
 		}
@@ -736,7 +744,7 @@ void
 blast()
 {
 	int             flagheader = 1;
-	int             i;
+	unsigned int    i;
 
 	if (!mess822_begin(&h, a))
 		nomem();
@@ -785,6 +793,7 @@ smtp_data(const char *x)
 	const char     *qqx;
 	unsigned long   qp;
 
+	(void) x;
 	tai_now(&n);
 	caltime_utc(&datastart.ct, &n, (int *) 0, (int *) 0);
 	datastart.known = 1;
@@ -979,7 +988,7 @@ auth_login(const char *arg)
 int
 auth_plain(const char *arg)
 {
-	int             r, id = 0;
+	unsigned int    r, id = 0;
 
 	if (*arg) {
 		if ((r = b64decode((const unsigned char *) arg, str_len(arg), &slop)) == 1)
@@ -992,7 +1001,7 @@ auth_plain(const char *arg)
 		if ((r = b64decode((const unsigned char *) authin.s, authin.len, &slop)) == 1)
 			return err_input();
 	}
-	if (r == -1 || !stralloc_0(&slop))
+	if ((int) r == -1 || !stralloc_0(&slop))
 		nomem();
 	while (slop.s[id])
 		id++; /*- ignore authorize-id */
@@ -1017,6 +1026,7 @@ auth_cram(const char *x)
 	char           *s;
 	char            unique[FMT_ULONG + FMT_ULONG + 3];
 
+	(void) x;
 	s = unique;
 	s += fmt_uint(s, getpid());
 	*s++ = '.';
@@ -1099,6 +1109,7 @@ smtp_auth(const char *arg)
 	{
 	case 0:
 		relayclient = "";
+		/* fall through */
 	case 3:
 		remoteinfo = user.s;
 		if (!env_put2("TCPREMOTEINFO", remoteinfo))
@@ -1107,6 +1118,7 @@ smtp_auth(const char *arg)
 		out("235 ok, go ahead (#2.0.0)\r\n");
 		break;
 	case 1:
+		/* fall through */
 	case 2:
 		sleep(5);
 		out("535 authorization failed (#5.7.1)\r\n");
@@ -1173,12 +1185,15 @@ main(int argc, char **argv)
 void
 getversion_ofmipd_c()
 {
-	const char     *x = "$Id: ofmipd.c,v 1.29 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ofmipd.c,v 1.30 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: ofmipd.c,v $
+ * Revision 1.30  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.29  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

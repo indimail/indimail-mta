@@ -207,7 +207,7 @@ auto_spawn.o: compile auto_spawn.c
 	./compile auto_spawn.c
 
 auto_split.c: auto-int conf-split
-	./auto-int auto_split `head -1 conf-split` > auto_split.c
+	./auto-int auto_split `head -1 conf-split` "unsigned int" > auto_split.c
 
 auto_split.o: compile auto_split.c
 	./compile auto_split.c
@@ -241,22 +241,22 @@ auto_uids.h: conf-users conf-groups
 	echo "#define QSCANDG   \"`head -4 conf-groups | tail -1`\""; \
 	echo "#define QCERTSG   \"`head -5 conf-groups | tail -1`\""; \
 	echo ""; \
-	echo "extern int auto_uida; /* alias user */" ;\
-	echo "extern int auto_uidd; /* qmail daemon user */" ;\
-	echo "extern int auto_uidl; /* qmail log user */" ;\
-	echo "extern int auto_uido; /* root user */" ;\
-	echo "extern int auto_uidp; /* password access user */" ;\
-	echo "extern int auto_uidq; /* qmail queue user */" ;\
-	echo "extern int auto_uidr; /* qmail remote user */" ;\
-	echo "extern int auto_uids; /* qmail send user */" ;\
-	echo "extern int auto_uidi; /* indimail user */" ;\
-	echo "extern int auto_uidv; /* virus scan user */" ;\
+	echo "extern uid_t auto_uida; /* alias user */" ;\
+	echo "extern uid_t auto_uidd; /* qmail daemon user */" ;\
+	echo "extern uid_t auto_uidl; /* qmail log user */" ;\
+	echo "extern uid_t auto_uido; /* root user */" ;\
+	echo "extern uid_t auto_uidp; /* password access user */" ;\
+	echo "extern uid_t auto_uidq; /* qmail queue user */" ;\
+	echo "extern uid_t auto_uidr; /* qmail remote user */" ;\
+	echo "extern uid_t auto_uids; /* qmail send user */" ;\
+	echo "extern uid_t auto_uidi; /* indimail user */" ;\
+	echo "extern uid_t auto_uidv; /* virus scan user */" ;\
 	echo ""; \
-	echo "extern int auto_gidq; /* qmail group */" ;\
-	echo "extern int auto_gidn; /* nofiles gorup */" ;\
-	echo "extern int auto_gidi; /* indimail user */" ;\
-	echo "extern int auto_gidv; /* virus scan group */" ;\
-	echo "extern int auto_gidc; /* certs access user */" ;\
+	echo "extern gid_t auto_gidq; /* qmail group */" ;\
+	echo "extern gid_t auto_gidn; /* nofiles gorup */" ;\
+	echo "extern gid_t auto_gidi; /* indimail user */" ;\
+	echo "extern gid_t auto_gidv; /* virus scan group */" ;\
+	echo "extern gid_t auto_gidc; /* certs access user */" ;\
 	echo ""; \
 	echo "int             uidinit(int, int);"; \
 	echo "const char     *get_user(uid_t);"; \
@@ -266,7 +266,7 @@ auto_uids.h: conf-users conf-groups
 	) > auto_uids.h
 
 auto_uids.c: auto-uid auto-gid conf-users conf-groups
-	( ./auto-uid auto_uida `head -1  conf-users` \
+	( echo "#include <sys/types.h>" && ./auto-uid auto_uida `head -1  conf-users` \
 	&&./auto-uid auto_uidd `head -2  conf-users | tail -1` \
 	&&./auto-uid auto_uidl `head -3  conf-users | tail -1` \
 	&&./auto-uid auto_uido `head -4  conf-users | tail -1` \

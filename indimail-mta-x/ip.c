@@ -1,5 +1,8 @@
 /*
  * $Log: ip.c,v $
+ * Revision 1.15  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -252,7 +255,7 @@ ip6_scan(const char *s, ip6_addr *ip6)
 	char            suffix[16];
 	unsigned int    i, x, len = 0;
 	unsigned long   u;
-	int             prefixlen = 0, suffixlen = 0;
+	unsigned int    prefixlen = 0, suffixlen = 0;
 	ip_addr         ip4;
 
 #if 0
@@ -357,7 +360,7 @@ ip6_scanbracket(const char *s, ip6_addr *ip6)
 void
 getversion_ip_c()
 {
-	const char     *x = "$Id: ip.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ip.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

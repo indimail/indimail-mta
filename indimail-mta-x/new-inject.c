@@ -1,5 +1,8 @@
 /*
  * $Log: new-inject.c,v $
+ * Revision 1.21  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.20  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -196,8 +199,7 @@ recipient_add(char *addr)
 void
 recipient_addlist(stralloc *list)
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 
 	for (j = i = 0; j < list->len; ++j) {
 		if (!list->s[j]) {
@@ -211,8 +213,7 @@ recipient_addlist(stralloc *list)
 void
 sender_get(stralloc *list)
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 
 	for (j = i = 0; j < list->len; ++j) {
 		if (!list->s[j]) {
@@ -278,8 +279,7 @@ envelope_make()
 void
 envelope_print()
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 
 	myputs("Envelope-Sender: ");
 	if (!mess822_quote(&tmp, sender.s, (char *) 0))
@@ -347,8 +347,7 @@ from_print()
 int
 inmft(stralloc *list)
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 
 	for (j = i = 0; j < list->len; ++j) {
 		if (!list->s[j]) {
@@ -424,7 +423,7 @@ no_return void
 finishmessage()
 {
 	const char     *qqx;
-	int             i, j;
+	unsigned int    i, j;
 
 	if (!flagqueue)
 		substdio_flush(subfdoutsmall);
@@ -446,7 +445,8 @@ finishmessage()
 int
 main(int argc, char **argv)
 {
-	int             i, opt, flagheader = 1;
+	int             opt, flagheader = 1;
+	unsigned int    i;
 	struct strerr   rwhconfig_err;
 
 	sig_pipeignore();
@@ -633,7 +633,7 @@ main(int argc, char **argv)
 void
 getversion_new_inject_c()
 {
-	const char     *x = "$Id: new-inject.c,v 1.20 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: new-inject.c,v 1.21 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

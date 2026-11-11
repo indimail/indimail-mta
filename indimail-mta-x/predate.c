@@ -1,5 +1,5 @@
 /*
- * $Id: predate.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: predate.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -28,14 +28,14 @@ main(int argc, char **argv)
 	time_t          now;
 	struct tm      *tm;
 	struct datetime dt;
-	datetime_sec    utc;
-	datetime_sec    local;
-	int             minutes;
+	datetime_sec    utc, local;
 	int             pi[2];
 	substdio        ss;
+	int             minutes;
 	int             wstat;
-	int             pid;
+	pid_t           pid;
 
+	(void) argc;
 	sig_pipeignore();
 
 	if (!argv[1])
@@ -121,12 +121,15 @@ main(int argc, char **argv)
 void
 getversion_predate_c()
 {
-	const char     *x = "$Id: predate.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: predate.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: predate.c,v $
+ * Revision 1.12  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

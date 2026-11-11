@@ -1,5 +1,8 @@
 /*
  * $Log: quote.c,v $
+ * Revision 1.8  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -47,8 +50,7 @@ static int
 doit(stralloc *saout, stralloc *sain)
 {
 	char            ch;
-	int             i, j;
-	unsigned int    nlen;
+	unsigned int    i, j, nlen;
 
 	/* make sure the size calculation below does not overflow */
 	if (__builtin_mul_overflow(sain->len, 2, &nlen) || __builtin_add_overflow(nlen, 2, &nlen)) {
@@ -74,7 +76,7 @@ int
 quote_need(const char *s, unsigned int n)
 {
 	unsigned char   uch;
-	int             i;
+	unsigned int    i;
 	if (!n)
 		return 1;
 	for (i = 0; i < n; ++i) {
@@ -126,7 +128,7 @@ quote2(stralloc *sa, const char *s)
 void
 getversion_quote_c()
 {
-	const char     *x = "$Id: quote.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: quote.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

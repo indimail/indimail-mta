@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-tcpok.c,v 1.32 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-tcpok.c,v 1.33 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <strerr.h>
@@ -33,7 +33,8 @@ int
 main()
 #endif
 {
-	int             fd, i;
+	int             fd;
+	unsigned int    i;
 	char            tcpto_buf[TCPTO_BUFSIZ];	/*- XXX: must match size in tcpto_clean.c, tcpto.c */
 	substdio        ss;
 #ifndef MULTI_QUEUE
@@ -41,6 +42,12 @@ main()
 	stralloc        QueueBase = { 0 };
 #endif
 
+#ifdef MULTI_QUEUE
+	(void) lcount;
+	(void) rcount;
+	(void) bcount;
+	(void) tcount;
+#endif
 #ifndef MULTI_QUEUE
 	if (!(qbase = env_get("QUEUE_BASE"))) {
 		switch (control_readfile(&QueueBase, "queue_base", 0))
@@ -89,6 +96,8 @@ main()
 int
 main(int argc, char **argv)
 {
+	(void) argc;
+	(void) argv;
 	process_queue(WARN, FATAL, main_function, 0, 0, 0, 0);
 	return 0;
 }
@@ -96,6 +105,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: qmail-tcpok.c,v $
+ * Revision 1.33  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.32  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -188,7 +200,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_tcpok_c()
 {
-	const char     *x = "$Id: qmail-tcpok.c,v 1.32 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-tcpok.c,v 1.33 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-nullqueue.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-nullqueue.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -12,6 +12,7 @@
 no_return void
 sigalrm(int x)
 {
+	(void) x;
 	/*- thou shalt not clean up here */
 	_exit(52);
 }
@@ -19,6 +20,7 @@ sigalrm(int x)
 no_return void
 sigbug(int x)
 {
+	(void) x;
 	_exit(81);
 }
 
@@ -53,13 +55,16 @@ main()
 void
 getversion_qmail_nullqueue_c()
 {
-	const char     *x = "$Id: qmail-nullqueue.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-nullqueue.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-nullqueue.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

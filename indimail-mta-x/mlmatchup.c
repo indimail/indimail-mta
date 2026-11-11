@@ -1,5 +1,5 @@
 /*
- * $Id: mlmatchup.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: mlmatchup.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -583,8 +583,7 @@ stralloc        outline = { 0 };
 void
 matchup(substdio * ssin)
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 	char            ch;
 
 	for (;;)
@@ -703,12 +702,15 @@ main()
 void
 getversion_mlmatchup_c()
 {
-	const char     *x = "$Id: mlmatchup.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mlmatchup.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: mlmatchup.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: spawn.c,v 1.38 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: spawn.c,v 1.39 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -25,7 +25,7 @@
 #include "auto_control.h"
 #include "variables.h"
 
-extern int      truncreport_SPAWN;
+extern uint     truncreport_SPAWN;
 int             SPAWN(int, int, unsigned long, char *, char *, char *, int);
 void            report_SPAWN(substdio *, int, char *, int);
 void            initialize_SPAWN(int, char **);
@@ -69,6 +69,7 @@ sigchld(int x)
 	int             pid;
 	int             i;
 
+	(void) x;
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		for (i = 0; i < auto_spawn; ++i) {
 			if (d[i].used) {
@@ -172,7 +173,8 @@ unset_env_variables()
 static void
 docmd()
 {
-	int             f, i, j, fdmess;
+	int             f, fdmess;
+	unsigned int    i, j;
 	int             pi[2];
 	struct stat     st;
 
@@ -376,7 +378,7 @@ QSPAWN(int argc, char **argv)
 	int             i, r, nfds;
 	fd_set          rfds;
 
-	if (uidinit(1, 0) == -1 || auto_uidq == -1)
+	if (uidinit(1, 0) == -1 || (int) auto_uidq == -1)
 		_exit(111);
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue"; /*- single queue like qmail */
@@ -485,7 +487,7 @@ QSPAWN(int argc, char **argv)
 static void /*- for ident command */
 getversion_spawn_c()
 {
-	const char     *x = "$Id: spawn.c,v 1.38 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: spawn.c,v 1.39 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
@@ -500,6 +502,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: spawn.c,v $
+ * Revision 1.39  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.38  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

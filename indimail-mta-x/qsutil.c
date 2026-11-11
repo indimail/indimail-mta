@@ -1,5 +1,5 @@
 /*
- * $Id: qsutil.c,v 1.28 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qsutil.c,v 1.29 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -222,7 +222,7 @@ issafe(char ch)
 void
 logsafe_noflush(const char *s, const char *argv0)
 {
-	int             i;
+	unsigned int    i;
 
 	while (!stralloc_copys(&foo, s))
 		nomem(argv0);
@@ -238,7 +238,7 @@ logsafe_noflush(const char *s, const char *argv0)
 void
 logsafe(const char *s, const char *argv0)
 {
-	int             i;
+	unsigned int    i;
 
 	while (!stralloc_copys(&foo, s))
 		nomem(argv0);
@@ -254,12 +254,15 @@ logsafe(const char *s, const char *argv0)
 void
 getversion_qsutil_c()
 {
-	const char     *x = "$Id: qsutil.c,v 1.28 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qsutil.c,v 1.29 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: qsutil.c,v $
+ * Revision 1.29  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.28  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

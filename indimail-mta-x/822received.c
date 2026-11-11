@@ -1,5 +1,8 @@
 /*
  * $Log: 822received.c,v $
+ * Revision 1.14  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -74,8 +77,7 @@ stralloc        line = { 0 };
 void
 doit()
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 	int             state;
 	char            ch;
 	char           *x;
@@ -185,6 +187,8 @@ main(int argc, char **argv)
 	int             j;
 	int             match;
 
+	(void) argc;
+	(void) argv;
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (!mess822_begin(&h, a))
@@ -226,7 +230,7 @@ main(int argc, char **argv)
 void
 getversion_822received_c()
 {
-	const char     *x = "$Id: 822received.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822received.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

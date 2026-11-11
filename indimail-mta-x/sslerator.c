@@ -1,5 +1,5 @@
 /*
- * $Id: sslerator.c,v 1.15 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: sslerator.c,v 1.16 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #ifdef TLS
 #include <unistd.h>
@@ -189,6 +189,7 @@ get_options(int argc, char **argv, char **certdir, char **certfile,
 			break;
 		case 'b':
 			*banner = optarg;
+			break;
 		case 'f':
 			scan_int(optarg, fd);
 			break;
@@ -434,13 +435,16 @@ main(int argc, char **argv)
 void
 getversion_sslerator_c()
 {
-	const char     *x = "$Id: sslerator.c,v 1.15 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sslerator.c,v 1.16 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: sslerator.c,v $
+ * Revision 1.16  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.15  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

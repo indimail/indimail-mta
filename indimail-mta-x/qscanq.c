@@ -1,5 +1,5 @@
 /*
- * $Id: qscanq.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qscanq.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -46,8 +46,7 @@ reset_sticky(char *scandir)
 			strerr_die4sys(QQ_XTEMP, FATAL, "unable to chdir to ", (char *) scandir, ": ");
 		_exit(QQ_XTEMP);	/*- temporary refusal to handle messages */
 	}
-	if (chmod(fn, 0700) == -1)
-		;
+	if (chmod(fn, 0700) == -1) {;} /*- make compiler happy */
 }
 
 void
@@ -65,6 +64,7 @@ main(int argc, char *argv[])
 	pid_t           pid = 0;
 	char           *ptr;
 
+	(void) argc;
 	if (uidinit(1, 1) == -1) {
 		if (flaglog)
 			strerr_die2sys(QQ_XTEMP, FATAL, "unable to get uid/gid: ");
@@ -162,13 +162,16 @@ main(int argc, char *argv[])
 void
 getversion_qscanq_c()
 {
-	const char     *x = "$Id: qscanq.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qscanq.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qscanq.c,v $
+ * Revision 1.18  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.17  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

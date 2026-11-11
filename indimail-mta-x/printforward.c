@@ -1,5 +1,8 @@
 /*
  * $Log: printforward.c,v $
+ * Revision 1.7  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.6  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -84,16 +87,11 @@ printsafe(const char *buf, int len)
 int
 main()
 {
-	uint32          eod;
-	uint32          pos;
-	uint32          klen;
-	uint32          dlen;
+	uint32          eod, pos, klen, dlen;
 	char            buf[8];
 	char            ch;
-	int             i;
-	int             j;
-	stralloc        key = { 0 };
-	stralloc        data = { 0 };
+	unsigned int    i, j;
+	stralloc        key = { 0 }, data = { 0 };
 
 	for (i = 0; i < 4; ++i)
 		getch(buf + i);
@@ -181,7 +179,7 @@ main()
 void
 getversion_printforward_c()
 {
-	const char     *x = "$Id: printforward.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: printforward.c,v 1.7 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

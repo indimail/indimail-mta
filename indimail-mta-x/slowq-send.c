@@ -1,5 +1,5 @@
 /*
- * $Id: slowq-send.c,v 1.44 2026-10-27 21:40:28+05:30 Cprogrammer Exp mbhangui $
+ * $Id: slowq-send.c,v 1.45 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <unistd.h>
@@ -201,6 +201,7 @@ fail:
 static void
 sigterm(int x)
 {
+	(void) x;
 	flagexitsend = 1;
 	slog(1, "alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
 	if (todopid)
@@ -210,6 +211,7 @@ sigterm(int x)
 static void
 sigterm_todo(int x)
 {
+	(void) x;
 	sig_block(sig_term);
 	todo_log("alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
 	if (!flagexittodo)
@@ -230,6 +232,7 @@ stop_todo()
 static void
 sigalrm(int x)
 {
+	(void) x;
 	flagrunasap = 1;
 	slog(1, "alert: ", argv0, ": ", mypid, " got ALRM: ", queuedesc, "\n", NULL);
 }
@@ -237,6 +240,7 @@ sigalrm(int x)
 static void
 sighup(int x)
 {
+	(void) x;
 	flagreadasap = 1;
 	slog(1, "alert: ", argv0, ": ", mypid, " got HUP: ", queuedesc, "\n", NULL);
 }
@@ -261,7 +265,7 @@ exit_todo()
 
 	if (!flagtodoalive)
 		return;
-	if (write(todofdo, "X", 1)) ; /*- keep compiler happy */
+	if (write(todofdo, "X", 1)) {;} /*- keep compiler happy */
 	r = read(todofdi, todobuf, sizeof (todobuf));
 	if (r > 0 && todobuf[0] == 'L')
 		slog(1, todobuf + 1, NULL);
@@ -773,8 +777,7 @@ comm_die_send(int i)
 void
 comm_info_todo(unsigned long id, unsigned long size, char *from, unsigned long pid, unsigned long uid)
 {
-	int             pos;
-	int             i;
+	unsigned int    pos, i;
 
 	comm_count_todo++;
 	pos = comm_buf_todo.len;
@@ -876,7 +879,7 @@ cleanup_do()
 	if (stat(fn1.s, &st) == -1)
 		return;	/*- probably qmail-queue deleted it */
 	getEnvConfiguLong(&ossified, "OSSIFIED", OSSIFIED);
-	if (recent <= st.st_atime + ossified)
+	if ((unsigned long) recent <= st.st_atime + ossified)
 		return;
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == 0)
@@ -1048,7 +1051,7 @@ pqfinish()
 static void
 pqrun()
 {
-	int             c, i;
+	unsigned int    c, i;
 
 	for (c = 0; c < CHANNELS; ++c) {
 		if (pqchan[c].p && pqchan[c].len) {
@@ -1071,7 +1074,7 @@ typedef struct job {
 	stralloc        sender, qqeh, envh;
 } job;
 
-static int      numjobs;
+static uint     numjobs;
 static job     *jo;
 
 /*
@@ -1082,7 +1085,7 @@ static job     *jo;
 static void
 job_init()
 {
-	int             j;
+	unsigned int    j;
 
 	while (!(jo = (struct job *) alloc(numjobs * sizeof (struct job))))
 		nomem(argv0);
@@ -1102,7 +1105,7 @@ job_init()
 static int
 job_avail()
 {
-	int             j;
+	unsigned int    j;
 
     /*- Rolf Eike Beer */
 	for (j = 0; j < numjobs; ++j) {
@@ -1214,7 +1217,8 @@ static stralloc orig_recip = { 0 };
 static void
 addbounce(unsigned long id, char *recip, char *report)
 {
-	int             fd, pos, w;
+	int             fd, w;
+	unsigned int    pos;
 
 	while (!stralloc_copyb(&bouncetext, "<", 1))
 		nomem(argv0);
@@ -1582,8 +1586,8 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		if ((fd = open_read(fn1.s)) == -1)
 			qmail_fail(&qqt);
 		else {
-			int             bytestogo = bouncemaxbytes;
-			int             bytestoget = (bytestogo < sizeof buf) ? bytestogo : sizeof buf;
+			unsigned int    bytestogo = bouncemaxbytes;
+			unsigned int    bytestoget = (bytestogo < sizeof buf) ? bytestogo : sizeof buf;
 			substdio_fdbuf(&ssread, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof (inbuf));
 			while (bytestoget > 0 && (r = substdio_get(&ssread, buf, bytestoget)) > 0) {
 				qmail_put(&qqt, buf, r);
@@ -1697,7 +1701,7 @@ del_status()
 static void
 del_init()
 {
-	int             c, i;
+	unsigned int    c, i;
 
 	for (c = 0; c < CHANNELS; ++c) {
 		flagspawnalive[c] = 1;
@@ -1752,7 +1756,7 @@ del_avail(int c)
 static void
 del_start(int j, seek_pos mpos, char *recip)
 {
-	int             i, c;
+	unsigned int    i, c;
 
 	c = jo[j].channel;
 	if (!flagspawnalive[c])
@@ -1852,7 +1856,7 @@ del_dochan(int c)
 		if (!ch && (dline[c].len > 2)) {
 			delnum = (unsigned int) (unsigned char) dline[c].s[0];
 			delnum += (unsigned int) ((unsigned int) dline[c].s[1]) << 8;
-			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
+			if ((delnum < 0) || ((unsigned int) delnum >= concurrency[c]) || !del[c][delnum].used)
 				slog(1, "warn: ", argv0, ": ", queuedesc, ": internal error: delivery report out of range\n", NULL);
 			else {
 				if (dline[c].s[2] == 'Z') {
@@ -2356,8 +2360,9 @@ todo_selprep_todo(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 static void
 todo_selprep_send(int *nfds, fd_set *rfds, datetime_sec *wakeup)
 {
+	(void) wakeup;
 	if (flagexitsend && flagtodoalive) {
-		if (write(todofdo, "X", 1)) ; /* keep compiler happy */
+		if (write(todofdo, "X", 1)) {;} /* keep compiler happy */
 		flagtodoalive = 0;
 	}
 	if (flagtodoalive) {
@@ -2789,8 +2794,8 @@ static void
 regetcontrols()
 {
 	int             r;
-	int             c; /*NJL*/
-	int             newholdjobs[CHANNELS] = { 0, 0 }; /*NJL*/
+	unsigned int    c; /*NJL*/
+	unsigned int    newholdjobs[CHANNELS] = { 0, 0 }; /*NJL*/
 
 	if (!controldir && !(controldir = env_get("CONTROLDIR")))
 		controldir = auto_control;
@@ -2815,11 +2820,11 @@ regetcontrols()
 		return;
 	}
 	/*- Add "holdlocal/holdremote" flags - NJL 1998/05/03 */
-	if (control_readint(&newholdjobs[0], "holdlocal") == -1) {
+	if (control_readint((int *) &newholdjobs[0], "holdlocal") == -1) {
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdlocal\n", NULL);
 		return;
 	}
-	if (control_readint(&newholdjobs[1], "holdremote") == -1) {
+	if (control_readint((int *) &newholdjobs[1], "holdremote") == -1) {
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdremote\n", NULL);
 		return;
 	}
@@ -2894,6 +2899,8 @@ reread()
 int
 todo_scan(int *nfds, fd_set *rfds, unsigned long *id, int mq_flag)
 {
+	(void) nfds;
+	(void) mq_flag;
 	/*- run todo maximal once every N seconds */
 	if (todo_interval > 0 && recent < nexttodorun)
 		return 1;	/* skip todo run this time */
@@ -2914,7 +2921,7 @@ todo_scan(int *nfds, fd_set *rfds, unsigned long *id, int mq_flag)
 	case 0: /*- no files in todo/split/ */
 		flagtododir = 0;
 		/*return 4;*/
-		/*- flow through */
+		/* fall through */
 	default: /*- error */
 		return -1;
 	}
@@ -3318,6 +3325,7 @@ todo_processor(int *pi1, int *pi2, int lockfd)
 static void
 sigusr1(int x)
 {
+	(void) x;
 	if (flagdetached == 1)
 		return;
 	sig_block(sig_usr1);
@@ -3355,6 +3363,7 @@ sigusr1(int x)
 static void
 sigusr2(int x)
 {
+	(void) x;
 	if (flagdetached == 0)
 		return;
 	sig_block(sig_usr2);
@@ -3389,9 +3398,9 @@ tododied()
 static void
 sigchld(int x)
 {
-	int             wstat;
-	pid_t           pid;
+	pid_t           pid, wstat;
 
+	(void) x;
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		if (pid == todopid) {
 			tododied();
@@ -3535,6 +3544,7 @@ main(int argc, char **argv)
 	struct timeval  tv;
 	char           *ptr;
 
+	(void) argc;
 	mypid[fmt_ulong(mypid, getpid())] = 0;
 	if (!(queuedir = env_get("QUEUEDIR")))
 		queuedir = "queue/slowq"; /*- single queue like qmail */
@@ -3558,7 +3568,7 @@ main(int argc, char **argv)
 		_exit(111);
 	}
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	strnum1[fmt_ulong(strnum1, conf_split)] = 0;
@@ -3647,7 +3657,7 @@ main(int argc, char **argv)
 	/*- read 2 bytes from qmail-lspawn, qmail-rspawn to get concurrency */
 	for (c = 0; c < CHANNELS; ++c) {
 		char            ch1, ch2;
-		int             u;
+		unsigned int    u;
 		int             r;
 
 		do {
@@ -3815,7 +3825,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_send_c()
 {
-	const char     *x = "$Id: slowq-send.c,v 1.44 2026-10-27 21:40:28+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: slowq-send.c,v 1.45 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsiddelivery_rateh;
 	x = sccsidgetdomainth;
@@ -3825,6 +3835,9 @@ getversion_slowq_send_c()
 
 /*
  * $Log: slowq-send.c,v $
+ * Revision 1.45  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.44  2026-10-27 21:40:28+05:30  Cprogrammer
  * fix compiler warnings
  *

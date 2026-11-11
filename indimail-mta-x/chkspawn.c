@@ -1,5 +1,8 @@
 /*
  * $Log: chkspawn.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -47,7 +50,7 @@ main()
 		substdio_flush(subfderr);
 		_exit(1);
 	}
-	if (auto_spawn > maxnumd)
+	if (auto_spawn > (int) maxnumd)
 	{
 		substdio_puts(subfderr, "Oops. Your system's FD_SET() has a hidden limit of ");
 		substdio_put(subfderr, num, fmt_ulong(num, hiddenlimit));
@@ -72,7 +75,7 @@ limit in conf-spawn be at most ");
 void
 getversion_chkspawn_c()
 {
-	const char     *x = "$Id: chkspawn.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: chkspawn.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

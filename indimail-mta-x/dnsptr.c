@@ -1,5 +1,8 @@
 /*
  * $Log: dnsptr.c,v $
+ * Revision 1.13  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -46,12 +49,13 @@ main(int argc, char **argv)
 {
 	ip_addr         ip;
 #ifdef USE_SPF
-	int             j;
+	unsigned int    j;
 	strsalloc       ssa = { 0 };
 #else
 	stralloc        sa = { 0 };
 #endif
 
+	(void) argc;
 	if (!argv[1])
 		_exit(100);
 	ip4_scan(argv[1], &ip);
@@ -73,7 +77,7 @@ main(int argc, char **argv)
 void
 getversion_dnsptr_c()
 {
-	const char     *x = "$Id: dnsptr.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dnsptr.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

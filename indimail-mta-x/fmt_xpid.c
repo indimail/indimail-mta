@@ -1,5 +1,8 @@
 /*
  * $Log: fmt_xpid.c,v $
+ * Revision 1.5  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.4  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -17,12 +20,13 @@
 /*- Public domain.  */
 #include "fmt_xpid.h"
 
-static char     hex[16] = "0123456789abcdef";
+static char     hex[] = "0123456789abcdef";
 unsigned int
-fmt_xpid(register char *s, register pid_t u, const int n)
+fmt_xpid(register char *s, register pid_t u, const unsigned int n)
 {
 	register unsigned int len;
 	register unsigned long q;
+
 	len = 1;
 	q = u;
 	while (q > 15)
@@ -49,7 +53,7 @@ fmt_xpid(register char *s, register pid_t u, const int n)
 void
 getversion_fmt_xpid_c()
 {
-	const char     *x = "$Id: fmt_xpid.c,v 1.4 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: fmt_xpid.c,v 1.5 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.93 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.94 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -132,9 +132,10 @@ static int
 run_mailfilter(const char *domain, const char *ext, const char *qqeh, const char *mailprog, char **argv)
 {
 	char            strnum[FMT_ULONG];
-	pid_t           filt_pid;
+	pid_t           filt_pid, wstat;
 	int             pipefd[2], pipefe[2];
-	int             wstat, filt_exitcode, e, len = 0;
+	unsigned int    len = 0;
+	int             filt_exitcode, e;
 	char           *filterargs;
 	static stralloc filterdefs = { 0 };
 	static char     errstr[1024];
@@ -399,7 +400,7 @@ check_size(const char *size)
 			report(111, "spawn-filter: Unable to read databytes: ", error_str(errno), ". (#4.3.0)", 0, 0, 0);
 	} else
 		scan_ulong(x, &databytes);
-	if (databytes == -1)
+	if ((int) databytes == -1)
 		return (0);
 	scan_ulong(size, &msgsize);
 	if (msgsize > databytes)
@@ -689,7 +690,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_spawn_filter_c()
 {
-	const char     *x = "$Id: spawn-filter.c,v 1.93 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: spawn-filter.c,v 1.94 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
@@ -700,6 +701,9 @@ getversion_qmail_spawn_filter_c()
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.94  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.93  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

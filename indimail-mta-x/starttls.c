@@ -1,5 +1,5 @@
 /*
- * $Id: starttls.c,v 1.21 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: starttls.c,v 1.22 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #if defined(HASTLSA) && defined(TLS)
@@ -60,7 +60,7 @@ static SSL     *ssl;
 static stralloc rhost = { 0 }; /*- host ip to which qmail-remote ultimately connects */
 static stralloc smtptext = { 0 };
 static saa      ehlokw = { 0 };	/*- list of EHLO keywords and parameters */
-static int      maxehlokwlen = 0;
+static uint     maxehlokwlen = 0;
 static stralloc hexstring = { 0 };
 static stralloc tline = { 0 };
 ipalloc         ia = { 0 };
@@ -139,7 +139,7 @@ logerrf(const char *str)
 	}
 }
 
-void
+no_return void
 die_nomem_child()
 {
 	substdio_flush(subfdout);
@@ -148,7 +148,7 @@ die_nomem_child()
 	die (2);
 }
 
-void
+no_return void
 die_nomem(void)
 {
 	substdio_flush(subfdout);
@@ -157,7 +157,7 @@ die_nomem(void)
 	die (111);
 }
 
-void
+no_return void
 die_control(const char *arg1, const char *arg2)
 {
 	substdio_flush(subfdout);
@@ -220,10 +220,11 @@ dropped()
 }
 
 ssize_t
-saferead(int fd, char *buf, int len)
+saferead(int fd, char *buf, size_t len)
 {
 	int             r;
 
+	(void) fd;
 	if (ssl) {
 		if ((r = ssl_timeoutread(timeoutdata, smtpfd, smtpfd, ssl, buf, len)) < 0)
 			ssl_err_str = myssl_error_str();
@@ -235,10 +236,11 @@ saferead(int fd, char *buf, int len)
 }
 
 ssize_t
-safewrite(int fd, char *buf, int len)
+safewrite(int fd, char *buf, size_t len)
 {
 	int             r;
 
+	(void) fd;
 	if (ssl) {
 		if ((r = ssl_timeoutwrite(timeoutdata, smtpfd, smtpfd, ssl, buf, len)) < 0)
 			ssl_err_str = myssl_error_str();
@@ -253,14 +255,14 @@ safewrite(int fd, char *buf, int len)
 static char     inbuf[BUFSIZE_MESS];
 static char     smtpfrombuf[BUFSIZE_SMALL];
 static char     smtptobuf[BUFSIZE_IN];
-static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, sizeof inbuf);
-static substdio smtpfrom = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) saferead, -1, smtpfrombuf, sizeof smtpfrombuf);
-substdio        smtpto = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) safewrite, -1, smtptobuf, sizeof smtptobuf);
+static substdio ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, inbuf, BUFSIZE_MESS);
+static substdio smtpfrom = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) saferead, -1, smtpfrombuf, BUFSIZE_SMALL);
+substdio        smtpto = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) safewrite, -1, smtptobuf, BUFSIZE_IN);
 
 void
 outsmtptext()
 {
-	int             i;
+	unsigned int    i;
 
 	if (smtptext.s && smtptext.len) {
 		out("Remote host said: ");
@@ -298,6 +300,8 @@ va_dcl
 #ifndef HAVE_STDARG_H
 	int             code, e;
 	const char     *prepend;
+#else
+	(void) code;
 #endif
 
 #ifdef HAVE_STDARG_H
@@ -330,11 +334,10 @@ no_return void
 tls_quit(const char *s1, const char *s2, const char *s3, const char *s4, const char *s5, stralloc *peer_sa)
 {
 	char            ch;
-	int             i, state;
+	unsigned int    i;
+	int             state;
 
-#if 0
-	logerr((char *) s1);
-#endif
+	(void) s1;
 	logerr((char *) s2);
 	if (s3)
 		logerr((char *) s3);
@@ -466,7 +469,7 @@ timeoutconn46(int fd, struct ip_mx *ix, union v46addr *ip, int port, int timeout
 	}
 }
 
-void
+no_return void
 perm_dns(char *str)
 {
 	logerr("Sorry, I couldn't find any host named ");
@@ -475,7 +478,7 @@ perm_dns(char *str)
 	die (5);
 }
 
-void
+no_return void
 temp_dns()
 {
 	logerr("no host by that name ");
@@ -484,7 +487,7 @@ temp_dns()
 	die (6);
 }
 
-void
+no_return void
 temp_oserr()
 {
 	logerrf("System resources temporarily unavailable\n");
@@ -495,7 +498,7 @@ stralloc        sa = { 0 };
 int
 get_tlsa_rr(const char *domain, int mxhost, int port)
 {
-	int             j;
+	unsigned int    j;
 	unsigned long   r;
 	char            strnum[FMT_ULONG];
 
@@ -638,7 +641,8 @@ do_dane_validation(const char *host, int port)
 	static ipalloc  ip = { 0 };
     char           *err_str = NULL, *servercert = NULL;
 	char            strnum[FMT_ULONG], hex[2];
-	int             i, j, tlsa_status, authfullMatch, authsha256, authsha512,
+	unsigned int    i, j;
+	int             tlsa_status, authfullMatch, authsha256, authsha512,
 					match0Or512, needtlsauth, usage;
 	unsigned long   code;
 	unsigned char   ch;
@@ -929,13 +933,16 @@ unsigned long smtpcode() { return(550);}
 void
 getversion_starttls_c()
 {
-	const char     *x = "$Id: starttls.c,v 1.21 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: starttls.c,v 1.22 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: starttls.c,v $
+ * Revision 1.22  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.21  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: auto-uid.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: auto-uid.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -18,6 +18,7 @@ main(int argc, char **argv)
 	char           *value;
 	struct passwd  *pw;
 
+	(void) argc;
 	if (!(name = argv[1]))
 		_exit(100);
 	if (!(value = argv[2]))
@@ -35,7 +36,7 @@ main(int argc, char **argv)
 		substdio_flush(subfderr);
 		_exit(111);
 	}
-	if (subprintf(&ss1, "int %s = %u;\n", name, pw->pw_uid) == -1)
+	if (subprintf(&ss1, "uid_t %s = %u;\n", name, pw->pw_uid) == -1)
 		_exit(111);
 	if (substdio_flush(&ss1) == -1)
 		_exit(111);
@@ -45,11 +46,14 @@ main(int argc, char **argv)
 void
 getversion_auto_uid_c()
 {
-	const char     *x = "$Id: auto-uid.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: auto-uid.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 	(void) x;
 }
 /*
  * $Log: auto-uid.c,v $
+ * Revision 1.15  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-local.c,v 1.53 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-local.c,v 1.54 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/time.h>
@@ -97,6 +97,7 @@ temp_read()
 no_return void
 temp_slowlock(int x)
 {
+	(void) x;
 	strerr_die1x(111, "File has been locked for 30 seconds straight. (#4.3.0)");
 }
 
@@ -505,7 +506,8 @@ qmeexists(int *fd, int *cutable)
 void
 qmesearch(int *fd, int *cutable)
 {
-	int             i;
+	unsigned int    i;
+	int             j;
 
 	if (!stralloc_copys(&qme, ".qmail")
 			|| !stralloc_cats(&qme, dash)
@@ -524,17 +526,17 @@ qmesearch(int *fd, int *cutable)
 		}
 		return;
 	}
-	for (i = safeext.len; i >= 0; --i) {
-		if (!i || (safeext.s[i - 1] == '-')) {
+	for (j = safeext.len; j >= 0; --j) {
+		if (!j || (safeext.s[j - 1] == '-')) {
 			if (!stralloc_copys(&qme, ".qmail")
 					|| !stralloc_cats(&qme, dash)
-					|| !stralloc_catb(&qme, safeext.s, i)
+					|| !stralloc_catb(&qme, safeext.s, j)
 					|| !stralloc_cats(&qme, "default"))
 				temp_nomem();
 			if (qmeexists(fd, cutable)) {
-				if (i <= str_len(ext)) {/*- paranoia */
+				if (j <= (int) str_len(ext)) {/*- paranoia */
 					/*- set env variable DEFAULT for fastforward */
-					if (!env_put2("DEFAULT", ext + i))
+					if (!env_put2("DEFAULT", ext + j))
 						temp_nomem();
 				}
 				return;
@@ -909,7 +911,7 @@ main(int argc, char **argv)
 			case '?': /* branch */
 				++i;
 				{
-					int             l;
+					unsigned int    l;
 					for (l = i; l < k; ++l)
 						if (cmds.s[l] == ' ' || cmds.s[l] == '\t') {
 							cmds.s[l] = 0;
@@ -955,6 +957,7 @@ main(int argc, char **argv)
 				break;
 			case '&':
 				++i;
+				/* fall through */
 			default:
 				++count_forward;
 				if (flagdoit)
@@ -983,7 +986,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_local_c()
 {
-	const char     *x = "$Id: qmail-local.c,v 1.53 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-local.c,v 1.54 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmyctimeh;
 	(void) x;
@@ -991,6 +994,9 @@ getversion_qmail_local_c()
 
 /*
  * $Log: qmail-local.c,v $
+ * Revision 1.54  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.53  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

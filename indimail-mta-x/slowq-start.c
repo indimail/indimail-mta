@@ -1,5 +1,8 @@
 /*
  * $Log: slowq-start.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -128,6 +131,7 @@ main(int argc, char **argv)
 	const char     *(qlargs[]) = { "qmail-lspawn", "./Mailbox", 0, 0};
 	const char     *(qrargs[]) = { "qmail-rspawn", 0, 0};
 
+	(void) argc;
 	set_supplementary_groups = env_get("USE_SETGROUPS");
 	if (chdir("/") == -1)
 		die();
@@ -304,7 +308,7 @@ main(int argc, char **argv)
 void
 getversion_slowq_start_c()
 {
-	const char     *x = "$Id: slowq-start.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: slowq-start.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

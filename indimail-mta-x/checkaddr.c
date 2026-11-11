@@ -1,5 +1,5 @@
 /*
- * $Id: checkaddr.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: checkaddr.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -44,6 +44,7 @@ main(int argc, char **argv)
 	char            ssinbuf[BUFSIZE_IN];
 	substdio        ssin = SUBSTDIO_FDBUF((ssize_t (*)(int,  char *, size_t)) read, 0, ssinbuf, sizeof ssinbuf);
 
+	(void) argc;
 	recipient = env_get("RECIPIENT");
 	recips = argv + 1;
 	if (*recips)
@@ -63,13 +64,16 @@ main(int argc, char **argv)
 void
 getversion_checkaddr_c()
 {
-	const char     *x = "$Id: checkaddr.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: checkaddr.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: checkaddr.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

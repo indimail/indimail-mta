@@ -1,5 +1,8 @@
 /*
  * $Log: plugtest.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -144,8 +147,10 @@ main(int argc, char **argv)
 		switch (opt) {
 		case 'i':
 			authenticated = 1;
+			/* fall through */
 		case 'I':
 			relayclient = "";
+			break;
 		case 'r':
 			remoteip = optarg;
 			break;
@@ -392,7 +397,7 @@ main(int argc, char **argv)
 void
 getversion_plugtest_c()
 {
-	const char     *x = "$Id: plugtest.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: plugtest.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

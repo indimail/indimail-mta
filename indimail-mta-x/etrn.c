@@ -1,5 +1,5 @@
 /*
- * $Id: etrn.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: etrn.c,v 1.23 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <sys/types.h>
@@ -30,11 +30,11 @@ static stralloc etrn, etrndir, lockfile, t;
 
 static char    *binetrnargs[5] = { 0, 0, 0, 0, (char *) 0 };
 
-int
+ssize_t
 etrn_queue(const char *arg, const char *remoteip)
 {
 	int             child, flagetrn, len, exitcode, wstat, fd;
-	size_t          mailcount;
+	ssize_t         mailcount;
 	struct constmap mapetrn;
 	static int      flagrcpt = 1;
 	char           *dir;
@@ -67,7 +67,7 @@ etrn_queue(const char *arg, const char *remoteip)
 		die_nomem();
 	mailcount = 0;
 	if (!access(etrndir.s, F_OK))
-		qcount_dir(etrndir.s, &mailcount);
+		qcount_dir(etrndir.s, (size_t *) &mailcount);
 	else {
 		if (errno != error_noent)
 			return -1;
@@ -77,7 +77,7 @@ etrn_queue(const char *arg, const char *remoteip)
 				!stralloc_0(&etrndir))
 			die_nomem();
 		if (!access(etrndir.s, F_OK))
-			qcount_dir(etrndir.s, &mailcount);
+			qcount_dir(etrndir.s, (size_t *) &mailcount);
 		else {
 			if (errno != error_noent)
 				return -1;
@@ -142,7 +142,7 @@ etrn_queue(const char *arg, const char *remoteip)
 void
 getversion_etrn_c()
 {
-	const char     *x = "$Id: etrn.c,v 1.22 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: etrn.c,v 1.23 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -150,6 +150,9 @@ getversion_etrn_c()
 
 /*
  * $Log: etrn.c,v $
+ * Revision 1.23  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.22  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

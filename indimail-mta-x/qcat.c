@@ -1,5 +1,5 @@
 /*
- * $Id: qcat.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qcat.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  *
  * qcat -- concatenate files and print on the standard output.
  * Copyright (C) 1988-2024 Free Software Foundation, Inc.
@@ -76,6 +76,7 @@ my_error(const char *s1, const char *s2, int exit_val)
 static void
 sigterm(int x)
 {
+	(void) x;
 	substdio_flush(&ssout);
 	substdio_flush(&sserr);
 	close(0);
@@ -88,7 +89,7 @@ void
 convert(char *inbuf, int len, int show_nonprinting, int show_tabs, int show_ends)
 {
 	int             i;
-	char           ch;
+	unsigned char  ch;
 
 	/* taken from coreutils/srcs/cat.c */
 	for (i = 0; i < len; i++) {
@@ -237,13 +238,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_cat_c()
 {
-	const char     *x = "$Id: qcat.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qcat.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qcat.c,v $
+ * Revision 1.15  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

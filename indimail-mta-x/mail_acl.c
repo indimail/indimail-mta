@@ -1,5 +1,5 @@
 /*
- * $Id: mail_acl.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: mail_acl.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stddef.h>
 #include <str.h>
@@ -19,8 +19,9 @@ extern void     flush();
 int
 mail_acl(stralloc *acclist, int qregex, const char *sender, const char *recipient, char verb)
 {
-	int             err, len, count, from_reject, rcpt_reject, rcpt_found,
+	int             err, from_reject, rcpt_reject, rcpt_found,
 					from_found;
+	unsigned int   len, count;
 	char           *ptr, *cptr, *rcpt_match, *from_match;
 	const char     *err_str;
 	char            count_buf[FMT_ULONG];
@@ -208,13 +209,16 @@ mail_acl(stralloc *acclist, int qregex, const char *sender, const char *recipien
 void
 getversion_mail_acl_c()
 {
-	const char     *x = "$Id: mail_acl.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mail_acl.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: mail_acl.c,v $
+ * Revision 1.12  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

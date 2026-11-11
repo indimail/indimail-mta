@@ -1,5 +1,8 @@
 /*
  * $Log: fmt_xpid.h,v $
+ * Revision 1.3  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.2  2004-10-11 13:53:59+05:30  Cprogrammer
  * added function prototypes
  *
@@ -11,5 +14,5 @@
 #define FMT_XPID_H
 #include <sys/types.h>
 
-unsigned int    fmt_xpid(char *, const pid_t, const int);
+unsigned int    fmt_xpid(char *, const pid_t, const unsigned int);
 #endif

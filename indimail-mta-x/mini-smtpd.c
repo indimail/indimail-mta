@@ -1,5 +1,5 @@
 /*
- * $Id: mini-smtpd.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: mini-smtpd.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -29,7 +29,7 @@
 #include "buffer_defs.h"
 
 #define MAXHOPS 100
-static int      databytes = 0;
+static uint     databytes = 0;
 static int      timeout = 1200;
 static int      liphostok = 0;
 static int      seenmail = 0;
@@ -140,6 +140,7 @@ err_size()
 void
 err_unimpl(const char *arg)
 {
+	(void) arg;
 	out("502 unimplemented (#5.5.1)\r\n");
 }
 
@@ -164,12 +165,14 @@ err_wantrcpt()
 void
 err_noop(const char *arg)
 {
+	(void) arg;
 	out("250 ok\r\n");
 }
 
 void
 err_vrfy(const char *arg)
 {
+	(void) arg;
 	out("252 send some mail, i'll try my best\r\n");
 }
 
@@ -189,12 +192,14 @@ smtp_greet(const char *code)
 void
 smtp_help(const char *arg)
 {
+	(void) arg;
 	out("214 netqmail home page: http://qmail.org/netqmail\r\n");
 }
 
 no_return void
 smtp_quit(const char *arg)
 {
+	(void) arg;
 	smtp_greet("221 ");
 	out("\r\n");
 	flush();
@@ -221,7 +226,7 @@ setup()
 			(liphostok = control_rldef(&liphost, "localiphost", 1, (char *) 0)) == -1 ||
 			control_readint(&timeout, "timeoutsmtpd") == -1 ||
 			rcpthosts_init() == -1 ||
-			control_readint(&databytes, "databytes") == -1)
+			control_readint((int *) &databytes, "databytes") == -1)
 		die_control();
 	if (timeout <= 0)
 		timeout = 1;
@@ -248,7 +253,7 @@ setup()
 int
 addrparse(const char *arg)
 {
-	int             i;
+	unsigned int    i;
 	char            ch;
 	char            terminator;
 	struct ip_address ip;
@@ -362,6 +367,7 @@ smtp_ehlo(const char *arg)
 void
 smtp_rset(const char *arg)
 {
+	(void) arg;
 	seenmail = 0;
 	out("250 flushed\r\n");
 }
@@ -618,6 +624,7 @@ smtp_data(const char *arg)
 	unsigned long   qp;
 	const char     *qqx;
 
+	(void) arg;
 	if (!seenmail) {
 		err_wantmail();
 		return;
@@ -696,6 +703,8 @@ main(int argc, char **argv)
 {
 	struct commands *cmdptr;
 
+	(void) argc;
+	(void) argv;
 	sig_pipeignore();
 	if (chdir(auto_qmail) == -1)
 		die_control();
@@ -714,13 +723,16 @@ main(int argc, char **argv)
 void
 getversion_mini_smtpd()
 {
-	const char     *x = "$Id: mini-smtpd.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mini-smtpd.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: mini-smtpd.c,v $
+ * Revision 1.13  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

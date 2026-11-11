@@ -1,5 +1,5 @@
 /*
- * $Id: qmta-send.c,v 1.33 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmta-send.c,v 1.34 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -181,18 +181,21 @@ chdir_toqueue()
 static void
 sigterm(int x)
 {
+	(void) x;
 	flagexitasap = 1;
 	slog(1, "info: ", argv0, ": ", mypid, ": got TERM\n", NULL);
 }
 
 void sigalrm(int x)
 {
+	(void) x;
 	flagrunasap = 1;
 	slog(1, "info: ", argv0, ": ", mypid, ": got ALRM\n", NULL);
 }
 
 void sighup(int x)
 {
+	(void) x;
 	flagreadasap = 1;
 	slog(1, "info: ", argv0, ": ", mypid, ": got HUP\n", NULL);
 }
@@ -277,6 +280,7 @@ cleanup_do(fd_set *wfds)
 	struct stat     st;
 	unsigned long   id, ossified;
 
+	(void) wfds;
 	if (!flagcleanup) {
 		if (recent < cleanuptime)
 			return;
@@ -290,7 +294,7 @@ cleanup_do(fd_set *wfds)
 	case 0: /*- no files found */
 		flagcleanup = 0;
 		cleanuptime = recent + SLEEP_CLEANUP;
-		/*- flow through */
+		/* fall through */
 	default:
 		return;
 	}
@@ -298,7 +302,7 @@ cleanup_do(fd_set *wfds)
 	if (stat(fn1.s, &st) == -1)
 		return;	/*- probably qmail-queue deleted it */
 	getEnvConfiguLong(&ossified, "OSSIFIED", OSSIFIED);
-	if (recent <= st.st_atime + ossified)
+	if ((unsigned long int) recent <= st.st_atime + ossified)
 		return;
 	fnmake_info(id);
 	if (stat(fn1.s, &st) == 0)
@@ -458,7 +462,7 @@ pqfinish()
 static void
 pqrun()
 {
-	int             c, i;
+	unsigned int    c, i;
 
 	for (c = 0; c < CHANNELS; ++c) {
 		if (pqchan[c].p && pqchan[c].len) {
@@ -822,7 +826,7 @@ todo_do(fd_set *rfds)
 		break;
 	case 0: /*- no files found */
 		flagtododir = 0;
-		/*- flow through */
+		/* fall through */
 	default:
 		return;
 	}
@@ -1093,7 +1097,7 @@ del_status()
 static void
 del_init()
 {
-	int             c, i;
+	unsigned int    c, i;
 
 	for (c = 0; c < CHANNELS; ++c) {
 		flagspawnalive[c] = 1;
@@ -1113,7 +1117,7 @@ del_init()
 static int
 del_canexit()
 {
-	int             c;
+	unsigned int    c;
 
 	for (c = 0; c < CHANNELS; ++c) {
 		if (flagspawnalive[c] && !holdjobs[c]) { /* if dead or held /NJL/, nothing we can do about its jobs */
@@ -1133,7 +1137,7 @@ del_avail(int c)
 static void
 del_start(int j, seek_pos mpos, char *recip)
 {
-	int             i, c;
+	unsigned int    i, c;
 
 	c = jo[j].channel;
 	if (!flagspawnalive[c])
@@ -1234,7 +1238,8 @@ static stralloc orig_recip = { 0 };
 static void
 addbounce(unsigned long id, char *recip, char *report)
 {
-	int             fd, pos, w;
+	int             fd, w;
+	unsigned int    pos;
 
 	while (!stralloc_copyb(&bouncetext, "<", 1))
 		nomem(argv0);
@@ -1292,9 +1297,10 @@ static void
 del_dochan(int c)
 {
 	char            ch;
-	int             r, i, delnum;
+	int             delnum;
+	unsigned int    i, r;
 
-	if ((r = read(chanfdin[c], delbuf, sizeof (delbuf))) == -1)
+	if ((int) (r = read(chanfdin[c], delbuf, sizeof (delbuf))) == -1)
 		return;
 	if (r == 0) {
 		spawndied(c);
@@ -1313,7 +1319,7 @@ del_dochan(int c)
 		if (!ch && (dline[c].len > 2)) {
 			delnum = (unsigned int) (unsigned char) dline[c].s[0];
 			delnum += (unsigned int) ((unsigned int) dline[c].s[1]) << 8;
-			if ((delnum < 0) || (delnum >= concurrency[c]) || !del[c][delnum].used)
+			if ((delnum < 0) || ((unsigned int) delnum >= concurrency[c]) || !del[c][delnum].used)
 				slog(1, "warn: ", argv0, ": internal error: delivery report out of range\n", NULL);
 			else {
 				if (dline[c].s[2] == 'Z') {
@@ -1829,8 +1835,8 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 		if ((fd = open_read(fn1.s)) == -1)
 			qmail_fail(&qqt);
 		else {
-			int             bytestogo = bouncemaxbytes;
-			int             bytestoget = (bytestogo < sizeof buf) ? bytestogo : sizeof buf;
+			unsigned int    bytestogo = bouncemaxbytes;
+			unsigned int    bytestoget = (bytestogo < sizeof buf) ? bytestogo : sizeof buf;
 			substdio_fdbuf(&ssread, (ssize_t (*)(int,  char *, size_t)) read, fd, inbuf, sizeof (inbuf));
 			while (bytestoget > 0 && (r = substdio_get(&ssread, buf, bytestoget)) > 0) {
 				qmail_put(&qqt, buf, r);
@@ -2200,6 +2206,7 @@ qmta_initialize(int *nfds, fd_set *rfds)
 {
 	int             c;
 
+	(void) rfds;
 	fnmake_init();  /*- initialize fn1, fn2 */
 	comm_init();
 	pqstart();      /*- add files earlier processed and now in info/split for processing */
@@ -2207,7 +2214,7 @@ qmta_initialize(int *nfds, fd_set *rfds)
 	/*- read 2 bytes from qmail-lspawn, qmail-rspawn to get concurrency */
 	for (c = 0; c < CHANNELS; ++c) {
 		char            ch1, ch2;
-		int             u;
+		unsigned int    u;
 		int             r;
 
 		do {
@@ -2378,8 +2385,8 @@ static void
 regetcontrols()
 {
 	int             r;
-	int             c; /*NJL*/
-	int             newholdjobs[CHANNELS] = { 0, 0 }; /*NJL*/
+	unsigned int    c; /*NJL*/
+	unsigned int    newholdjobs[CHANNELS] = { 0, 0 }; /*NJL*/
 
 	if (control_readfile(&newlocals, "locals", 1) != 1) {
 		slog(1, "alert: ", argv0, ": unable to reread locals\n", NULL);
@@ -2402,11 +2409,11 @@ regetcontrols()
 		return;
 	}
 	/*- Add "holdlocal/holdremote" flags - NJL 1998/05/03 */
-	if (control_readint(&newholdjobs[0], "holdlocal") == -1) {
+	if (control_readint((int *) &newholdjobs[0], "holdlocal") == -1) {
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdlocal\n", NULL);
 		return;
 	}
-	if (control_readint(&newholdjobs[1], "holdremote") == -1) {
+	if (control_readint((int *) &newholdjobs[1], "holdremote") == -1) {
 		slog(1, "alert: ", argv0, ": ", queuedesc, ": unable to reread ", controldir, "/holdremote\n", NULL);
 		return;
 	}
@@ -2461,6 +2468,7 @@ sigchld(int x)
 	int             wstat;
 	pid_t           pid;
 
+	(void) x;
 	while ((pid = wait_nohang(&wstat)) > 0) {
 		if (pid == cleanuppid) {
 			cleandied();
@@ -2557,7 +2565,7 @@ check_usage(int argc, char **argv, int *daemon_mode, int *flagqfix)
 			_qmail_clean = 1;
 			break;
 		case 's':
-			scan_int(optarg, &conf_split);
+			scan_uint(optarg, &conf_split);
 			break;
 		default:
 			substdio_puts(subfderr, "fatal: ");
@@ -2612,7 +2620,7 @@ main(int argc, char **argv)
 	if (!bigtodo)
 		getEnvConfigInt(&bigtodo, "BIGTODO", 1);
 	if (!conf_split)
-		getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+		getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	if (!(queuedir = env_get("QUEUEDIR"))) {
@@ -2773,7 +2781,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	const char     *x = "$Id: qmta-send.c,v 1.33 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmta-send.c,v 1.34 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -2781,6 +2789,9 @@ getversion_qmta_send_c()
 
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.34  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.33  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

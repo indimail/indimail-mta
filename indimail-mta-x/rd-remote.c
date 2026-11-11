@@ -1,5 +1,5 @@
 /*
- * $Id: rd-remote.c,v 1.7 2026-09-08 00:30:44+05:30 Cprogrammer Exp mbhangui $
+ * $Id: rd-remote.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -161,8 +161,9 @@ addrmangle(stralloc *saout, const char *sender)
 int
 main(int argc, char **argv)
 {
-	int             r, use_regex = 0, lcount, len, nullflag, count, wstat,
-					match;
+	int             r, use_regex = 0, nullflag, match;
+	unsigned int    lcount, len, count;
+	pid_t           wstat;
 	int             pipefd[2], errpipe[2];
 	unsigned long   size;
 	const char     *errStr;
@@ -386,6 +387,9 @@ main(int argc, char **argv)
 
 /*
  * $Log: rd-remote.c,v $
+ * Revision 1.8  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.7  2026-09-08 00:30:44+05:30  Cprogrammer
  * null terminate sender, recipient for do_match
  *

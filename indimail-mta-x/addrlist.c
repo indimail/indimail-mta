@@ -1,5 +1,5 @@
 /*
- * $Id: addrlist.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: addrlist.c,v 1.7 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -40,8 +40,7 @@ stralloc        quoted = { 0 };
 int
 main()
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 
 	for (;;)
 	{
@@ -101,12 +100,15 @@ main()
 void
 getversion_addrlist_c()
 {
-	const char     *x = "$Id: addrlist.c,v 1.6 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: addrlist.c,v 1.7 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: addrlist.c,v $
+ * Revision 1.7  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.6  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

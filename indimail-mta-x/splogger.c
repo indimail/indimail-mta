@@ -1,5 +1,8 @@
 /*
  * $Log: splogger.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -76,6 +79,7 @@ main(int argc, char **argv)
 {
 	char            ch;
 
+	(void) argc;
 	if (argv[1]) {
 		if (argv[2]) {
 			unsigned long   facility;
@@ -106,7 +110,7 @@ main(int argc, char **argv)
 void
 getversion_splogger_c()
 {
-	const char     *x = "$Id: splogger.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: splogger.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

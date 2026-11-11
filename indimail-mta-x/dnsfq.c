@@ -1,5 +1,8 @@
 /*
  * $Log: dnsfq.c,v $
+ * Revision 1.13  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -48,10 +51,11 @@ int
 main(int argc, char **argv)
 {
 #ifdef USE_SPF
-	int             j;
+	unsigned int    j;
 	strsalloc       ssa = { 0 };
 #endif
 
+	(void) argc;
 	if (!argv[1])
 		_exit(100);
 	if (!stralloc_copys(&sa, argv[1])) {
@@ -91,7 +95,7 @@ main(int argc, char **argv)
 void
 getversion_dnsfq_c()
 {
-	const char     *x = "$Id: dnsfq.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dnsfq.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

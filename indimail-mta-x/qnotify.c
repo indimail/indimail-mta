@@ -1,5 +1,5 @@
 /*
- * $Id: qnotify.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qnotify.c,v 1.17 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -364,7 +364,7 @@ parse_email(int get_subj, int get_rpath)
 }
 
 int
-compare_local(char *s1, int i1, char *s2, int i2)
+compare_local(char *s1, int i1, char *s2)
 {
 	int             at1, at2;
 
@@ -440,7 +440,7 @@ main(int argc, char **argv)
 	/*-
 	 * compare the disposition and return path addresses
 	 */
-	if (!compare_local(email_disp.s, email_disp.len, rpath.s, rpath.len))
+	if (!compare_local(email_disp.s, email_disp.len, rpath.s))
 		_exit (0);
 	if (flagqueue) {
 		set_environment(WARN, FATAL, 0);
@@ -547,12 +547,15 @@ main(int argc, char **argv)
 void
 getversion_qnotify_c()
 {
-	const char     *x = "$Id: qnotify.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qnotify.c,v 1.17 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: qnotify.c,v $
+ * Revision 1.17  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.16  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

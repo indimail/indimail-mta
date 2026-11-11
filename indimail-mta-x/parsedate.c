@@ -1,5 +1,8 @@
 /*
  * $Log: parsedate.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -51,7 +54,8 @@ nomem()
 int
 main()
 {
-	int             i, match;
+	int             match;
+	unsigned int    i;
 	struct tai      sec;
 	stralloc        line = { 0 };
 	mess822_time    t;
@@ -105,7 +109,7 @@ main()
 void
 getversion_parsedate_c()
 {
-	const char     *x = "$Id: parsedate.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: parsedate.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

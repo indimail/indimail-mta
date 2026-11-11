@@ -1,5 +1,5 @@
 /*
- * $Id: atrn.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: atrn.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <case.h>
 #include <sig.h>
@@ -27,7 +27,7 @@ static char    *binatrnargs[5] = { 0, 0, 0, 0, (char *) 0 };
 static stralloc atrn, atrndir, lockfile;
 
 int
-atrn_queue(char *arg, char *remoteip)
+atrn_queue(char *arg)
 {
 	int             child, flagatrn, len, exitcode, wstat, end_flag, fd;
 	char           *cptr, *domain_ptr, *dir;
@@ -124,13 +124,16 @@ atrn_queue(char *arg, char *remoteip)
 void
 getversion_atrn_c()
 {
-	const char     *x = "$Id: atrn.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: atrn.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: atrn.c,v $
+ * Revision 1.14  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

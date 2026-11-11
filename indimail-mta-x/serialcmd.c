@@ -1,5 +1,5 @@
 /*
- * $Id: serialcmd.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: serialcmd.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  *
  * serialcmd -- apply a command to a mail message.
  * Copyright 1999,  Len Budney
@@ -411,6 +411,7 @@ main(int argc, char *argv[])
 	substdio        ssfname;
 	int             fd;
 
+	(void) argc;
 	use_pwgr = env_get("USE_QPWGR") ? 1 : 0;
 	substdio_fdbuf(&ssfname, (ssize_t (*)(int,  char *, size_t)) read, 0, fnamebuf, sizeof fnamebuf);
 	if (getln(&ssfname, &fname, &match, '\0') == -1)
@@ -427,6 +428,9 @@ main(int argc, char *argv[])
 
 /*
  * $Log: serialcmd.c,v $
+ * Revision 1.12  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -465,7 +469,7 @@ main(int argc, char *argv[])
 void
 getversion_serialcmd_c()
 {
-	const char     *x = "$Id: serialcmd.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: serialcmd.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

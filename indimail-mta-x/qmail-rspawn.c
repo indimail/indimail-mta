@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-rspawn.c,v 1.45 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-rspawn.c,v 1.46 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fd.h>
@@ -38,10 +38,12 @@ static char *setup_qrargs()
 void
 initialize_SPAWN(int argc, char **argv)
 {
+	(void) argc;
+	(void) argv;
 	tcpto_clean();
 }
 
-int             truncreport_SPAWN = 0;
+unsigned int    truncreport_SPAWN = 0;
 
 void
 report_SPAWN(substdio *ss, int wstat, char *s, int len)
@@ -251,7 +253,7 @@ noroutes:
 void
 getversion_qmail_rspawn_c()
 {
-	const char     *x = "$Id: qmail-rspawn.c,v 1.45 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-rspawn.c,v 1.46 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -259,6 +261,9 @@ getversion_qmail_rspawn_c()
 
 /*
  * $Log: qmail-rspawn.c,v $
+ * Revision 1.46  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.45  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: starttls.h,v $
+ * Revision 1.5  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.4  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -19,14 +22,15 @@
 #include "ipalloc.h"
 #include "tlsarralloc.h"
 #include "buffer_defs.h"
+#include "noreturn.h"
 
 #ifndef	lint
-static const char sccsidstarttlsh[] = "$Id: starttls.h,v 1.4 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+static const char sccsidstarttlsh[] = "$Id: starttls.h,v 1.5 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 #endif
 
-void            die_control(const char *, const char *);
+no_return void  die_control(const char *, const char *);
 void            out(const char *);
-void            die_nomem();
+no_return void  die_nomem();
 void            logerr(const char *);
 void            logerrf(const char *);
 void            flush();

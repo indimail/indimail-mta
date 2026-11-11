@@ -1,5 +1,5 @@
 /*
- * $Id: serialsmtp.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: serialsmtp.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <strerr.h>
@@ -188,7 +188,7 @@ void
 result(unsigned long code)
 {
 	char            ch;
-	int             i;
+	unsigned int    i;
 
 	if (code >= 500) {
 		if (!stralloc_copyb(&line, "D", 1))
@@ -382,13 +382,16 @@ main(int argc, char **argv)
 void
 getversion_serialsmtp_c()
 {
-	const char     *x = "$Id: serialsmtp.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: serialsmtp.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: serialsmtp.c,v $
+ * Revision 1.14  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

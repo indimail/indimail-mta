@@ -1,5 +1,8 @@
 /*
  * $Log: qmail-popbull.c,v $
+ * Revision 1.14  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -142,6 +145,7 @@ main(int argc, char **argv)
 	direntry       *d;
 	stralloc        errorstr = { 0 }, fn = { 0 };
 
+	(void) argc;
 	if (!(bulldirname = argv[1]))
 		die_usage();
 	if (!(programname = argv[2]))
@@ -180,8 +184,9 @@ main(int argc, char **argv)
 			continue;
 		if (st.st_mtime > ts_date) {
 			fnmake_maildir();
-			if (symlink(fn.s, fntmptph) == -1)
+			if (symlink(fn.s, fntmptph) == -1) {
 				;
+			}
 		}
 	}
 	closedir(bulldir);
@@ -202,7 +207,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_popbull_c()
 {
-	const char     *x = "$Id: qmail-popbull.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-popbull.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

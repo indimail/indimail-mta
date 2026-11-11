@@ -1,5 +1,8 @@
 /*
  * $Log: set_queuedir.c,v $
+ * Revision 1.4  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.3  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -22,6 +25,7 @@ set_queuedir(const char *argv0, const char *queue)
 	char           *qbase;
 	static stralloc QueueDir = { 0 };
 
+	(void) argv0;
 	if ((qbase = env_get("QUEUE_BASE"))) {
 		if (!stralloc_copys(&QueueDir, qbase) ||
 				!stralloc_append(&QueueDir, "/") ||
@@ -54,7 +58,7 @@ set_queuedir(const char *argv0, const char *queue)
 void
 getversion_set_queuedir_c()
 {
-	const char     *x = "$Id: set_queuedir.c,v 1.3 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: set_queuedir.c,v 1.4 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

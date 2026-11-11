@@ -1,5 +1,5 @@
 /*
- * $Id: qmail.c,v 1.40 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail.c,v 1.41 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -177,7 +177,8 @@ qmail_to(struct qmail *qq, const char *s)
 const char     *
 qmail_close(struct qmail *qq)
 {
-	int             wstat, exitcode, len = 0;
+	int             wstat, exitcode;
+	unsigned int    len = 0;
 	char            ch;
 	static char     errstr[1024];
 
@@ -230,7 +231,7 @@ qmail_close(struct qmail *qq)
 	case QQ_OK:
 		if (!qq->flagerr)
 			return "";
-		/*- fall through */
+		/* fall through */
 	case QQ_READ_ERR:
 		return "Zqq read error (#4.3.0)";
 	case QQ_CONFIG_ERR:
@@ -312,7 +313,7 @@ qmail_close(struct qmail *qq)
 void
 getversion_qmail_c()
 {
-	const char     *x = "$Id: qmail.c,v 1.40 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail.c,v 1.41 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	(void) x;
@@ -320,6 +321,9 @@ getversion_qmail_c()
 
 /*
  * $Log: qmail.c,v $
+ * Revision 1.41  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.40  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

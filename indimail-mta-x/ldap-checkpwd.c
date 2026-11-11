@@ -1,5 +1,5 @@
 /*
- * $Id: ldap-checkpwd.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: ldap-checkpwd.c,v 1.17 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  *
  * ldap-checkpwd.c
  *
@@ -124,7 +124,8 @@ main(int argc, char *argv[])
 {
 	char           *login, *password, *ptr;
 	const char     *error = NULL;
-	int             uplen, i, r, native_checkpassword;
+	unsigned int    i, uplen;
+	int             r, native_checkpassword;
 	uid_t           uid;
 	gid_t           gid;
 
@@ -171,7 +172,7 @@ main(int argc, char *argv[])
 		subprintf(subfdout, "login [%s] password [%s]\n", login, password);
 		flush();
 	}
-	if ((i = ldap_lookup(login, password, &error, &uid, &gid)) == -1)
+	if ((int) (i = ldap_lookup(login, password, &error, &uid, &gid)) == -1)
 		my_error("ldap lookup error", error, 111);
 #ifdef EXTENDED_ATTRIBUTES
 	if (homedir.len && chdir(homedir.s) != 0)
@@ -524,12 +525,15 @@ main(int argc, char **argv)
 void
 getversion_ldap_checkpwd_c()
 {
-	const char     *x = "$Id: ldap-checkpwd.c,v 1.16 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ldap-checkpwd.c,v 1.17 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*-
  * $Log: ldap-checkpwd.c,v $
+ * Revision 1.17  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.16  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

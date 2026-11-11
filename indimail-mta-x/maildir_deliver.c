@@ -1,5 +1,5 @@
 /*
- * $Id: maildir_deliver.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: maildir_deliver.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/time.h>
@@ -31,6 +31,7 @@ tryunlinktmp()
 static void
 sigalrm(int i)
 {
+	(void) i;
 	tryunlinktmp();
 	_exit (3);
 }
@@ -79,7 +80,8 @@ maildir_deliver(const char *dir, stralloc *rpline, stralloc *dtline, const char 
 	struct timeval  tmval;
 	struct stat     st;
 	unsigned long   pid;
-	int             loop, fd, i;
+	unsigned int    i, loop;
+	int             fd;
 	substdio        ss, ssout;
 
 	sig_alarmcatch(sigalrm);
@@ -233,12 +235,15 @@ fail:
 void
 getversion_maildir_deliver_c()
 {
-	const char     *x = "$Id: maildir_deliver.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: maildir_deliver.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: maildir_deliver.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

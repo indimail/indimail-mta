@@ -1,5 +1,8 @@
 /*
  * $Log: bouncesaying.c,v $
+ * Revision 1.11  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -33,6 +36,7 @@ main(int argc, char **argv)
 	int             pid;
 	int             wstat;
 
+	(void) argc;
 	if (!argv[1])
 		strerr_die1x(100, "bouncesaying: usage: bouncesaying error [ program [ arg ... ] ]");
 	if (argv[2])
@@ -69,7 +73,7 @@ main(int argc, char **argv)
 void
 getversion_bouncesaying_c()
 {
-	const char     *x = "$Id: bouncesaying.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: bouncesaying.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

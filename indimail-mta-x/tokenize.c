@@ -1,5 +1,8 @@
 /*
  * $Log: tokenize.c,v $
+ * Revision 1.6  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.5  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -52,7 +55,8 @@ myput(char *buf, int len)
 int
 main()
 {
-	int             i, j, match;
+	unsigned int    i, j;
+	int             match;
 	stralloc        line = { 0 }, tokens = { 0 };
 
 	for (;;) {
@@ -108,7 +112,7 @@ main()
 void
 getversion_tokenize_c()
 {
-	const char     *x = "$Id: tokenize.c,v 1.5 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tokenize.c,v 1.6 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

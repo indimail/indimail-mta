@@ -1,5 +1,5 @@
 /*
- * $Id: auto-int.c,v 1.9 2025-01-22 00:30:36+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auto-int.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "substdio.h"
@@ -24,6 +24,7 @@ main(int argc, char **argv)
 	unsigned long   num;
 	char            strnum[FMT_ULONG];
 
+	(void) argc;
 	name = argv[1];
 	if (!name)
 		_exit(100);
@@ -32,7 +33,11 @@ main(int argc, char **argv)
 		_exit(100);
 	scan_ulong(value, &num);
 	strnum[fmt_ulong(strnum, num)] = 0;
-	my_puts("int ");
+	if (argc == 4) {
+		my_puts(argv[3]);
+		my_puts(" ");
+	} else
+		my_puts("int ");
 	my_puts(name);
 	my_puts(" = ");
 	my_puts(strnum);
@@ -43,6 +48,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: auto-int.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2025-01-22 00:30:36+05:30  Cprogrammer
  * Fixes for gcc14
  *

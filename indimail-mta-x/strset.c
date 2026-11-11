@@ -1,5 +1,8 @@
 /*
  * $Log: strset.c,v $
+ * Revision 1.6  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.5  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -119,10 +122,9 @@ strset_add(strset *set, const char *s)
 		set->a = newa;
 
 		if (n + n + n > set->mask) {
-			int             newmask;
+			uint32          newmask, t;
 			int            *newfirst;
 			int             i;
-			uint32          t;
 
 			newmask = set->mask + set->mask + 1;
 			newfirst = (int *) alloc(sizeof(int) * (newmask + 1));
@@ -160,7 +162,7 @@ strset_add(strset *set, const char *s)
 void
 getversion_strset_c()
 {
-	const char     *x = "$Id: strset.c,v 1.5 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: strset.c,v 1.6 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

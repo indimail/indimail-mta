@@ -1,5 +1,8 @@
 /*
  * $Log: fmtqfn.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -26,7 +29,7 @@
 #include "fmt.h"
 #include "auto_split.h"
 
-int             conf_split;
+unsigned int    conf_split;
 
 unsigned int
 fmtqfn(char *s, const char *dirslash, unsigned long id, int flagsplit)
@@ -64,7 +67,7 @@ fmtqfn(char *s, const char *dirslash, unsigned long id, int flagsplit)
 void
 getversion_fmtqfn_c()
 {
-	const char     *x = "$Id: fmtqfn.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: fmtqfn.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

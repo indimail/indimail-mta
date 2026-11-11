@@ -1,5 +1,5 @@
 /*
- * $Id: dot-forward.c,v 1.21 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: dot-forward.c,v 1.22 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -37,8 +37,8 @@ int             flagdoit = 1;
 int             flagacted;
 int             flagdirect;
 const char     *ufline, *rpline, *dtline, *sender, *user, *host;
-int             userlen;
-int             hostlen;
+unsigned int    userlen;
+unsigned int    hostlen;
 char            messbuf[1024];
 substdio        ssmess;
 char            childbuf[1024];
@@ -95,8 +95,9 @@ die_parse()
 ssize_t
 blindwrite(int fd, char *buf, size_t len)
 {
-	if (write(fd, buf, len) == -1)
+	if (write(fd, buf, len) == -1) {
 		;
+	}
 	return len;
 }
 
@@ -195,8 +196,7 @@ readcontrols()
 void
 gotaddr()
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 	int             flaghasat;
 
 	token822_reverse(&tokaddr);
@@ -345,6 +345,7 @@ parseline()
 ssize_t
 mywrite(int fd, const char *buf, size_t len)
 {
+	(void) fd;
 	qmail_put(&qq, buf, len);
 	return len;
 }
@@ -459,12 +460,15 @@ main(int argc, char **argv)
 void
 getversion_dot_forward_c()
 {
-	const char     *x = "$Id: dot-forward.c,v 1.21 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dot-forward.c,v 1.22 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: dot-forward.c,v $
+ * Revision 1.22  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.21  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: fastforward.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: fastforward.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -81,6 +81,7 @@ printsafe(const char *s)
 ssize_t
 qqwrite(int fd, const char *buf, size_t len)
 {
+	(void) fd;
 	qmail_put(&qq, buf, len);
 	return len;
 }
@@ -88,7 +89,8 @@ qqwrite(int fd, const char *buf, size_t len)
 void
 dofile(const char *fn)
 {
-	int             fd, i, j;
+	int             fd;
+	unsigned int    i, j;
 	struct stat     st;
 
 	if (!stralloc_copys(&mailinglist, ""))
@@ -234,7 +236,7 @@ doprogram(const char *arg)
 void
 dodata()
 {
-	int             i, j;
+	unsigned int    i, j;
 
 	i = 0;
 	for (j = 0; j < data.len; ++j) {
@@ -428,13 +430,16 @@ main(int argc, char **argv)
 void
 getversion_fastforward_c()
 {
-	const char     *x = "$Id: fastforward.c,v 1.17 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: fastforward.c,v 1.18 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: fastforward.c,v $
+ * Revision 1.18  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.17  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

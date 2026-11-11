@@ -1,5 +1,5 @@
 /*
- * $Id: tcpto_clean.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: tcpto_clean.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "tcpto.h"
@@ -12,7 +12,7 @@ void
 tcpto_clean()					/*- running from queue/mess */
 {
 	int             fd;
-	int             i;
+	unsigned int    i;
 	substdio        ss;
 
 	if ((fd = open_write("../lock/tcpto")) == -1)
@@ -27,12 +27,15 @@ tcpto_clean()					/*- running from queue/mess */
 void
 getversion_tcpto_clean_c()
 {
-	const char     *x = "$Id: tcpto_clean.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: tcpto_clean.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: tcpto_clean.c,v $
+ * Revision 1.11  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

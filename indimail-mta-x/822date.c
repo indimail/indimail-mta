@@ -1,5 +1,8 @@
 /*
  * $Log: 822date.c,v $
+ * Revision 1.15  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -81,6 +84,7 @@ int             match;
 int
 main(int argc, char **argv)
 {
+	(void) argc;
 	if (leapsecs_init() == -1)
 		strerr_die2sys(111, FATAL, "unable to init leapsecs: ");
 	if (argv[1])
@@ -135,7 +139,7 @@ main(int argc, char **argv)
 void
 getversion_822date_c()
 {
-	const char     *x = "$Id: 822date.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822date.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

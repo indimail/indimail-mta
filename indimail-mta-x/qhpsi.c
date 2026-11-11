@@ -1,5 +1,5 @@
 /*
- * $Id: qhpsi.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qhpsi.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <dlfcn.h>
@@ -31,6 +31,7 @@ main(int argc, char **argv)
 	const char     *messfn, *error, *queue_plugin_symbol, *plugindir;
 	stralloc        plugin = { 0 };
 
+	(void) argc;
 	if (uidinit(1, 1) == -1)
 		_exit(QQ_GET_UID_GID);
 	if (env_get("DEBUG"))
@@ -106,12 +107,15 @@ main(int argc, char **argv)
 void
 getversion_qmail_qhpsi_c()
 {
-	const char     *x = "$Id: qhpsi.c,v 1.14 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qhpsi.c,v 1.15 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 	(void) x;
 }
 
 /*
  * $Log: qhpsi.c,v $
+ * Revision 1.15  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.14  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

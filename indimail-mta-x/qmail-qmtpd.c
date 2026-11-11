@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qmtpd.c,v 1.22 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-qmtpd.c,v 1.23 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -15,6 +15,7 @@
 #include "rcpthosts.h"
 #include "control.h"
 #include "received.h"
+#include "noreturn.h"
 
 void
 badproto()
@@ -22,9 +23,10 @@ badproto()
 	_exit(100);
 }
 
-void
+no_return void
 resources(int x)
 {
+	(void) x;
 	_exit(111);
 }
 
@@ -96,7 +98,8 @@ main()
 {
 	char            ch;
 	unsigned long   biglen, len, qp, u;
-	int             i, flagdos = 0, flagsenderok, flagbother, hide_host;
+	unsigned int    i;
+	int             flagdos = 0, flagsenderok, flagbother, hide_host;
 	const char     *result, *x;
 
 	sig_pipeignore();
@@ -308,13 +311,16 @@ main()
 void
 getversion_qmail_qmtpd_c()
 {
-	const char     *x = "$Id: qmail-qmtpd.c,v 1.22 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-qmtpd.c,v 1.23 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-qmtpd.c,v $
+ * Revision 1.23  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.22  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

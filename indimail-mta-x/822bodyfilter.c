@@ -1,5 +1,5 @@
 /*
- * $Id: 822bodyfilter.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: 822bodyfilter.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "error.h"
@@ -27,6 +27,7 @@ main(int argc, char **argv, char **envp)
 	seek_pos        pos;
 	int             r;
 
+	(void) argc;
 	if (!argv[1])
 		strerr_die1x(100, "822bodyfilter: usage: 822bodyfilter program [ arg ... ]");
 	for (;;)
@@ -63,7 +64,7 @@ main(int argc, char **argv, char **envp)
 	if (substdio_flush(&ssout) == -1)
 		strerr_die2x(111, FATAL, "unable to write output: ");
 	pos = seek_cur(0);
-	if (pos == -1)
+	if ((int) pos == -1)
 		strerr_die2sys(111, FATAL, "unable to seek: ");
 	if (seek_set(0, pos - ssout.p - line.len - r) == -1)
 		strerr_die2sys(111, FATAL, "unable to seek: ");
@@ -79,12 +80,15 @@ main(int argc, char **argv, char **envp)
 void
 getversion_822bodyfilter_c()
 {
-	const char     *x = "$Id: 822bodyfilter.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: 822bodyfilter.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: 822bodyfilter.c,v $
+ * Revision 1.8  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: triggerpull.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -31,8 +34,9 @@ triggerpull()
 
 	if((fd = open_write("lock/trigger")) >= 0) {
 		ndelay_on(fd);
-		if (write(fd, "", 1) == -1)
+		if (write(fd, "", 1) == -1) {
 			; /*- if it fails, bummer */
+		}
 		close(fd);
 	}
 }
@@ -40,7 +44,7 @@ triggerpull()
 void
 getversion_triggerpull_c()
 {
-	const char     *x = "$Id: triggerpull.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: triggerpull.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

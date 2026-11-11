@@ -1,5 +1,8 @@
 /*
  * $Log: dnstxt.c,v $
+ * Revision 1.12  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -50,6 +53,7 @@ main(int argc, char **argv)
 	int             len;
 	char            strnum[FMT_ULONG];
 
+	(void) argc;
 	if (!argv[1])
 		_exit(100);
 	txtrec = dns_text(argv[1]);
@@ -76,7 +80,7 @@ main(int argc, char **argv)
 void
 getversion_dnstxt_c()
 {
-	const char     *x = "$Id: dnstxt.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dnstxt.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

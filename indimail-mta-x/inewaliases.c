@@ -1,5 +1,5 @@
 /*
- * $Id: inewaliases.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: inewaliases.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/stat.h>
@@ -121,8 +121,7 @@ gotincl()
 void
 gotaddr()
 {
-	int             i;
-	int             j;
+	unsigned int    i, j;
 	int             flaghasat;
 
 	token822_reverse(&tokaddr);
@@ -359,12 +358,15 @@ main()
 void
 getversion_newaliases_c()
 {
-	const char     *x = "$Id: inewaliases.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: inewaliases.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: inewaliases.c,v $
+ * Revision 1.11  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qmqpc.c,v 1.30 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-qmqpc.c,v 1.31 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -110,6 +110,7 @@ saferead(int fd, char *_buf, size_t len)
 {
 	int             r;
 
+	(void) fd;
 	if ((r = timeoutread(timeoutremote, qmqpfd, _buf, len)) <= 0)
 		die_conn();
 	return r;
@@ -120,6 +121,7 @@ safewrite(int fd, const char *_buf, size_t len)
 {
 	int             r;
 
+	(void) fd;
 	if ((r = timeoutwrite(timeoutremote, qmqpfd, _buf, len)) <= 0)
 		die_conn();
 	return r;
@@ -231,7 +233,8 @@ stralloc        servers = { 0 };
 int
 main(int argc, char **argv)
 {
-	int             i, j, r, server_count, server_no = 0, load_dist = 0;
+	int             r, server_count, server_no = 0, load_dist = 0;
+	unsigned int    i, j;
 	char           *x;
 	union v46addr   outip;
 	struct stat     st;
@@ -331,13 +334,16 @@ again:
 void
 getversion_qmail_qmqpc_c()
 {
-	const char     *x = "$Id: qmail-qmqpc.c,v 1.30 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-qmqpc.c,v 1.31 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-qmqpc.c,v $
+ * Revision 1.31  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.30  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

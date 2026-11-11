@@ -1,5 +1,8 @@
 /*
  * $Log: relaytest.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -140,6 +143,8 @@ quit()	/*- what a stupid protocol */
 int
 main(int argc, char **argv)
 {
+	(void) argc;
+	(void) argv;
 	if (smtpcode() != 220) {
 		quit();
 		strerr_die2x(111, FATAL, "connected but greeting failed");
@@ -191,13 +196,16 @@ main(int argc, char **argv)
 void
 getversion_relaytest_c()
 {
-	const char     *x = "$Id: relaytest.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: relaytest.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: relaytest.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

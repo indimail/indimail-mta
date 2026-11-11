@@ -1,5 +1,5 @@
 /*
- * $Id: test-recipients.c,v 1.5 2025-02-02 11:51:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: test-recipients.c,v 1.6 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <substdio.h>
@@ -66,6 +66,7 @@ check_recipient_sql(char *addr, int len)
 	const char     *ptr, *errstr;
 	void           *(*inquery) (char, char *, char *);
 
+	(void) len;
 	if (!(ptr = load_virtual()))
 		return -1;
 	if (!(inquery = getlibObject(ptr, &phandle, "inquery", &errstr)))

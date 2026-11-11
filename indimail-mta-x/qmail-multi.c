@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-multi.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-multi.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -13,6 +13,7 @@
 no_return void
 sigalrm(int x)
 {
+	(void) x;
 	/*- thou shalt not clean up here */
 	_exit(QQ_TIMEOUT);
 }
@@ -20,6 +21,7 @@ sigalrm(int x)
 no_return void
 sigbug(int x)
 {
+	(void) x;
 	_exit(QQ_INTERNAL_BUG);
 }
 
@@ -43,7 +45,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_multi_c()
 {
-	const char     *x = "$Id: qmail-multi.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-multi.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
@@ -51,6 +53,9 @@ getversion_qmail_multi_c()
 
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.8  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

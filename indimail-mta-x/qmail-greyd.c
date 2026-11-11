@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-greyd.c,v 1.40 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-greyd.c,v 1.41 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <stdlib.h>
 #include <time.h>
@@ -244,7 +244,7 @@ int
 ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 	const char *errStr[])
 {
-	int             x, len, mask;
+	unsigned int    x, len, mask;
 	struct netspec  netspec;
 	unsigned int    tmp_ip;
 	ip_addr         ip;
@@ -274,7 +274,7 @@ ip_match(stralloc *ipaddr, stralloc *content, struct constmap *ptrmap,
 		x = str_chr(ptr, '/');
 		if (ptr[x]) {
 			ptr[x] = 0;
-			scan_int(ptr + 1, &mask);
+			scan_uint(ptr + 1, &mask);
 			if (cidr2IPrange(ptr, mask, &netspec) == -1) {
 				if (errStr)
 					*errStr = error_str(errno);
@@ -331,7 +331,7 @@ is_white(const char *ip)
 int
 copy_grey(struct greylst *ptr, const char *ipaddr, const char *rpath, const char *rcpt, int rcptlen)
 {
-	int             len;
+	unsigned int    len;
 
 #ifdef IPV6
 	byte_zero((char *) &ptr->ip, sizeof(union v46addr));
@@ -574,7 +574,7 @@ struct greylst *grey_index;
  */
 
 int
-search_record(const char *remoteip, const char *rpath, const char *rcpt, int rcptlen, int min_resend,
+search_record(const char *remoteip, const char *rpath, const char *rcpt, uint rcptlen, int min_resend,
 	int resend_win, int fr_int, struct greylst **store)
 {
 	struct greylst *ptr;
@@ -590,7 +590,7 @@ search_record(const char *remoteip, const char *rpath, const char *rcpt, int rcp
 		return (RECORD_NEW);
 	cur_time = time(0);
 	/* point ptr to the latest unexpired entry */
-	if (cur_time - timeout > head->timestamp) {
+	if (cur_time - timeout > (unsigned long) head->timestamp) {
 		/*- records waiting to be expired */
 		if (!(cur_time % fr_int)) {
 			/*-expire records */
@@ -638,7 +638,7 @@ search_record(const char *remoteip, const char *rpath, const char *rcpt, int rcp
 		ptr->attempts++;
 		/*- # not older than timeout days */
 		if ((ptr->status == RECORD_GREY || ptr->status == RECORD_OK)
-			&& (ptr->timestamp > cur_time - timeout)) {
+			&& ((unsigned long) ptr->timestamp > cur_time - timeout)) {
 			ptr->timestamp = cur_time;
 			ptr->status = RECORD_OK;
 			return (RECORD_OK); /*- "\1\2" */
@@ -807,7 +807,7 @@ save_context()
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
 	for (ptr = head;ptr;ptr = ptr->next) {
-		if (ptr->timestamp < time(0) - timeout) /*- don't save expired records */
+		if ((unsigned long) ptr->timestamp < time(0) - timeout) /*- don't save expired records */
 			continue;
 		rcptlen[fmt_ulong(rcptlen, ptr->rcptlen)] = 0;
 		timestamp[fmt_ulong(timestamp, ptr->timestamp)] = 0;
@@ -888,7 +888,7 @@ load_context()
 		cptr += str_len(cptr) + 1;
 		status = *cptr;
 		if (verbose > 1) {
-			if (timestamp < cur_time - timeout) { /*- expired records */
+			if ((unsigned long) timestamp < cur_time - timeout) { /*- expired records */
 				print_record(ip, rpath, rcpt, rcptlen, timestamp, status, 1);
 				continue;
 			} else
@@ -932,6 +932,7 @@ load_context()
 void
 sighup(int x)
 {
+	(void) x;
 	sig_block(SIGHUP);
 	if (whitelistok) {
 		constmap_free(&mapwhite);
@@ -946,6 +947,7 @@ sighup(int x)
 void
 sigusr1(int x)
 {
+	(void) x;
 	sig_block(SIGUSR1);
 	save_context();
 	flush();
@@ -977,6 +979,7 @@ sigusr2(int x)
 	int             i, j;
 	char            strnum[FMT_ULONG];
 
+	(void) x;
 	sig_block(SIGUSR2);
 	expire_records(time(0));
 	if (verbose > 2) {
@@ -1001,6 +1004,7 @@ sigusr2(int x)
 no_return void
 sigterm(int x)
 {
+	(void) x;
 	sig_block(SIGTERM);
 	logerr("ARGH!! Committing suicide on SIGTERM\n", NULL);
 	logflush();
@@ -1433,13 +1437,16 @@ main(int argc, char **argv)
 void
 getversion_qmail_greyd_c()
 {
-	const char     *x = "$Id: qmail-greyd.c,v 1.40 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-greyd.c,v 1.41 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-greyd.c,v $
+ * Revision 1.41  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.40  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: envrules.c,v 1.26 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: envrules.c,v 1.27 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <error.h>
 #include <stralloc.h>
@@ -14,7 +14,8 @@
 int
 envrules(const char *email, const char *envrules_f, const char *rulesfile, const char *errStr[])
 {
-	int             len, count, lcount, nullflag, use_regex = 0;
+	unsigned int    len, count, lcount;
+	int             nullflag, use_regex = 0;
 	const char     *ptr;
 	char           *cptr;
 	static stralloc rules = { 0 };
@@ -23,7 +24,7 @@ envrules(const char *email, const char *envrules_f, const char *rulesfile, const
 		*errStr = 0;
 	if (!(ptr = env_get(rulesfile)))
 		ptr = envrules_f;
-	if ((count = control_readfile(&rules, ptr, 0)) == -1) {
+	if ((int) (count = control_readfile(&rules, ptr, 0)) == -1) {
 		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_FILE_ERR);
@@ -59,7 +60,7 @@ envrules(const char *email, const char *envrules_f, const char *rulesfile, const
 int
 domainqueue(const char *email, const char *domainqueue_f, const char *domainqueue, const char *errStr[])
 {
-	int             len, lcount, count;
+	unsigned int    len, lcount, count;
 	const char     *ptr, *domain;
 	char           *cptr;
 	static stralloc rules = { 0 };
@@ -68,7 +69,7 @@ domainqueue(const char *email, const char *domainqueue_f, const char *domainqueu
 		*errStr = 0;
 	if (!(ptr = env_get(domainqueue)))
 		ptr = domainqueue_f;
-	if ((count = control_readfile(&rules, ptr, 0)) == -1) {
+	if ((int) (count = control_readfile(&rules, ptr, 0)) == -1) {
 		if (errStr)
 			*errStr = error_str(errno);
 		return (AM_FILE_ERR);
@@ -103,13 +104,16 @@ domainqueue(const char *email, const char *domainqueue_f, const char *domainqueu
 void
 getversion_envrules_c()
 {
-	const char     *x = "$Id: envrules.c,v 1.26 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: envrules.c,v 1.27 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: envrules.c,v $
+ * Revision 1.27  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.26  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

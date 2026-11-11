@@ -1,5 +1,8 @@
 /*
  * $Log: dnsbl.c,v $
+ * Revision 1.10  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.9  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -146,6 +149,7 @@ mailfrom_hook(const char *remoteip, const char *from, char **mesg)
 	char           *x, *_relayclient;
 	int             _authenticated;
 
+	(void) from;
 	if (env_get("SKIPDNSBL")) {
 		skipdnsbl = 1;
 		return (0);
@@ -191,6 +195,6 @@ plugin_init()
 void
 getversion_dnsbl_c()
 {
-	const char     *x = "$Id: dnsbl.c,v 1.9 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dnsbl.c,v 1.10 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 	(void) x;
 }

@@ -1,5 +1,8 @@
 /*
  * $Log: fmtqfn.h,v $
+ * Revision 1.6  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.5  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -20,6 +23,6 @@
 
 unsigned int    fmtqfn(char *, const char *, unsigned long, int);
 
-extern int      conf_split;
+extern unsigned int conf_split;
 
 #endif

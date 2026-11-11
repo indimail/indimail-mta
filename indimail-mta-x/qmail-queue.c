@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.97 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.98 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -126,6 +126,7 @@ die(int e, int do_cleanup, const char *str)
 no_return void
 sigalrm(int x)
 {
+	(void) x;
 	/*- thou shalt not clean up here */
 	errno = 0;
 	die(QQ_TIMEOUT, 0, "timer expired");
@@ -134,6 +135,7 @@ sigalrm(int x)
 no_return void
 sigbug(int x)
 {
+	(void) x;
 	errno = 0;
 	die(QQ_INTERNAL_BUG, 0, "internal bug");
 }
@@ -543,7 +545,8 @@ set_archive(const char *eaddr)
 {
 	char           *rule_ptr, *dest, *ptr, *addr_ptr;
 	const char     *addr, *errStr = NULL;
-	int             len, at, type, found, negate = 0, use_regex = 0;
+	unsigned int    len, at;
+	int             type, found, negate = 0, use_regex = 0;
 	static stralloc tmpe = {0};
 
 	/*
@@ -814,7 +817,7 @@ main()
 		die(QQ_CHDIR, 0, err_str.s);
 	}
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	qqeh = fastqueue ? (char *) NULL : env_get("QQEH");
@@ -1193,7 +1196,7 @@ main()
 void
 getversion_qmail_queue_c()
 {
-	const char     *x = "$Id: qmail-queue.c,v 1.97 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-queue.c,v 1.98 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	(void) x;
@@ -1201,6 +1204,9 @@ getversion_qmail_queue_c()
 #endif
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.98  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.97  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

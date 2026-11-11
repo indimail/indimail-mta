@@ -1,5 +1,5 @@
 /*
- * $Id: filterit_sub.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: filterit_sub.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <ctype.h>
 #include <unistd.h>
@@ -115,7 +115,7 @@ static void
 do_rpline()
 {
 	char           *sender;
-	int             i;
+	unsigned int    i;
 
 	if (!(sender = env_get("SENDER")))
 		strerr_die2x(111, FATAL, "No SENDER environment variable");
@@ -138,7 +138,7 @@ static void
 do_dtline()
 {
 	char           *local, *host;
-	int             i;
+	unsigned int    i;
 
 	if (!(local = env_get("LOCAL")))
 		strerr_die2x(111, FATAL, "No LOCAL environment variable");
@@ -198,6 +198,7 @@ write_xfilter_header(char **ptr, int matched, int argc, char **argv)
 static ssize_t
 mywrite(int fd, const char *buf, size_t len)
 {
+	(void) fd;
 	qmail_put(&qqt, buf, len);
 	return len;
 }
@@ -657,6 +658,9 @@ getversion_filterit_c()
 
 /*
  * $Log: filterit_sub.c,v $
+ * Revision 1.12  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

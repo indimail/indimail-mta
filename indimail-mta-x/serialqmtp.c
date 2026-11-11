@@ -1,5 +1,5 @@
 /*
- * $Id: serialqmtp.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: serialqmtp.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -50,10 +50,9 @@ void
 doit(int fd)
 {
 	struct stat     st;
-	unsigned long   len;
-	int             len2;
+	off_t           len;
+	unsigned int    n, len2;
 	char           *x;
-	int             n;
 	substdio        ssin;
 
 	if (fstat(fd, &st) == -1)
@@ -244,6 +243,7 @@ main(int argc, char **argv)
 	int             wstat, pid;
 	int             pic2p[2];
 
+	(void) argc;
 	sig_pipeignore();
 
 	remoteip = env_get("TCPREMOTEIP");
@@ -295,13 +295,16 @@ main(int argc, char **argv)
 void
 getversion_serialqmtp_c()
 {
-	const char     *x = "$Id: serialqmtp.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: serialqmtp.c,v 1.13 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: serialqmtp.c,v $
+ * Revision 1.13  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.86 2026-11-10 15:12:38+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.87 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stdlib.h>
@@ -89,6 +89,7 @@ die_read()
 no_return void
 sigalrm(int x)
 {
+	(void) x;
 	/*- thou shalt not clean up here */
 	die(QQ_TIMEOUT, 0);
 }
@@ -96,6 +97,7 @@ sigalrm(int x)
 no_return void
 sigbug(int x)
 {
+	(void) x;
 	die(QQ_INTERNAL_BUG, 0);
 }
 
@@ -329,14 +331,15 @@ write_signature(const char *domain, DKIMSignOptions *opts, size_t selector_size)
 {
 	char           *pSig;
 	const char     *keyfn, *ptr, *selector;
-	int             i, r_selector, pct_found;
+	unsigned int    i;
+	int             r_selector, pct_found;
 	static stralloc tmp = { 0 };
 
 	if (env_get("NODKIMKEYS")) {
 		i = 0;
 		keyfn = dkimsign;
 	} else {
-		if ((i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1)
+		if ((int) (i = control_readfile(&dkimkeys, "dkimkeys", 0)) == -1)
 			custom_error("qmail-dkim", "Z", "unable to read dkimkeys.", 0, "X.3.0");
 		else
 		if (!i || !(keyfn = getDomainToken(domain, &dkimkeys))) {
@@ -539,8 +542,10 @@ main(int argc, char *argv[])
 	int             pim[2];
 	int             wstat;
 	int             verbose = 0;
-	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0, len, token_len;
-	unsigned long   pid, death;
+	unsigned int    len, token_len;
+	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0;
+	pid_t           pid;
+	unsigned long   death;
 	const char     *selector = NULL, *ptr;
 	stralloc        dkimfn = {0};
 	DKIMVerifyDetails *pDetails;
@@ -812,7 +817,7 @@ main(int argc, char *argv[])
 void
 getversion_qmail_dkim_c()
 {
-	const char     *x = "$Id: qmail-dkim.c,v 1.86 2026-11-10 15:12:38+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-dkim.c,v 1.87 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
@@ -820,6 +825,9 @@ getversion_qmail_dkim_c()
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.87  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.86  2026-11-10 15:12:38+05:30  Cprogrammer
  * fix compile (albeit with stub) on older openssl versions
  *

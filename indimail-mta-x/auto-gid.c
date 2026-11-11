@@ -1,5 +1,5 @@
 /*
- * $Id: auto-gid.c,v 1.10 2025-01-22 00:30:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: auto-gid.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -18,6 +18,7 @@ main(int argc, char **argv)
 	char           *value;
 	struct group   *gr;
 
+	(void) argc;
 	if (!(name = argv[1]))
 		_exit(100);
 	if (!(value = argv[2]))
@@ -31,7 +32,7 @@ main(int argc, char **argv)
 		substdio_flush(subfderr);
 		_exit(111);
 	}
-	if (subprintf(&ss1, "int %s = %u;\n", name, gr->gr_gid) == -1)
+	if (subprintf(&ss1, "gid_t %s = %u;\n", name, gr->gr_gid) == -1)
 		_exit(111);
 	if (substdio_flush(&ss1) == -1)
 		_exit(111);
@@ -41,6 +42,9 @@ main(int argc, char **argv)
 }
 /*
  * $Log: auto-gid.c,v $
+ * Revision 1.11  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.10  2025-01-22 00:30:37+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,8 @@
 /*
  * $Log: setforward.c,v $
+ * Revision 1.9  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.8  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -127,6 +130,7 @@ main(int argc, char **argv)
 {
 	char            ch;
 
+	(void) argc;
 	if (!stralloc_copys(&target, ""))
 		nomem();
 	if (!stralloc_copys(&command, ""))
@@ -226,7 +230,7 @@ eof:
 void
 getversion_setforward_c()
 {
-	const char     *x = "$Id: setforward.c,v 1.8 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: setforward.c,v 1.9 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

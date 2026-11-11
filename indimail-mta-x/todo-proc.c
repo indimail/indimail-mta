@@ -1,5 +1,5 @@
 /*
- * $Id: todo-proc.c,v 1.69 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: todo-proc.c,v 1.70 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <unistd.h>
@@ -241,7 +241,7 @@ fnmake_chanaddr(unsigned long id, int c)
 int
 rewrite(const char *recip)
 {
-	int             i, j, at;
+	unsigned int    i, j, at;
 	const char     *x;
 	static stralloc addr = { 0 };
 
@@ -369,8 +369,7 @@ fail:
 void
 comm_info(unsigned long id, unsigned long size, char *from, unsigned long pid, unsigned long uid)
 {
-	int             pos;
-	int             i;
+	unsigned int    i, pos;
 
 	comm_count++;
 	pos = comm_buf.len;
@@ -423,6 +422,7 @@ comm_exit(void)
 void
 sigterm(int x)
 {
+	(void) x;
 	sig_block(sig_term);
 	todo_log("alert: ", argv0, ": pid ", mypid, " got TERM: ", queuedesc, "\n", NULL);
 	if (!flagexittodo)
@@ -800,7 +800,7 @@ todo_scan(int *nfds, fd_set *rfds, unsigned long *id, int mq_flag)
 		}
 #endif
 		/*return 4;*/
-		/*- flow through */
+		/* fall through */
 	default: /*- error */
 		return -1;
 	}
@@ -1253,7 +1253,7 @@ main(int argc, char **argv)
 	}
 	getEnvConfigInt(&chunk_wait, "CHUNK_WAIT", CHUNK_WAIT);
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	getEnvConfigInt(&todo_chunk_size, "TODO_CHUNK_SIZE", CHUNK_SIZE);
@@ -1431,7 +1431,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_todo_c()
 {
-	const char     *x = "$Id: todo-proc.c,v 1.69 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: todo-proc.c,v 1.70 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -1439,6 +1439,9 @@ getversion_qmail_todo_c()
 
 /*
  * $Log: todo-proc.c,v $
+ * Revision 1.70  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.69  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

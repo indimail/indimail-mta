@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-showctl.c,v 1.20 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-showctl.c,v 1.21 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -49,7 +49,7 @@
 static stralloc me = { 0 };
 static stralloc line = { 0 };
 static stralloc libfn = { 0 };
-static int      meok, conf_split;
+static unsigned int meok, conf_split;
 static char     num[FMT_ULONG];
 
 no_return void
@@ -109,9 +109,9 @@ do_str(const char *fn, int flagme, const char *def, const char *pre)
 		i = 1;
 		if (!stralloc_copys(&line, def))
 			die_nomem();
-		if (flagme && meok)
-			if (!stralloc_copy(&line, &me))
-				die_nomem();
+		if (flagme && meok && !stralloc_copy(&line, &me))
+			die_nomem();
+		/* fall through */
 	case 1:
 		substdio_puts(subfdout, pre);
 		safeput(line.s, line.len);
@@ -125,7 +125,7 @@ do_str(const char *fn, int flagme, const char *def, const char *pre)
 int
 do_lst(const char *fn, const char *def, const char *pre, const char *post)
 {
-	int             i, j;
+	unsigned int    i, j;
 
 	subprintf(subfdout, "%-22s: ", fn);
 	switch (control_readfile(&line, fn, 0))
@@ -644,7 +644,7 @@ show_queues()
 	const char     *extra_queue[] = {"slowq", "nqueue", "qmta", 0};
 
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	substdio_puts(subfdout, "subdirectory split      : ");
@@ -901,7 +901,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_showctl_c()
 {
-	const char     *x = "$Id: qmail-showctl.c,v 1.20 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-showctl.c,v 1.21 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -909,6 +909,9 @@ getversion_qmail_showctl_c()
 
 /*
  * $Log: qmail-showctl.c,v $
+ * Revision 1.21  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.20  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

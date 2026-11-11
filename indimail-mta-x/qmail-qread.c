@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qread.c,v 1.48 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qread.c,v 1.49 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sys/types.h>
@@ -378,7 +378,7 @@ main(int argc, char **argv)
 	if (chdir(queuedir) == -1)
 		strerr_die4sys(111, FATAL, "unable to chdir to ", queuedir, ": ");
 	getEnvConfigInt(&bigtodo, "BIGTODO", 1);
-	getEnvConfigInt(&conf_split, "CONFSPLIT", auto_split);
+	getEnvConfigInt((int *) &conf_split, "CONFSPLIT", auto_split);
 	if (conf_split > auto_split)
 		conf_split = auto_split;
 	readsubdir_init(&rs, "info", 1, die_opendir);
@@ -428,6 +428,7 @@ main(int argc, char **argv)
 								putstats();
 							if (!silent)
 								substdio_puts(subfdout, "  done");
+							/* fall through */
 						case 'T':
 							if (!flag++)
 								putstats();
@@ -498,6 +499,7 @@ main(int argc, char **argv)
 								putstats();
 							if (!silent)
 								substdio_puts(subfdout, "  done");
+							/* fall through */
 						case 'T':
 							if (!flag++)
 								putstats();
@@ -600,7 +602,7 @@ main(int argc, char **argv)
 void
 getversion_qmail_qread_c()
 {
-	const char     *x = "$Id: qmail-qread.c,v 1.48 2025-01-22 00:30:35+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qread.c,v 1.49 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -608,6 +610,9 @@ getversion_qmail_qread_c()
 
 /*
  * $Log: qmail-qread.c,v $
+ * Revision 1.49  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.48  2025-01-22 00:30:35+05:30  Cprogrammer
  * Fixes for gcc14
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: control.c,v 1.26 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: control.c,v 1.27 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <open.h>
@@ -304,7 +304,8 @@ control_readrandom(stralloc *sa, const char *fn)
 {
 	substdio        ss;
 	char           *ptr;
-	int             fd, match, len, ilen, count;
+	unsigned int    len, ilen, count;
+	int             fd, match;
 	unsigned long   random;
 	static stralloc controlfile = {0};
 
@@ -367,7 +368,8 @@ extern int rename (const char *, const char *);
 int
 control_writefile(stralloc *sa, const char *fn)
 {
-	int             i, wfd;
+	int             wfd;
+	unsigned int    i;
 	static stralloc controlfileold = {0}, controlfilenew = {0};
 
 	if (*fn != '/' && *fn != '.') {
@@ -545,7 +547,7 @@ control_readcmd(stralloc *sa, const char *fn)
 void
 getversion_control_c()
 {
-	const char     *x = "$Id: control.c,v 1.26 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: control.c,v 1.27 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
@@ -553,6 +555,9 @@ getversion_control_c()
 
 /*
  * $Log: control.c,v $
+ * Revision 1.27  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.26  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

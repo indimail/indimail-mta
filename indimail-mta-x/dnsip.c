@@ -1,5 +1,8 @@
 /*
  * $Log: dnsip.c,v $
+ * Revision 1.12  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.11  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -44,8 +47,9 @@ ipalloc         ia = { 0 };
 int
 main(int argc, char **argv)
 {
-	int             j;
+	unsigned int    j;
 
+	(void) argc;
 	if (!argv[1])
 		_exit(100);
 
@@ -79,7 +83,7 @@ main(int argc, char **argv)
 void
 getversion_dnsip_c()
 {
-	const char     *x = "$Id: dnsip.c,v 1.11 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: dnsip.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

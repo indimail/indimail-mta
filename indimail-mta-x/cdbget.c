@@ -1,5 +1,8 @@
 /*
  * $Log: cdbget.c,v $
+ * Revision 1.8  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.7  2024-05-09 22:03:17+05:30  mbhangui
  * fix discarded-qualifier compiler warnings
  *
@@ -57,7 +60,8 @@ int
 main(int argc, char **argv)
 {
 	char           *key;
-	int             r, i, put_null = 0;
+	unsigned int    r;
+	int             i, put_null = 0;
 	uint32          pos, len;
 	unsigned long   u = 0;
 	char            buf[1024];
@@ -90,7 +94,7 @@ main(int argc, char **argv)
 	if (!put_null)
 		_key.len--;
 	for (;;) {
-		if ((r = cdb_findnext(&c, _key.s, _key.len)) == -1)
+		if ((int) (r = cdb_findnext(&c, _key.s, _key.len)) == -1)
 			die_read();
 		if (!r)
 			_exit(100);
@@ -121,7 +125,7 @@ main(int argc, char **argv)
 void
 getversion_cdbget_c()
 {
-	const char     *x = "$Id: cdbget.c,v 1.7 2024-05-09 22:03:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: cdbget.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 	if (x)
 		x++;
 }

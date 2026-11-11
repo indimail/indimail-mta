@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-daned.c,v 1.37 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-daned.c,v 1.38 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #include "subfd.h"
@@ -115,7 +115,7 @@ int
 domain_match(char *fn, stralloc *domain, stralloc *content,
 	struct constmap *ptrmap, const char *errStr[])
 {
-	int             x, len;
+	unsigned int    x, len;
 	char           *ptr;
 
 	if (errStr)
@@ -202,7 +202,7 @@ is_white(const char *domain)
 int
 copy_dane(struct danerec *ptr, const char *domain, char status)
 {
-	int             len;
+	unsigned int    len;
 
 	len = str_len(domain);
 	if (!(ptr->domain = (char *) malloc(len + 1)))
@@ -374,7 +374,7 @@ search_record(const char *domain, int fr_int, struct danerec **store)
 		return (RECORD_NEW);
 	cur_time = time(0);
 	/* point ptr to the latest unexpired entry */
-	if (cur_time - timeout > head->timestamp) {
+	if (cur_time - timeout > (unsigned long) head->timestamp) {
 		/*- records waiting to be expired */
 		if (!(cur_time % fr_int)) {
 			/*-expire records */
@@ -397,7 +397,7 @@ search_record(const char *domain, int fr_int, struct danerec **store)
 	*store = ptr;
 	ptr->attempts++;
 	/*- # not older than timeout days */
-	if ((ptr->status == RECORD_OK) && (ptr->timestamp > cur_time - timeout))
+	if ((ptr->status == RECORD_OK) && ((unsigned long) ptr->timestamp > cur_time - timeout))
 		return (RECORD_OK);
 	else
 		return (RECORD_OLD);
@@ -478,7 +478,7 @@ save_context()
 	if ((context_fd = open(context_file.s, O_WRONLY | O_CREAT | O_TRUNC, 0644)) == -1)
 		strerr_die4sys(111, FATAL, "unable to open file: ", context_file.s, ": ");
 	for (ptr = head;ptr;ptr = ptr->next) {
-		if (ptr->timestamp < time(0) - timeout) /*- don't save expired records */
+		if ((unsigned long) ptr->timestamp < time(0) - timeout) /*- don't save expired records */
 			continue;
 		timestamp[fmt_ulong(timestamp, ptr->timestamp)] = 0;
 		datalen[fmt_ulong(datalen, ptr->datalen)] = 0;
@@ -547,7 +547,7 @@ load_context()
 		cptr += 2;
 		scan_ulong(cptr, (unsigned long *) &timestamp);
 		if (verbose > 1) {
-			if (timestamp < cur_time - timeout) { /*- expired records */
+			if ((unsigned long) timestamp < cur_time - timeout) { /*- expired records */
 				print_record(domain, timestamp, dnstate, 1);
 				continue;
 			} else
@@ -596,6 +596,7 @@ load_context()
 void
 sighup(int x)
 {
+	(void) x;
 	sig_block(SIGHUP);
 	if (whitelistok) {
 		constmap_free(&mapwhite);
@@ -610,6 +611,7 @@ sighup(int x)
 void
 sigusr1(int x)
 {
+	(void) x;
 	sig_block(SIGUSR1);
 	save_context();
 	flush();
@@ -644,6 +646,7 @@ sigusr2(int x)
 	int             i;
 	char            strnum[FMT_ULONG];
 
+	(void) x;
 	sig_block(SIGUSR2);
 	expire_records(time(0));
 	if (verbose > 2) {
@@ -662,6 +665,7 @@ sigusr2(int x)
 no_return void
 sigterm(int x)
 {
+	(void) x;
 	sig_block(SIGTERM);
 	logerrf("ARGH!! Committing suicide on SIGTERM\n");
 	save_context();
@@ -1257,7 +1261,7 @@ main()
 void
 getversion_qmail_dane_c()
 {
-	const char     *x = "$Id: qmail-daned.c,v 1.37 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-daned.c,v 1.38 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -1269,6 +1273,9 @@ getversion_qmail_dane_c()
 
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.38  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.37  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

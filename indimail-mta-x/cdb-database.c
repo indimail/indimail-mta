@@ -1,5 +1,5 @@
 /*
- * $Id: cdb-database.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: cdb-database.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -26,7 +26,8 @@ int             rename(const char *, const char *);
 int
 main(int argc, char **argv)
 {
-	int             i, fd, fdtemp, match, l_no;
+	int             fd, fdtemp, match;
+	unsigned int    i, l_no;
 	struct cdbmss   cdbmss;
 	stralloc        key = { 0 }, data = { 0 }, line = { 0 }, wildchars = { 0 },
 					fntmp = {0}, fncdb = {0};
@@ -111,12 +112,15 @@ main(int argc, char **argv)
 void
 getversion_cdb_database_c()
 {
-	const char     *x = "$Id: cdb-database.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: cdb-database.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: cdb-database.c,v $
+ * Revision 1.8  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

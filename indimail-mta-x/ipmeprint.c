@@ -1,5 +1,8 @@
 /*
  * $Log: ipmeprint.c,v $
+ * Revision 1.16  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.15  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
@@ -48,7 +51,7 @@ char            temp[IPFMT];
 int
 main()
 {
-	int             j;
+	unsigned int    j;
 
 	switch (ipme_init())
 	{
@@ -86,7 +89,7 @@ main()
 void
 getversion_ipmeprint_c()
 {
-	const char     *x = "$Id: ipmeprint.c,v 1.15 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: ipmeprint.c,v 1.16 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }

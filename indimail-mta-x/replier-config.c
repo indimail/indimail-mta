@@ -1,5 +1,5 @@
 /*
- * $Id: replier-config.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: replier-config.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -107,6 +107,7 @@ linkdotdir(const char *dash, const char *slash)
 int
 main(int argc, char **argv)
 {
+	(void) argc;
 	umask(077);
 
 	if (!(dir = argv[1]))
@@ -281,13 +282,16 @@ main(int argc, char **argv)
 void
 getversion_replier_config_c()
 {
-	const char     *x = "$Id: replier-config.c,v 1.10 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: replier-config.c,v 1.11 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: replier-config.c,v $
+ * Revision 1.11  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.10  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

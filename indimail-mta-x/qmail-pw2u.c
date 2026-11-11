@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-pw2u.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-pw2u.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -118,7 +118,7 @@ void
 doaccount()
 {
 	struct stat     st;
-	int             i;
+	unsigned int    i;
 	const char     *mailnames;
 	char           *x;
 	unsigned int    xlen;
@@ -300,7 +300,7 @@ stralloc        sub = { 0 };
 void
 dosubuser()
 {
-	int             i;
+	unsigned int    i;
 	char           *x;
 	unsigned int    xlen;
 	const char     *u;
@@ -483,12 +483,15 @@ main(int argc, char **argv)
 void
 getversion_qmail_pw2u_c()
 {
-	const char     *x = "$Id: qmail-pw2u.c,v 1.13 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-pw2u.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 /*
  * $Log: qmail-pw2u.c,v $
+ * Revision 1.14  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.13  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

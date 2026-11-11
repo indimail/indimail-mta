@@ -1,5 +1,5 @@
 /*
- * $Id: forward.c,v 1.19 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: forward.c,v 1.20 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <envdir.h>
@@ -32,6 +32,7 @@ struct qmail    qqt;
 ssize_t
 mywrite(int fd, const char *buf, size_t len)
 {
+	(void) fd;
 	qmail_put(&qqt, buf, len);
 	return len;
 }
@@ -49,6 +50,7 @@ main(int argc, char **argv)
 	char          **a;
 	int             x;
 
+	(void) argc;
 	sig_pipeignore();
 	if (!(sender = env_get("NEWSENDER")))
 		strerr_die2x(100, FATAL, "NEWSENDER not set");
@@ -114,13 +116,16 @@ main(int argc, char **argv)
 void
 getversion_forward_c()
 {
-	const char     *x = "$Id: forward.c,v 1.19 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: forward.c,v 1.20 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: forward.c,v $
+ * Revision 1.20  2026-11-11 19:26:59+05:30  Cprogrammer
+ * Fix warnings from -Wextra
+ *
  * Revision 1.19  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *
