@@ -6,6 +6,9 @@ Release @version@-@release@ Start 04/09/2026 End --/--/----
 - 27/10/2026
 03. Added udpclient
 04. Changes for cygwin
+- 13/11/2026
+05. Fixed compiler warnings when using -Wextra
+06. tcpserver.c: close descriptors opened by getpwnam/getgrnam when using -u option
 
 * Thu Dec 18 2025 XX:XX:XX +0000 Manvendra Bhangui <ucspi-tcp@indimail.org> @version@-@release@%{?dist}
 Release 1.1.4-1.2 Start 05/09/2024 End 18/12/2025

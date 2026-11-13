@@ -1,5 +1,5 @@
 /*
- * $Id: tcpserver.c,v 1.100 2026-11-10 23:17:09+05:30 Cprogrammer Exp mbhangui $
+ * $Id: tcpserver.c,v 1.101 2026-11-13 21:14:34+05:30 Cprogrammer Exp mbhangui $
  */
 #include <fcntl.h>
 #include <netdb.h>
@@ -65,6 +65,7 @@
 #endif
 #include "control.h"
 #include "auto_home.h"
+#include "closefd.h"
 
 typedef const char c_char;
 #ifdef IPV6
@@ -1969,6 +1970,11 @@ do_socket:
 					SSL_CTX_free(ctx);
 					close(0);
 					close(1);
+					close(pi2c[1]);
+					close(pi4c[0]);
+					if ((fd_move(0, pi2c[0]) == -1) || (fd_move(1, pi4c[1]) == -1))
+						strerr_die2sys(111, DROP, "unable to set up descriptors: ");
+					close_extra_fds(3, 6, 0);
 					if (!stralloc_copyb(&tmp, "tcpserver, ", 11))
 						strerr_die2x(111, FATAL, "out of memory");
 					if (provide_data)
@@ -1977,10 +1983,6 @@ do_socket:
 						strerr_die2x(111, FATAL, "out of memory");
 					if (!env_put2("TLS_PROVIDER", tmp.s))
 						strerr_die2x(111, FATAL, "out of memory");
-					close(pi2c[1]);
-					close(pi4c[0]);
-					if ((fd_move(0, pi2c[0]) == -1) || (fd_move(1, pi4c[1]) == -1))
-						strerr_die2sys(111, DROP, "unable to set up descriptors: ");
 					/*- signals are allready set in the parent */
 					upathexec(argv);
 					strerr_die4sys(111, DROP, "unable to run ", *argv, ": ");
@@ -2018,6 +2020,7 @@ do_socket:
 #else
 			printstatus("un-encrypted session", getpid(), -1);
 #endif
+			close_extra_fds(3, 6, 0);
 			upathexec(argv);
 			strerr_die4sys(111, DROP, "unable to run ", *argv, ": ");
 		default:
@@ -2030,13 +2033,16 @@ do_socket:
 void
 getversion_tcpserver_c()
 {
-	const char    *x = "$Id: tcpserver.c,v 1.100 2026-11-10 23:17:09+05:30 Cprogrammer Exp mbhangui $";
+	const char    *x = "$Id: tcpserver.c,v 1.101 2026-11-13 21:14:34+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: tcpserver.c,v $
+ * Revision 1.101  2026-11-13 21:14:34+05:30  Cprogrammer
+ * close descriptors opened by getpwnam/getgrnam when using -u option
+ *
  * Revision 1.100  2026-11-10 23:17:09+05:30  Cprogrammer
  * fix compiler warning with -Wextra
  *
