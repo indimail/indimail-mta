@@ -1,5 +1,5 @@
 /*
- * $Id: smtpd.c,v 1.336 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: smtpd.c,v 1.337 2026-11-13 21:17:55+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -160,7 +160,7 @@ static SSL     *ssl = NULL;
 static struct strerr *se;
 #endif
 static int      tr_success = 0, penalty = 5;
-static c_char  *revision = "$Revision: 1.336 $";
+static c_char  *revision = "$Revision: 1.337 $";
 static c_char  *protocol = "SMTP";
 static stralloc proto = { 0 };
 static stralloc Revision = { 0 };
@@ -5184,9 +5184,9 @@ int
 authenticate(int method)
 {
 	int             child, wstat, i, n = 0;
-	int             pi[2], po[2] = { -1, -1};
+	int             pi[2] = {-1, -1}, po[2] = { -1, -1};
 #ifdef TLS
-	int             pe[2];
+	int             pe[2] = {-1, -1};
 	struct substdio pwd_in;
 	char            pwd_in_buf[1024];
 #endif
@@ -7572,6 +7572,9 @@ addrrelay()
 
 /*
  * $Log: smtpd.c,v $
+ * Revision 1.337  2026-11-13 21:17:55+05:30  Cprogrammer
+ * initialize pipe descriptors
+ *
  * Revision 1.336  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *
@@ -8040,7 +8043,7 @@ addrrelay()
 const char     *
 getversion_smtpd_c()
 {
-	const char     *x = "$Id: smtpd.c,v 1.336 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: smtpd.c,v 1.337 2026-11-13 21:17:55+05:30 Cprogrammer Exp mbhangui $";
 
 	x++;
 	if (0)
