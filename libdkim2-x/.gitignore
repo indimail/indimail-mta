@@ -1,7 +1,7 @@
-dkim
+dkim2
 Makefile
 Makefile.in
-dkim.8
+dkim2.8
 compile
 depcomp
 .deps

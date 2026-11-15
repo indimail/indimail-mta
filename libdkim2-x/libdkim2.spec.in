@@ -20,6 +20,7 @@
 %endif
 
 %global _prefix            /usr
+%global mandir             /usr/share/man
 %global _pkg_config_path   /usr/%{_lib}/pkgconfig
 
 %global _verbose           0
@@ -109,7 +110,7 @@ or both.
 %setup -q -n libdkim2-%{version}
 
 %build
-%configure --prefix=%{_prefix}
+%configure --prefix=%{_prefix} --mandir=%{mandir}
 
 %install
 %if 0%{?build_cflags:1}
@@ -159,6 +160,9 @@ done
 %defattr(-, root, root,-)
 %{_libdir}/libdkim2.so.1
 %{_libdir}/libdkim2.so.1.0.0
+%doc %attr(644,root,root)               %{mandir}/man8/*
+
+%attr(755,root,root)                    %{_prefix}/bin/dkim2
 
 %if %build_on_obs == 0
 %license %attr(0644,root,root)          %{_prefix}/share/doc/%{name}/COPYING
