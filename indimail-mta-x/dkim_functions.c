@@ -1,5 +1,5 @@
 /*-
- * $Id: dkim_functions.c,v 1.2 2026-11-10 15:11:37+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dkim_functions.c,v 1.3 2026-11-15 19:01:15+05:30 Cprogrammer Exp mbhangui $
  *
  * dkim_functions.c - DKIM (RFC 6376 / RFC 8463) signing and verification
  *
@@ -1011,7 +1011,7 @@ static int
 sign_one(DKIMSign *s, const DKIMSignOptions *o, int hash, EVP_PKEY *pkey, dbuf *out)
 {
 	int             hc_relaxed, bc_relaxed, is_ed = (hash == DKIM_HASH_ED25519), i, r = 0, nsel = 0, from_ok = 0;
-	const char     *alg;
+	const char     *alg, *p;
 	const char     *domain;
 	char            numbuf[64];
 	dbuf            sig = {0}, hdata = {0}, tmp = {0}, hnames = {0};
@@ -1068,9 +1068,13 @@ sign_one(DKIMSign *s, const DKIMSignOptions *o, int hash, EVP_PKEY *pkey, dbuf *
 	}
 
 	/* DKIM-Signature header up to and including "b=" */
+	if ((p = getenv("DKIMSIGN_HEADER")) && *p) {
+		if (dbuf_cats(&sig, p))
+			goto nomem;
+	} else
 	if (dbuf_cats(&sig, "DKIM-Signature:"))
 		goto nomem;
-	col = 15;
+	col = sig.len;
 	if (tag_add(&sig, &col, "v=1;"))
 		goto nomem;
 	snprintf(numbuf, sizeof(numbuf), "a=%s;", alg);
@@ -1476,17 +1480,30 @@ static int
 verify_begin(DKIMVerify *v)
 {
 	static const char *const from_only[] = { "From", NULL };
+	const char     *p;
+	dbuf            tmp = {0};
 	int             i;
 
 	if (v->began)
 		return 0;
+	if (!(p = getenv("DKIMSIGN_HEADER")) || !*p)
+		p = "dkim-signature";
+	else {
+		if (dbuf_cats(&tmp, p))
+			return DKIM_OUT_OF_MEMORY;
+		for (i = 0; i < (int) tmp.len - 1; i++)
+			tmp.s[i] = tolower((unsigned char) tmp.s[i]);
+		if (tmp.s[tmp.len - 1] == ':')
+			tmp.s[tmp.len - 1] = '\0';
+		p = tmp.s;
+	}
 	v->began = 1;
 	v->have_author = find_domain(&v->msg.hl, from_only, v->author, sizeof(v->author));
 	for (i = 0; i < v->msg.hl.n && v->nsigs < DKIM_MAX_VERIFY_SIGNATURES; i++) {
 		hdr            *h = &v->msg.hl.v[i];
 		vsig           *sg;
 
-		if (!hdr_is(h, "dkim-signature"))
+		if (!hdr_is(h, p))
 			continue;
 		sg = &v->sigs[v->nsigs++];
 		sg->hdr_idx = i;
@@ -1504,6 +1521,7 @@ verify_begin(DKIMVerify *v)
 			sg->bh_ready = 1;
 		}
 	}
+	dbuf_free(&tmp);
 	return 0;
 }
 
@@ -1989,6 +2007,9 @@ int             dkim_verify_status(int nsigs, const DKIMVerifyDetails *details) 
 
 /*-
  * $Log: dkim_functions.c,v $
+ * Revision 1.3  2026-11-15 19:01:15+05:30  Cprogrammer
+ * use DKIMSIGN_HEADER to change DKIM header used
+ *
  * Revision 1.2  2026-11-10 15:11:37+05:30  Cprogrammer
  * fix compile (albeit with stub) on older openssl versions
  *
