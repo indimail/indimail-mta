@@ -1,32 +1,37 @@
 .\" vim: tw=75
-.TH dkim 8
+.TH dkim2 8
 .SH NAME
-dkim \- exercise the domainkeys library
+dkim2 \- exercise the domainkeys library
 .SH SYNOPSIS
-.B dkim
+.B dkim2
 .I opts
 
 .I opts
 is a series of getopt-style options.
 
 .SH DESCRIPTION
-.B dkim
+.B dkim2
 exercises the dkim library. Both signing and verification merely print out
 the DKIM header. They do not keep a copy of the input file. You will need
-to do something like this:
+to do something like this
 
 .EX
 This example verifies using DNS
 
- (./dkim -s @controldir@/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\\
- | ./dkim -v
+ (./dkim2 -s @controldir@/domainkeys/dog </tmp/testmsg; cat /tmp/testmsg)\\
+ | ./dkim2 -v
 
 This example does not use DNS. Useful for testing
 
- (./dkim -z 4 -s /tmp/domainkeys/efgh </tmp/mail.txt;cat /tmp/mail.txt) \\
- | ./dkim -v -T \\
+ (./dkim2 -z 4 -s /tmp/domainkeys/efgh </tmp/mail.txt;cat /tmp/mail.txt) \\
+ | ./dkim2 -v -T \\
  "v=DKIM1; k=ed25519; t=y; p=okZUL1G6RmS4IWfCpCX3xjGKhVssoM4KfKpkmW8IERg="
 .EE
+
+\fBdkim2\fR is similar to \fBdkim\fR from indimail-mta, the difference
+being that \fBdkim2\fR supports older linux distribution and uses the ALT-N
+libdkim2 library. \fBlibdim\fR is a pure C code, where as \fBlibdkim2\fR is
+written in C++.
 
 .SH OPTIONS
 .TP
@@ -134,17 +139,17 @@ Sets verbose output
 this help
 
 .SH Return Value
-When signing, \fBdkim\fR returns 0 on success and non-zero on any failure.
+When signing, \fBdkim2\fR returns 0 on success and non-zero on any failure.
 
 When verifying, you can set the environment variable \fBDKIMVERIFY\fR to
 set the exit code corresponding to the DKIM verifcation status by setting
 \fBDKIMVERIFY\fR environment variable to a desired set of letters.
-Precisely, if you want a dkim return status to generate an error, include
+Precisely, if you want a DKIM return status to generate an error, include
 that letter, where A is the first return status (DKIM_SUCCESS), B is the
 second (DKIM_FINISHED_BODY), etc.  The letter should be uppercase if you
 want a permanent error (exit code 14) to be returned, and lowercase if you
 want a temporary error to be returned (exit code 88). If you omit the
-letter, \fBdkim\fR will not issue any error inspite of DKIM verification
+letter, \fBdkim2\fR will not issue any error inspite of DKIM verification
 failure. It will return success.
 
 The complete set of letters with the corresponding return status is given
@@ -206,13 +211,13 @@ SIGNATURE_BAD, SIGNATURE_EXPIRED, SELECTOR_INVALID, GRANULARITY_MISMATCH,
 SELECTOR_KEY_REVOKED, DOMAIN_NAME_TOO_LONG, SELECTOR_PUBLIC_KEY_INVALID,
 NO_VALID_SIGNATURES and BODY_HASH_MISMATCH errors, and temporarily
 SIGNATURE_BAD_BUT_TESTING and DNS_TEMP_FAILURE. Add in \fBS\fR if you want
-to reject messages that do not have a DKIM signature. Note that \fBdkim\fR
+to reject messages that do not have a DKIM signature. Note that \fBdkim2\fR
 always inserts the \fBDKIM-Status\fR header, so that messages can be
 rejected later at delivery time, or in the mail reader. In that case you
 need not set \fBDKIMVERIFY\fR or set it as "p" as the maximum.
 
 .SH "SEE ALSO"
-qmail-dk(8),
+dkim(8),
 qmail-dkim(8),
 dknewkey(8),
 rfc-4870(5),
