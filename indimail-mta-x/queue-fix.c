@@ -1,5 +1,5 @@
 /*-
- * $Id: queue-fix.c,v 1.37 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: queue-fix.c,v 1.38 2026-11-16 18:29:19+05:30 Cprogrammer Exp mbhangui $
  *
  * adapted from queue-fix 1.4
  * by Eric Huss
@@ -704,7 +704,7 @@ fix_part(char *part, int part_num)
 		 * check that filename==inode number
 		 * check that inode%auto_split==part_num
 		 */
-		scan_ulong(d->d_name, &old_inode);
+		scan_ulong(d->d_name, (unsigned long *) &old_inode);
 		correct_part_num = st.st_ino % split;
 		if (st.st_ino != old_inode || part_num != correct_part_num) {
 			/*- rename */
@@ -1135,13 +1135,16 @@ main(int argc, char **argv)
 void
 getversion_queue_fix_c()
 {
-	const char     *x = "$Id: queue-fix.c,v 1.37 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: queue-fix.c,v 1.38 2026-11-16 18:29:19+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: queue-fix.c,v $
+ * Revision 1.38  2026-11-16 18:29:19+05:30  Cprogrammer
+ * fixed compilation on armv7 architecture
+ *
  * Revision 1.37  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *
