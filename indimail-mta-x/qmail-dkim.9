@@ -8,12 +8,13 @@ message for delivery
 \fBqmail-dkim\fR [ \fIqqf\fR [\fIarg1\fR] [\fIarg2\fR] [...] ]
 
 .SH DESCRIPTION
-\fBqmail-dkim\fR(8) is a DKIM signing or DKIM verification program. It
-reads descriptor 0 for a RFC-5322 message and can either print a
-DKIM-Signature header or it can verify a DKIM signed RFC-5322 message and
-print a DKIM-Status header. \fBqmail-dkim\fR prints the original message
-after the DKIM-Signature or DKIM-Status header. The output of
-DKIM-Signature, DKIM-Status and the message is on a pipe to
+\fBqmail-dkim\fR(8) is a DKIM signing or DKIM verification program for
+indimail-mta, netqmail and notqmail. It reads descriptor 0 for a RFC-5322
+message and can either print a DKIM-Signature header or it can verify a
+DKIM signed RFC-5322 message and print a DKIM-Status header.
+\fBqmail-dkim\fR is based on RFC-6376, RFC-8464. \fBqmail-dkim\fR prints
+the original message after the DKIM-Signature or DKIM-Status header. The
+output of DKIM-Signature, DKIM-Status and the message is on a pipe to
 \fBqmail-queue\fR. If \fBDKIMQUEUE\fR is defined, the
 DKIM-Signature/DKIM-Status header and message will be written to the
 program defined by \fBDKIMQUEUE\fR. You can use \fI/bin/cat\fR for
@@ -316,6 +317,7 @@ envelopes(5),
 qmail-header(5),
 dknewkey(8),
 dkim(8),
+dkim2(8),
 qmail-inject(8),
 qmail-qmqpc(8),
 qmail-queue(8),
