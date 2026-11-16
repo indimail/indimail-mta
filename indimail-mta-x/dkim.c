@@ -36,29 +36,30 @@ static void
 usage(void)
 {
 	fprintf(stderr, "usage: %s [-lqthvVHSf] [-c <r|s|t|u>] [-d domain]\n%s\n", program,
-			"\t[-i you@domain] [-x expire_time] [-z hash] [-y selector] -s privkeyfile [-T [selector=]dnstext]");
-	fprintf(stderr, "l include body length tag when signing, honor it when verifying\n");
-	fprintf(stderr, "q include query method tag\n");
-	fprintf(stderr, "t include a timestamp tag\n");
-	fprintf(stderr, "h include Copied Headers (z= tag)\n");
-	fprintf(stderr, "f allow Unsigned From (default is to fail if not every From field is signed)\n");
-	fprintf(stderr, "S allow Unsigned Subject (default is to fail if Subject field is not signed)\n");
-	fprintf(stderr, "v verify the message\n");
+			"\t[-i you@domain] [-x expire_time] [-z hash] [-y selector]\n"
+			"\t-s privkeyfile [-T [selector=]dnstext]");
+	fprintf(stderr, "l                    include body length tag\n");
+	fprintf(stderr, "q                    include query method tag\n");
+	fprintf(stderr, "t                    include a timestamp tag\n");
+	fprintf(stderr, "h                    include Copied Headers. This adds the z= tag containing\n");
+	fprintf(stderr, "                     a copy of the message's original headers.\n");
+	fprintf(stderr, "f                    allow Unsigned From    (default is to fail if not every From field is signed)\n");
+	fprintf(stderr, "S                    allow Unsigned Subject (default is to fail if Subject field is not signed)\n");
+	fprintf(stderr, "v                    verify the message\n");
 	fprintf(stderr, "c <canonicalization> r for relaxed [DEFAULT], s - simple, t relaxed/simple, u - simple/relaxed\n");
-	fprintf(stderr, "d <domain> the domain tag, if not provided, determined from the From header\n");
-	fprintf(stderr, "i <identity> the identity, if not provided it will not be included\n");
-	fprintf(stderr, "x <expire_time> seconds from now ( DEFAULT = 604800). If set to - it will not be included\n");
-	fprintf(stderr, "z <hash> 1 - sha1, 2 - sha256, 3 - sha1+sha256, 4 - ed25519\n");
-	fprintf(stderr, "y <selector> the selector tag DEFAULT=basename of privkeyfile\n");
-	fprintf(stderr, "s <privkeyfile> sign the message using the private key in privkeyfile\n");
-	fprintf(stderr, "                (may be repeated; -y and -z before an -s apply to that key)\n");
+	fprintf(stderr, "d <domain>           the domain tag, if not provided, determined from the sender/from header\n");
+	fprintf(stderr, "i <identity>         the identity, if not provided it will not be included\n");
+	fprintf(stderr, "x <expire_time>      seconds from now ( DEFAULT = 604800). If set to - it will not be included\n");
+	fprintf(stderr, "z <hash>             1 - sha1, 2 - sha256, 3 - sha1+sha256, 4 - ed25519\n");
+	fprintf(stderr, "y <selector>         the selector tag DEFAULT=basename of privkeyfile\n");
+	fprintf(stderr, "s <privkeyfile>      sign the message using the private key in privkeyfile\n");
+	fprintf(stderr, "                     (may be repeated; -y and -z before an -s apply to that key)\n");
 	fprintf(stderr, "T [selector=]DNSText Use DNSText as domainkey text record instead of using DNS.\n");
-	fprintf(stderr, "                With selector= the record is used only for that selector and -T can be\n");
-	fprintf(stderr, "                repeated. Without selector= it is used for every signature.\n");
-	fprintf(stderr, "X excl Colon separated list of headers to exclude from signing\n");
-	fprintf(stderr, "p <n>  obsolete, ignored (SSP/ADSP have been removed)\n");
-	fprintf(stderr, "V set verbose mode\n");
-	fprintf(stderr, "H this help\n");
+	fprintf(stderr, "                     With selector= the record is used only for that selector and -T can be\n");
+	fprintf(stderr, "                     repeated. Without selector= it is used for every signature.\n");
+	fprintf(stderr, "X excl               Colon separated list of headers to exclude from signing\n");
+	fprintf(stderr, "V                    set verbose mode\n");
+	fprintf(stderr, "H                    this help\n");
 	exit(1);
 }
 
@@ -232,7 +233,7 @@ main(int argc, char **argv)
 		sigheader = p;
 	excl = getenv("EXCLUDE_DKIMSIGN");
 
-	while ((ch = getopt(argc, argv, "lqtfhHSvVp:b:c:d:i:s:x:X:y:z:T:")) != -1) {
+	while ((ch = getopt(argc, argv, "lqtfhHSvVc:d:i:s:x:X:y:z:T:")) != -1) {
 		switch (ch)
 		{
 		case 'l':
@@ -262,9 +263,6 @@ main(int argc, char **argv)
 			break;
 		case 'V':
 			verbose = vopts.verbose = 1;
-			break;
-		case 'p': /*- obsolete */
-		case 'b':
 			break;
 		case 'c':
 			switch (*optarg)
@@ -462,13 +460,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.41 2026-11-10 15:14:08+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.42 2026-11-16 17:38:43+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x++) x--;
 }
 
 /*
  * $Log: dkim.c,v $
+ * Revision 1.42  2026-11-16 17:38:43+05:30  Cprogrammer
+ * improved usage output
+ *
  * Revision 1.41  2026-11-10 15:14:08+05:30  Cprogrammer
  * fix compilation with older version of openssl
  *
