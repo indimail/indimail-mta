@@ -678,6 +678,9 @@ main(int argc, char **argv)
 			case '4':
 				nHash = DKIM_HASH_ED25519;
 				break;
+			case '9':
+				nHash = DKIM_HASH_PRIVATE;
+				break;
 #endif
 			default:
 				fprintf(stderr, "%s: unrecognized hash.\n", program);

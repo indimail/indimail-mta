@@ -192,7 +192,7 @@ bool CDKIMSign::SignThisHeader(const string &sTag)
 	bool            bRet = true;
 	char           *ptr;
 
-	if (!(ptr = getenv("DKIMSIGN_HEADER")) && *ptr)
+	if (!((ptr = getenv("DKIMSIGN_HEADER")) && *ptr))
 		ptr = (char *) "DKIM-Signature:";
 	if (_strnicmp(sTag.c_str(), "X-", 2) == 0
 		|| _stricmp(sTag.c_str(), "Authentication-Results:") == 0
@@ -705,6 +705,9 @@ CDKIMSign::ConstructSignature(const char *szPrivKey, int nSigAlg)
 	case DKIM_HASH_ED25519:
 		AddTagToSig((char *) "a", "ed25519-sha256", 0, false);
 		break;
+	case DKIM_HASH_PRIVATE:
+		AddTagToSig((char *) "a", "ed25519-private", 0, false);
+		break;
 	default:
 		return DKIM_INVALID_CONTEXT;
 	}
@@ -779,6 +782,8 @@ CDKIMSign::ConstructSignature(const char *szPrivKey, int nSigAlg)
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	case DKIM_HASH_ED25519:
+		/* fall through */
+	case DKIM_HASH_PRIVATE:
 		if (!EVP_DigestFinal(p4, Hash, &nHashLen))
 			return DKIM_EVP_DIGEST_FAILURE;
 		break;
@@ -844,6 +849,8 @@ CDKIMSign::ConstructSignature(const char *szPrivKey, int nSigAlg)
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
 	case DKIM_HASH_ED25519:
+		/* fall through */
+	case DKIM_HASH_PRIVATE:
 		SigHdrs.append(sTemp.c_str(), sTemp.size());
 		break;
 #endif
@@ -878,7 +885,7 @@ CDKIMSign::ConstructSignature(const char *szPrivKey, int nSigAlg)
 		break;
 #endif
 #if OPENSSL_VERSION_NUMBER >= 0x10101000L
-	case DKIM_HASH_ED25519:
+	case DKIM_HASH_PRIVATE:
 		size_t          sig_len;
 		unsigned char  *SignMsg;
 
@@ -895,6 +902,38 @@ CDKIMSign::ConstructSignature(const char *szPrivKey, int nSigAlg)
 		nSignRet = EVP_DigestSign(p5, sig, &sig_len, SignMsg, SigHdrs.length());
 		siglen = (unsigned int) sig_len;
 		break;
+	case DKIM_HASH_ED25519:
+	{
+		/*-
+		 * RFC 8463: ed25519-sha256 computes the SHA-256 hash of the
+		 * canonicalized header data (as in RFC 6376 section 3.7) and then
+		 * signs that 32 byte digest with PureEd25519. The raw header data
+		 * must NOT be passed directly to Ed25519.
+		 */
+		size_t          sig_len = 0;
+		unsigned char   md[EVP_MAX_MD_SIZE];
+		unsigned int    mdlen = 0;
+
+		if (!EVP_Digest(SigHdrs.data(), SigHdrs.length(), md, &mdlen, EVP_sha256(), NULL)) {
+			EVP_PKEY_free(pkey);
+			return DKIM_EVP_DIGEST_FAILURE;
+		}
+		if (!EVP_DigestSignInit(p5, NULL, NULL, NULL, pkey)) {
+			EVP_PKEY_free(pkey);
+			return DKIM_BAD_PRIVATE_KEY;
+		}
+		if (!EVP_DigestSign(p5, NULL, &sig_len, md, mdlen)) {
+			EVP_PKEY_free(pkey);
+			return DKIM_BAD_PRIVATE_KEY;
+		}
+		if (!(sig = (unsigned char *) OPENSSL_malloc(sig_len))) {
+			EVP_PKEY_free(pkey);
+			return DKIM_OUT_OF_MEMORY;
+		}
+		nSignRet = EVP_DigestSign(p5, sig, &sig_len, md, mdlen);
+		siglen = (unsigned int) sig_len;
+		break;
+	}
 #endif
 	}
 	EVP_PKEY_free(pkey);
@@ -978,6 +1017,13 @@ CDKIMSign::AssembleReturnedSig(const char *szPrivKey)
 		else
 			return nRet;
 	}
+	if (m_nHash == DKIM_HASH_PRIVATE) {
+		nRet = ConstructSignature(szPrivKey, DKIM_HASH_PRIVATE);
+		if (nRet == DKIM_SUCCESS)
+			ed25519Sig.assign(m_sSig);
+		else
+			return nRet;
+	}
 	if (!ed25519Sig.empty()) {
 		if (!m_sReturnedSig.empty())
 			m_sReturnedSig.append("\n");
@@ -1001,13 +1047,17 @@ CDKIMSign::AssembleReturnedSig(const char *szPrivKey)
 void
 getversion_dkimsign_cpp()
 {
-	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.32 2026-10-21 21:47:22+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimsign.cpp,v 1.33 2026-11-16 17:32:43+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x++) x--;
 }
 
 /*
  * $Log: dkimsign.cpp,v $
+ * Revision 1.33  2026-11-16 17:32:43+05:30  Cprogrammer
+ * moved original ed25519 to custom encryption
+ * fixed ed25519 as per RFC 8463
+ *
  * Revision 1.32  2026-10-21 21:47:22+05:30  Cprogrammer
  * fix compiler warnings
  *

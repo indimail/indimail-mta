@@ -36,6 +36,7 @@ extern          "C" {
 #define DKIM_HASH_SHA256            2
 #define DKIM_HASH_SHA1_AND_SHA256   3
 #define DKIM_HASH_ED25519           4
+#define DKIM_HASH_PRIVATE           9
 
 /* DKIM canonicalization methods */
 #define DKIM_CANON_SIMPLE           1
@@ -179,6 +180,9 @@ int  DKIM_CALL  DKIMSignReplaceHash(DKIMContext *pSignContext, DKIMSignOptions *
 
 /*
  * $Log: dkim.h,v $
+ * Revision 1.18  2026-11-16 17:31:59+05:30  Cprogrammer
+ * added custom encryption for vigil
+ *
  * Revision 1.17  2025-02-08 23:24:01+05:30  Cprogrammer
  * make DKIM-Signature header name configurable
  *

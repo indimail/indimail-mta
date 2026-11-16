@@ -86,6 +86,7 @@ public:
 	SelectorInfo   *m_pSelector;
 	int             Status;
 	int             m_nHash;	/* use one of the DKIM_HASH_xxx constants here */
+	int             m_private;
 	unsigned        EmptyLineCount;
 	bool            m_SaveCanonicalizedData;
 };
@@ -127,6 +128,9 @@ protected:
 
 /*
  * $Log: dkimverify.h,v $
+ * Revision 1.13  2026-11-16 17:33:45+05:30  Cprogrammer
+ * added custom encryption
+ *
  * Revision 1.12  2023-01-29 22:06:08+05:30  Cprogrammer
  * added new member 'method'
  *

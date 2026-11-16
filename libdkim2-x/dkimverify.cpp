@@ -494,11 +494,26 @@ CDKIMVerify::GetResults(int *sCount, int *sSize)
 							fprintf(stderr, "EVP_DigestVerifyInit: %s\n", ERR_error_string(r, NULL));
 					}
 				} else {
-					res = EVP_DigestVerify(i->m_Msg_ctx, (unsigned char *)i->SignatureData.data(),
-							(size_t) i->SignatureData.length(), (unsigned char *) SigHdr.data(), SigHdr.length());
-					if (res != 1 && res != 0 && verbose == true) {
-						while ((r = ERR_get_error()))
-							fprintf(stderr, "EVP_DigestVerify: %s\n", ERR_error_string(r, NULL));
+					if (i->m_private) {
+						res = EVP_DigestVerify(i->m_Msg_ctx, (unsigned char *)i->SignatureData.data(),
+								(size_t) i->SignatureData.length(), (unsigned char *) SigHdr.data(), SigHdr.length());
+						if (res != 1 && res != 0 && verbose == true) {
+							while ((r = ERR_get_error()))
+								fprintf(stderr, "EVP_DigestVerify: %s\n", ERR_error_string(r, NULL));
+						}
+					} else {
+						/*- RFC 8463: verify against the SHA-256 digest of the canonicalized headers */
+						unsigned char   md[EVP_MAX_MD_SIZE];
+						unsigned int    mdlen = 0;
+						if (!EVP_Digest(SigHdr.data(), SigHdr.length(), md, &mdlen, EVP_sha256(), NULL))
+							res = -1;
+						else
+							res = EVP_DigestVerify(i->m_Msg_ctx, (unsigned char *)i->SignatureData.data(),
+									(size_t) i->SignatureData.length(), md, mdlen);
+						if (res != 1 && res != 0 && verbose == true) {
+							while ((r = ERR_get_error()))
+								fprintf(stderr, "EVP_DigestVerify: %s\n", ERR_error_string(r, NULL));
+						}
 					}
 				}
 			}
@@ -834,6 +849,7 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 	/*- signature MUST have a=, b=, d=, h=, s= -*/
 	if (values[1] == NULL || values[2] == NULL || values[3] == NULL || values[4] == NULL || values[5] == NULL)
 		return DKIM_BAD_SYNTAX;
+	sig.m_private = 0;
 	/*- algorithm can be "rsa-sha1" or "rsa-sha256" -*/
 	if (strcmp(values[1], "rsa-sha1") == 0)
 		sig.m_nHash = DKIM_HASH_SHA1;
@@ -846,6 +862,11 @@ CDKIMVerify::ParseDKIMSignature(const string &sHeader, SignatureInfo &sig)
 	else
 	if (strcmp(values[1], "ed25519-sha256") == 0)
 		sig.m_nHash = DKIM_HASH_SHA256;
+	else
+	if (strcmp(values[1], "ed25519-private") == 0) {
+		sig.m_nHash = DKIM_HASH_SHA256;
+		sig.m_private = 1;
+	}
 #endif
 	else
 		return DKIM_BAD_SYNTAX;	/* todo: maybe create a new error code for unknown algorithm */
@@ -1315,13 +1336,17 @@ CDKIMVerify::GetDomain(void)
 void
 getversion_dkimverify_cpp()
 {
-	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.37 2026-10-21 21:47:32+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkimverify.cpp,v 1.38 2026-11-16 17:33:26+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x++) x--;
 }
 
 /*
  * $Log: dkimverify.cpp,v $
+ * Revision 1.38  2026-11-16 17:33:26+05:30  Cprogrammer
+ * added custom encryptio
+ * fixed ed25519 as per RFC 8463
+ *
  * Revision 1.37  2026-10-21 21:47:32+05:30  Cprogrammer
  * fix compiler warnings
  *
