@@ -4,16 +4,13 @@ on:
   push:
     paths:
       - '**/indimail-mta-x/**'
-      - '**/libdkim2-x/**'
       - '**/libsrs2-x/**'
       - .github/workflows/indimail-mta-c-cpp.yml
       - '!**/indimail-mta-x/indimail-mta.spec.in'
-      - '!**/libdkim2-x/libdkim2.spec.in'
       - '!**/libsrs2-x/libsrs2.spec.in'
       - '!**/indimail-mta-x/qmail-perf/*'
       - '!**/indimail-mta-x/tests/*'
       - '!**/indimail-mta-x/debian/*'
-      - '!**/libdkim2-x/debian/*'
       - '!**/libsrs2-x/debian/*'
       - '!**/*.9'
       - '!**/*.8'
@@ -67,27 +64,6 @@ jobs:
           export LDFLAGS=""
         fi
         cd libqmail
-        ./default.configure
-        make
-        sudo make install-strip
-      env:
-        OS: ${{ matrix.host }}
-
-    - name: install_libdkim2
-      run: |
-        if [ "${OS}" = "macos-latest" ] ; then
-          # Dynamically fetch base paths for Homebrew dependencies
-          OPENSSL_PREFIX=$(brew --prefix openssl@3)
-
-          # Combine both paths cleanly into your compilation flags
-          export CPPFLAGS="-I${OPENSSL_PREFIX}/include"
-          export LDFLAGS="-L${OPENSSL_PREFIX}/lib"
-        else
-          # Standard flags for Ubuntu environment
-          export CPPFLAGS="-I/usr/include/tirpc"
-          export LDFLAGS=""
-        fi
-        cd main/libdkim2-x
         ./default.configure
         make
         sudo make install-strip
