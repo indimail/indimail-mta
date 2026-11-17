@@ -609,6 +609,11 @@ the same message for another domain, create a second context, or set
 strcpy(opts.szDomain, "example.org");
 s = dkim_sign_new(&opts);
 .fi
+.SH AUTHORS
+The functions in \fIdkim_functions.c\fR were written by Claude
+(Claude Sonnet 5.5, Anthropic) at the request and under the direction of
+Manvendra Bhangui, who specified the interfaces, reviewed and tested the
+code, and maintains it as part of indimail\-mta.
 .SH SEE ALSO
 \fBqmail-dkim\fR(8), \fBdkim\fR(8), \fBdknewkey\fR(8), \fBOPENSSL_free\fR(3)
 .PP

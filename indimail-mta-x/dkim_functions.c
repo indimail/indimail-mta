@@ -1,5 +1,5 @@
 /*-
- * $Id: dkim_functions.c,v 1.3 2026-11-15 19:01:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dkim_functions.c,v 1.4 2026-11-18 01:24:45+05:30 Cprogrammer Exp mbhangui $
  *
  * dkim_functions.c - DKIM (RFC 6376 / RFC 8463) signing and verification
  *
@@ -18,6 +18,9 @@
  *   message. That is what makes multiple signatures safe.
  * - Verifier: every DKIM-Signature header gets its own body hasher (own
  *   canonicalization, own algorithm, own l= limit) and its own result.
+ *
+ * Written by Claude (Claude Sonnet 5.5, Anthropic) for indimail-mta,
+ * directed, reviewed and tested by Manvendra Bhangui.
  */
 #include <stdlib.h>
 #include <ctype.h>
@@ -2007,6 +2010,9 @@ int             dkim_verify_status(int nsigs, const DKIMVerifyDetails *details) 
 
 /*-
  * $Log: dkim_functions.c,v $
+ * Revision 1.4  2026-11-18 01:24:45+05:30  Cprogrammer
+ * added attribution to claude
+ *
  * Revision 1.3  2026-11-15 19:01:15+05:30  Cprogrammer
  * use DKIMSIGN_HEADER to change DKIM header used
  *
