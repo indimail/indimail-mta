@@ -1,5 +1,5 @@
 /*
- * $Id: mailfilter.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: mailfilter.c,v 1.8 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <env.h>
@@ -78,19 +78,20 @@ mailfilter(int argc, char **argv, char *filterargs)
 	return (QQ_OK);
 }
 
-#ifndef	lint
 void
 getversion_mailfilter_c()
 {
-	const char     *x = "$Id: mailfilter.c,v 1.7 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: mailfilter.c,v 1.8 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmktempfileh;
 	(void) x;
 }
-#endif
 
 /*
  * $Log: mailfilter.c,v $
+ * Revision 1.8  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.7  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

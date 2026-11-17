@@ -1,5 +1,5 @@
 /*
- * $Id: sys-checkpwd.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: sys-checkpwd.c,v 1.25 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  *
  * Test method
  * printf "login\0pass\0\0\x01\0" >/tmp/input
@@ -323,19 +323,20 @@ main(int argc, char **argv)
 	return (0);
 }
 
-#ifndef lint
 void
 getversion_sys_checkpwd_c()
 {
-	const char     *x = "$Id: sys-checkpwd.c,v 1.24 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: sys-checkpwd.c,v 1.25 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	(void) x;
 }
-#endif
 
 /*
  * $Log: sys-checkpwd.c,v $
+ * Revision 1.25  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.24  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

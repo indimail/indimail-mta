@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-multi.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-multi.c,v 1.9 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <sig.h>
@@ -41,18 +41,19 @@ main(int argc, char **argv)
 	return (filterargs ? mailfilter(argc, argv, filterargs) : qmulti(0, argc, argv));
 }
 
-#ifndef	lint
 void
 getversion_qmail_multi_c()
 {
-	const char     *x = "$Id: qmail-multi.c,v 1.8 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-multi.c,v 1.9 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
-#endif
 
 /*
  * $Log: qmail-multi.c,v $
+ * Revision 1.9  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.8  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *

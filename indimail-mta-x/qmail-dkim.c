@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.87 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.88 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stdlib.h>
@@ -813,18 +813,19 @@ main(int argc, char *argv[])
 	die(wait_exitcode(wstat), 0);
 }
 
-#ifndef lint
 void
 getversion_qmail_dkim_c()
 {
-	const char     *x = "$Id: qmail-dkim.c,v 1.87 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-dkim.c,v 1.88 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
-#endif
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.88  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.87  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *

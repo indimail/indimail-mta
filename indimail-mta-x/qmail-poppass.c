@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-poppass.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmail-poppass.c,v 1.13 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  *
  * See http://ietfreport.isoc.org/all-ids/draft-gellens-password-00.txt
  *
@@ -315,18 +315,20 @@ main(int argc, char **argv)
 	return(0);
 }
 
-#ifndef lint
 void
 getversion_qmail_poppass_c()
 {
-	const char     *x = "$Id: qmail-poppass.c,v 1.12 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmail-poppass.c,v 1.13 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	(void) x;
 }
-#endif
+
 /*
  * $Log: qmail-poppass.c,v $
+ * Revision 1.13  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.12  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

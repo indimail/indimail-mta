@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-daned.c,v 1.38 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-daned.c,v 1.39 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include "hastlsa.h"
 #include "subfd.h"
@@ -1257,11 +1257,10 @@ main()
 }
 #endif
 
-#ifndef lint
 void
 getversion_qmail_dane_c()
 {
-	const char     *x = "$Id: qmail-daned.c,v 1.38 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-daned.c,v 1.39 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 #if defined(HASTLSA) && defined(TLS)
 	x = sccsidstarttlsh;
@@ -1269,10 +1268,12 @@ getversion_qmail_dane_c()
 #endif
 	(void) x;
 }
-#endif
 
 /*
  * $Log: qmail-daned.c,v $
+ * Revision 1.39  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.38  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *

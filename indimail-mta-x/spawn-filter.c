@@ -1,5 +1,5 @@
 /*
- * $Id: spawn-filter.c,v 1.94 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: spawn-filter.c,v 1.95 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -686,21 +686,22 @@ main(int argc, char **argv)
 	return(0);
 }
 
-#ifndef lint
 void
 getversion_qmail_spawn_filter_c()
 {
-	const char     *x = "$Id: spawn-filter.c,v 1.94 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: spawn-filter.c,v 1.95 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidreporth;
 	x = sccsidgetdomainth;
 	x = sccsidmakeargsh;
 	(void) x;
 }
-#endif
 
 /*
  * $Log: spawn-filter.c,v $
+ * Revision 1.95  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.94  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *

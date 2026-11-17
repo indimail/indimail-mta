@@ -1,5 +1,5 @@
 /*
- * $Id: cdb_match.c,v 1.3 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: cdb_match.c,v 1.4 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stralloc.h>
@@ -125,18 +125,19 @@ cdb_match(const char *fn, const char *addr, int len, char **result)
 	return CDB_NOMATCH;
 }
 
-#ifndef lint
 void
 getversion_cdb_match_c()
 {
-	const char     *x = "$Id: cdb_match.c,v 1.3 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: cdb_match.c,v 1.4 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
-#endif
 
 /*
  * $Log: cdb_match.c,v $
+ * Revision 1.4  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.3  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

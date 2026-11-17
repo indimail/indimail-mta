@@ -1,5 +1,5 @@
 /*
- * $Id: qscanq-stdin.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qscanq-stdin.c,v 1.13 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -171,18 +171,19 @@ main(int argc, char *argv[])
 	_exit(QQ_XTEMP);
 }
 
-#ifndef lint
 void
 getversion_qscanq_stdin_c()
 {
-	const char     *x = "$Id: qscanq-stdin.c,v 1.12 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qscanq-stdin.c,v 1.13 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
-#endif
 
 /*
  * $Log: qscanq-stdin.c,v $
+ * Revision 1.13  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.12  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *

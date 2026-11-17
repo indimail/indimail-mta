@@ -1,5 +1,5 @@
 /*
- * $Id: qmulti.c,v 1.70 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $
+ * $Id: qmulti.c,v 1.71 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include "haslibrt.h"
@@ -236,18 +236,19 @@ rewrite_envelope(int outfd)
 	return (1);
 }
 
-#ifndef	lint
 void
 getversion_qmulti_c()
 {
-	const char     *x = "$Id: qmulti.c,v 1.70 2026-11-10 16:01:17+05:30 mbhangui Exp mbhangui $";
+	const char     *x = "$Id: qmulti.c,v 1.71 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
-#endif
 
 /*
  * $Log: qmulti.c,v $
+ * Revision 1.71  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.70  2026-11-10 16:01:17+05:30  mbhangui
  * fix set but unused variable warnings
  *

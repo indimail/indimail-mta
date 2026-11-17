@@ -1,5 +1,5 @@
 /*
- * $Id: control.c,v 1.27 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: control.c,v 1.28 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <open.h>
@@ -543,18 +543,19 @@ control_readcmd(stralloc *sa, const char *fn)
 	return 1;
 }
 
-#ifndef lint
 void
 getversion_control_c()
 {
-	const char     *x = "$Id: control.c,v 1.27 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: control.c,v 1.28 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
-#endif
 
 /*
  * $Log: control.c,v $
+ * Revision 1.28  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.27  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *

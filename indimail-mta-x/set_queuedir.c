@@ -1,5 +1,8 @@
 /*
  * $Log: set_queuedir.c,v $
+ * Revision 1.5  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.4  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *
@@ -54,12 +57,10 @@ set_queuedir(const char *argv0, const char *queue)
 	}
 }
 
-#ifndef	lint
 void
 getversion_set_queuedir_c()
 {
-	const char     *x = "$Id: set_queuedir.c,v 1.4 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: set_queuedir.c,v 1.5 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
-#endif

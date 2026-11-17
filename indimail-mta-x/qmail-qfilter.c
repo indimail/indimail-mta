@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-qfilter.c,v 1.27 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-qfilter.c,v 1.28 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  *
  * Copyright (C) 2001,2004-2005 Bruce Guenter <bruceg@em.ca>
  *
@@ -391,18 +391,19 @@ main(int argc, char *argv[])
 	return QQ_INTERNAL;
 }
 
-#ifndef lint
 void
 getversion_qmail_qfilter_c()
 {
-	const char     *x = "$Id: qmail-qfilter.c,v 1.27 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-qfilter.c,v 1.28 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
-#endif
 
 /*
  * $Log: qmail-qfilter.c,v $
+ * Revision 1.28  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.27  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *

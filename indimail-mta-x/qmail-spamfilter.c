@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-spamfilter.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-spamfilter.c,v 1.15 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -233,20 +233,21 @@ finish:
 	return (0);
 }
 
-#ifndef	lint
 void
 getversion_qmail_spamfilter_c()
 {
-	const char     *x = "$Id: qmail-spamfilter.c,v 1.14 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-spamfilter.c,v 1.15 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	x = sccsidmktempfileh;
 	(void) x;
 }
-#endif
 
 /*
  * $Log: qmail-spamfilter.c,v $
+ * Revision 1.15  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.14  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *

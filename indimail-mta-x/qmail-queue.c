@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-queue.c,v 1.98 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-queue.c,v 1.99 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
  */
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -1192,18 +1192,20 @@ main()
 	_exit(0);
 }
 
-#ifndef lint
 void
 getversion_qmail_queue_c()
 {
-	const char     *x = "$Id: qmail-queue.c,v 1.98 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-queue.c,v 1.99 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
 
 	x = sccsidmakeargsh;
 	(void) x;
 }
-#endif
+
 /*
  * $Log: qmail-queue.c,v $
+ * Revision 1.99  2026-11-17 19:00:16+05:30  Cprogrammer
+ * removed #ifdef lint
+ *
  * Revision 1.98  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *
