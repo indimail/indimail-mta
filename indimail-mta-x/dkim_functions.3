@@ -1,0 +1,616 @@
+.TH DKIM_FUNCTIONS 3 "" "indimail-mta" "Library Functions"
+.SH NAME
+dkim_sign_new, dkim_sign_process, dkim_sign_domain, dkim_sign_get, dkim_sign_free,
+dkim_verify_new, dkim_verify_process, dkim_verify_finish, dkim_verify_author_domain,
+dkim_verify_status, dkim_verify_free, dkim_status_text, dkim_code_name, dkim_free,
+exit_if_old \- sign and verify mail with DKIM (RFC 6376, RFC 8463)
+.SH SYNOPSIS
+.nf
+.B #include \(dqdkim_functions.h\(dq
+.sp
+.B DKIMSign   *dkim_sign_new(const DKIMSignOptions *\fIopts\fB);
+.B int         dkim_sign_process(DKIMSign *\fIs\fB, const char *\fIbuf\fB, size_t \fIlen\fB);
+.B const char *dkim_sign_domain(DKIMSign *\fIs\fB);
+.B int         dkim_sign_get(DKIMSign *\fIs\fB, const DKIMSignOptions *\fIopts\fB,
+.B                           const char *\fIprivkey_pem\fB, char **\fIsig\fB);
+.B void        dkim_sign_free(DKIMSign *\fIs\fB);
+.sp
+.B DKIMVerify *dkim_verify_new(const DKIMVerifyOptions *\fIopts\fB);
+.B int         dkim_verify_process(DKIMVerify *\fIv\fB, const char *\fIbuf\fB, size_t \fIlen\fB);
+.B int         dkim_verify_finish(DKIMVerify *\fIv\fB, int *\fInsigs\fB,
+.B                                DKIMVerifyDetails **\fIdetails\fB);
+.B const char *dkim_verify_author_domain(DKIMVerify *\fIv\fB);
+.B int         dkim_verify_status(int \fInsigs\fB, const DKIMVerifyDetails *\fIdetails\fB);
+.B void        dkim_verify_free(DKIMVerify *\fIv\fB);
+.sp
+.B const char *dkim_status_text(int \fIcode\fB, const char **\fIenhanced\fB);
+.B const char *dkim_code_name(int \fIcode\fB);
+.B void        dkim_free(void *\fIp\fB);
+.B int         exit_if_old(int \fIcode\fB);
+.fi
+.sp
+Link with \fB\-lcrypto\fR (OpenSSL 1.1.1 or later).
+.SH DESCRIPTION
+These functions, in \fIdkim_functions.c\fR, add DKIM signatures to a message
+and verify the DKIM signatures of a message. They are plain C, need only libc
+and OpenSSL, and replace the C++ libdkim. They are used by
+\fBqmail-dkim\fR(8) and \fBdkim\fR(8).
+.PP
+Both signing and verifying are \fIstreaming\fR: the message is passed in with
+repeated calls, in chunks of any size (including one byte), and only the
+header fields are kept in memory. Line endings may be LF or CRLF. The
+supported algorithms are \fBrsa\-sha1\fR, \fBrsa\-sha256\fR and
+\fBed25519\-sha256\fR, with \fBsimple\fR and \fBrelaxed\fR canonicalization
+for header and body.
+.SS Signing
+.nf
+dkim_sign_new()
+dkim_sign_process()  ... once per chunk of the message
+dkim_sign_get()      ... once per signature wanted
+dkim_sign_free()
+.fi
+.PP
+The message is read once. While it is read the body is hashed for each of the
+four combinations of canonicalization (simple, relaxed) and hash (SHA\-1,
+SHA\-256), so that \fBdkim_sign_get\fR() can be called any number of times, with
+a different key, selector, algorithm or canonicalization each time, without
+the message being passed in again. This is how several signatures (for
+example RSA and Ed25519) are made.
+.SS Verifying
+.nf
+dkim_verify_new()
+dkim_verify_process() ... once per chunk of the message
+dkim_verify_finish()  ... result for every DKIM\-Signature header
+dkim_verify_free()
+.fi
+.PP
+Every DKIM\-Signature header is verified independently, with its own
+canonicalization, hash algorithm, \fIl=\fR limit and key lookup. At most
+\fBDKIM_MAX_VERIFY_SIGNATURES\fR (10) signatures are examined; the rest are
+ignored.
+.SH DATA TYPES
+.SS DKIMSignOptions
+Initialize with \fBmemset(&opts, 0, sizeof(opts))\fR and set what you need.
+.TP
+.B pfnHeaderCallback
+\fBint (*)(const char *header)\fR. Called for every header field of the
+message; return 1 to include it in the signature (\fIh=\fR), 0 to leave it
+out. \fIheader\fR is the field as it appears in the message ("Name: value",
+folded lines joined with CRLF). If NULL every header is signed. The From
+header is signed whatever the callback returns. Used by \fBdkim_sign_new\fR().
+.TP
+.B szDomain
+The \fId=\fR tag. If empty, the domain is taken from the message (see
+\fBdkim_sign_domain\fR()). Used by \fBdkim_sign_new\fR().
+.TP
+.B szDefaultDomain
+\fId=\fR to use when no domain can be found in the message. Used by
+\fBdkim_sign_new\fR().
+.TP
+.B nCanon
+Canonicalization, header/body: \fBDKIM_SIGN_SIMPLE\fR (simple/simple),
+\fBDKIM_SIGN_RELAXED\fR (relaxed/relaxed), \fBDKIM_SIGN_RELAXED_SIMPLE\fR
+(relaxed header, simple body) or \fBDKIM_SIGN_SIMPLE_RELAXED\fR (simple header,
+relaxed body). Note that the value 0 is simple/simple. Used by
+\fBdkim_sign_get\fR().
+.TP
+.B nHash
+\fBDKIM_HASH_SHA1\fR (rsa\-sha1), \fBDKIM_HASH_SHA256\fR (rsa\-sha256),
+\fBDKIM_HASH_SHA1_AND_SHA256\fR (two RSA signatures with the same key, SHA\-1
+first) or \fBDKIM_HASH_ED25519\fR (ed25519\-sha256). The key must match: an RSA
+key for the first three, an Ed25519 key for the last, otherwise
+\fBDKIM_BAD_PRIVATE_KEY\fR is returned. SHA\-1 is deprecated by RFC 8301. Used
+by \fBdkim_sign_get\fR().
+.TP
+.B nIncludeBodyLengthTag
+Non\-zero adds \fIl=\fR (length of the canonicalized body). Used by
+\fBdkim_sign_get\fR().
+.TP
+.B nIncludeQueryMethod
+Non\-zero adds \fIq=dns/txt\fR.
+.TP
+.B nIncludeTimeStamp
+Non\-zero adds \fIt=\fR (current time).
+.TP
+.B nIncludeCopiedHeaders
+Non\-zero adds \fIz=\fR, a copy of the signed headers.
+.TP
+.B expireTime
+Absolute time, as returned by \fBtime\fR(2), for \fIx=\fR. 0 means no \fIx=\fR.
+.TP
+.B szSelector
+The \fIs=\fR tag. The public key is looked up at
+\fIselector\fB._domainkey.\fIdomain\fR.
+.TP
+.B szIdentity
+The \fIi=\fR tag, \fIlocal@domain\fR. The domain must be \fId=\fR or a
+subdomain of it, otherwise \fBDKIM_BAD_IDENTITY\fR is returned. Empty means no
+\fIi=\fR.
+.SS DKIMVerifyOptions
+.TP
+.B nAllowUnsignedFromHeaders
+0 (default): every From header of the message must be listed in \fIh=\fR,
+otherwise the signature fails with \fBDKIM_UNSIGNED_FROM\fR. Non\-zero skips
+the check.
+.TP
+.B nSubjectRequired
+Non\-zero: if the message has a Subject header, it must be listed in \fIh=\fR,
+otherwise the signature fails with \fBDKIM_BAD_SYNTAX\fR.
+.TP
+.B nHonorBodyLengthTag
+Non\-zero: only the first \fIl=\fR bytes of the canonicalized body are hashed.
+A signature that verifies but does not cover the whole body gets the result
+\fBDKIM_SUCCESS_BUT_EXTRA\fR. 0 (default): \fIl=\fR is ignored and the whole
+body must match. Honoring \fIl=\fR lets anyone append text to a signed
+message, so leave it off unless you need it.
+.TP
+.B verbose
+Reserved.
+.TP
+.B pfnDnsCallback
+\fBchar *(*)(const char *name)\fR. Called with \fIselector._domainkey.domain\fR
+and must return the TXT record as a string allocated so that it can be
+released with \fBOPENSSL_free\fR(3), or the literal strings \fB"e=temp;"\fR
+(temporary DNS failure) or \fB"e=perm;"\fR (permanent failure, record does not
+exist). The library frees the returned string. Required unless
+\fBpszSelectorOverride\fR is set.
+.TP
+.B pszSelectorOverride
+If not NULL, this text is used as the key record for every signature and
+\fBpfnDnsCallback\fR is not called. Useful for testing.
+.SS DKIMVerifyDetails
+One per DKIM\-Signature header, in the order they appear in the message.
+.TP
+.B nResult
+>= 0: verified; < 0: failed. See \fBRETURN VALUES\fR.
+.TP
+.B szDomain, szSelector
+The \fId=\fR and \fIs=\fR values, or NULL if the signature could not be parsed
+that far.
+.TP
+.B szAlgorithm
+"rsa\-sha1", "rsa\-sha256", "ed25519\-sha256" or NULL.
+.SH FUNCTIONS
+.SS dkim_sign_new()
+Creates a signing context from the \fIpfnHeaderCallback\fR, \fIszDomain\fR and
+\fIszDefaultDomain\fR members of \fIopts\fR. Returns NULL if memory is
+exhausted, or if OpenSSL is older than 1.1.1. The options are copied; they may
+change afterwards without affecting the context.
+.SS dkim_sign_process()
+Passes \fIlen\fR bytes of the message to the signer. Returns 0, or
+\fBDKIM_OUT_OF_MEMORY\fR, \fBDKIM_FAIL\fR (header larger than 16 MB) or
+\fBDKIM_INVALID_CONTEXT\fR (called after \fBdkim_sign_get\fR()).
+.SS dkim_sign_domain()
+Returns the domain that will be used for \fId=\fR, or NULL if none can be
+found. The order is: \fIszDomain\fR; the domain of the first address in the
+From, Sender, Return\-Path or X\-Bounced\-Address header, in that order;
+\fIszDefaultDomain\fR. Call it after the whole message has been passed to
+\fBdkim_sign_process\fR(). The pointer is valid until \fBdkim_sign_free\fR().
+.SS dkim_sign_get()
+Makes the signature(s) for the message that has been passed in, using the
+signing members of \fIopts\fR (see above) and the unencrypted PEM private key
+in the NUL terminated string \fIprivkey_pem\fR (RSA, or Ed25519 when
+\fInHash\fR is \fBDKIM_HASH_ED25519\fR). On success \fI*sig\fR points to
+allocated memory holding one complete header, or two with
+\fBDKIM_HASH_SHA1_AND_SHA256\fR:
+.PP
+.RS
+.nf
+DKIM\-Signature: v=1; a=rsa\-sha256; c=relaxed/relaxed; d=example.com;
+        s=default; ...; b=...
+.fi
+.RE
+.PP
+Every line, including the last, is terminated by LF (not CRLF), and
+continuation lines begin with a tab, so the result can be written in front
+of a message that uses LF line ends. (The hash is computed over the CRLF form
+that every verifier uses, so the signature is valid either way.) Release
+\fI*sig\fR with \fBdkim_free\fR(). On failure \fI*sig\fR is NULL. The first call
+completes the message; \fBdkim_sign_process\fR() can no longer be used after
+it. \fBdkim_sign_get\fR() can be called as many times as needed. Besides the
+common errors, it returns \fBDKIM_NO_SENDER\fR if no domain is available,
+\fBDKIM_BAD_IDENTITY\fR, \fBDKIM_BAD_PRIVATE_KEY\fR (key cannot be read, is
+passphrase protected, or does not match \fInHash\fR), \fBDKIM_EVP_SIGN_FAILURE\fR
+and \fBDKIM_EVP_DIGEST_FAILURE\fR.
+.PP
+The headers signed are those the callback accepts, always including From.
+They are listed in \fIh=\fR from the bottom of the message up, once per
+occurrence, so that headers that occur several times are covered correctly.
+.SS dkim_sign_free()
+Releases the context. NULL is allowed.
+.SS dkim_verify_new()
+Creates a verification context. The options are copied. Returns NULL if memory
+is exhausted, or if OpenSSL is older than 1.1.1.
+.SS dkim_verify_process()
+Passes \fIlen\fR bytes of the message to the verifier. Returns 0, or
+\fBDKIM_OUT_OF_MEMORY\fR, \fBDKIM_FAIL\fR (header larger than 16 MB) or
+\fBDKIM_INVALID_CONTEXT\fR (called after \fBdkim_verify_finish\fR()).
+.SS dkim_verify_finish()
+Ends the message and verifies every signature: it fetches the keys, compares
+the body hash and checks the signature. Returns 0 and sets \fI*nsigs\fR to the
+number of DKIM\-Signature headers found (0 if none) and \fI*details\fR to an
+array of that many \fBDKIMVerifyDetails\fR. The array and the strings in it
+belong to the context and are valid until \fBdkim_verify_free\fR(). It can be
+called again and returns the same array. A non\-zero return is an error of
+the kind \fBDKIM_OUT_OF_MEMORY\fR.
+.PP
+A failure of a signature is not an error of this function; it is reported in
+that signature's \fInResult\fR.
+.SS dkim_verify_author_domain()
+Returns the domain of the From header (the first address of the first From
+header), or NULL if there is none or the header has not been read yet. A
+signature whose \fId=\fR is neither this domain nor a parent of it, but which
+verifies, has the result \fBDKIM_3PS_SIGNATURE\fR. The pointer is valid until
+\fBdkim_verify_free\fR().
+.SS dkim_verify_status()
+Reduces the details to one status code for the message. A good signature
+(\fBDKIM_SUCCESS\fR or \fBDKIM_3PS_SIGNATURE\fR) gives \fBDKIM_SUCCESS\fR, no
+matter how many other signatures failed. If there is none, but a signature
+verified without covering the whole body, \fBDKIM_SUCCESS_BUT_EXTRA\fR is
+returned. Otherwise the result of the first failed signature is returned.
+\fBDKIM_NO_SIGNATURES\fR is returned if \fInsigs\fR is 0.
+.SS dkim_verify_free()
+Releases the context and everything returned by \fBdkim_verify_finish\fR().
+NULL is allowed.
+.SS dkim_status_text()
+Returns a text for \fIcode\fR suitable for a DKIM\-Status header or an error
+message. \fBDKIM_SUCCESS\fR gives "good" (padded with blanks, as in earlier
+versions). If \fIenhanced\fR is not NULL it is set to an RFC 3463 enhanced
+status code ("X.7.5", "X.7.7", "X.3.0" ...). The result is a static string.
+.SS dkim_code_name()
+Returns the short name of \fIcode\fR, e.g. "SIGNATURE BAD", as a static
+string.
+.SS dkim_free()
+Releases memory returned by this library (the signature from
+\fBdkim_sign_get\fR()).
+.SS exit_if_old()
+Returns 0. If the library was compiled with OpenSSL older than 1.1.1 it calls
+\fB_exit\fR(\fIcode\fR) instead. Call it first in \fBmain\fR().
+.SH RETURN VALUES
+Functions that return \fIint\fR return 0 (\fBDKIM_SUCCESS\fR) on success or a
+negative error code. Verification results (\fBnResult\fR, and the value of
+\fBdkim_verify_status\fR()) are >= 0 for success and < 0 for failure. The letter
+is the one used in the \fBDKIMVERIFY\fR environment variable of
+\fBqmail-dkim\fR(8): upper case for a permanent, lower case for a temporary
+error.
+.PP
+.na
+.TS
+box;
+l l lw(20).
+Code	Value	Meaning
+_
+DKIM_SUCCESS	0 (A)	T{
+good
+T}
+DKIM_FINISHED_BODY	1 (B)	T{
+(not produced)
+T}
+DKIM_PARTIAL_SUCCESS	2 (C)	T{
+(not produced)
+T}
+DKIM_NEUTRAL	3 (D)	T{
+set by qmail\-dkim
+T}
+DKIM_SUCCESS_BUT_EXTRA	4 (E)	T{
+verified, l= left part of body uncovered
+T}
+DKIM_3PS_SIGNATURE	5 (F)	T{
+verified, d= is not the author's domain
+T}
+DKIM_FAIL	\-1 (G)	T{
+general failure
+T}
+DKIM_BAD_SYNTAX	\-2 (H)	T{
+signature unparsable or bad tags
+T}
+DKIM_SIGNATURE_BAD	\-3 (I)	T{
+signature does not verify
+T}
+DKIM_SIGNATURE_BAD_BUT_TESTING	\-4 (J)	T{
+as \-3, key has t=y
+T}
+DKIM_SIGNATURE_EXPIRED	\-5 (K)	T{
+x= is in the past
+T}
+DKIM_SELECTOR_INVALID	\-6 (L)	T{
+key record unparsable or bad values
+T}
+DKIM_SELECTOR_GRANULARITY_MISMATCH	\-7 (M)	T{
+key g= does not match i=
+T}
+DKIM_SELECTOR_KEY_REVOKED	\-8 (N)	T{
+key record has empty p=
+T}
+DKIM_SELECTOR_DOMAIN_NAME_TOO_LONG	\-9 (O)	T{
+name to query too long
+T}
+DKIM_SELECTOR_DNS_TEMP_FAILURE	\-10 (P)	T{
+temporary DNS failure
+T}
+DKIM_SELECTOR_DNS_PERM_FAILURE	\-11 (Q)	T{
+no key record
+T}
+DKIM_SELECTOR_PUBLIC_KEY_INVALID	\-12 (R)	T{
+p= unusable, or RSA key < 1024 bits
+T}
+DKIM_NO_SIGNATURES	\-13 (S)	T{
+no DKIM\-Signature header
+T}
+DKIM_NO_VALID_SIGNATURES	\-14 (T)	T{
+(not produced)
+T}
+DKIM_BODY_HASH_MISMATCH	\-15 (U)	T{
+body does not match bh=
+T}
+DKIM_SELECTOR_ALGORITHM_MISMATCH	\-16 (V)	T{
+key h= or k= does not match a=
+T}
+DKIM_STAT_INCOMPAT	\-17 (W)	T{
+v= is not 1
+T}
+DKIM_UNSIGNED_FROM	\-18 (X)	T{
+a From header is not in h=
+T}
+DKIM_BAD_IDENTITY	\-19 (Y)	T{
+i= not under d=
+T}
+DKIM_OUT_OF_MEMORY	\-20	T{
+out of memory
+T}
+DKIM_INVALID_CONTEXT	\-21	T{
+context NULL, or called in wrong order
+T}
+DKIM_NO_SENDER	\-22	T{
+no domain for d=
+T}
+DKIM_BAD_PRIVATE_KEY	\-23	T{
+private key unusable
+T}
+DKIM_BUFFER_TOO_SMALL	\-24	T{
+(not produced)
+T}
+DKIM_EVP_SIGN_FAILURE	\-25	T{
+OpenSSL could not sign
+T}
+DKIM_EVP_DIGEST_FAILURE	\-26	T{
+OpenSSL could not hash
+T}
+DKIM_OPENSSL_TOO_OLD	\-27	T{
+OpenSSL older than 1.1.1
+T}
+DKIM_MAX_ERROR	\-100	T{
+marker, never returned
+T}
+.TE
+.ad
+.PP
+When the library was built with OpenSSL older than 1.1.1 every function fails:
+those that return an \fIint\fR return \fBDKIM_OPENSSL_TOO_OLD\fR, those that
+return a pointer return NULL, and \fBdkim_status_text\fR() gives "OpenSSL
+version too old on this system". A program can test for this once at start up
+with \fBexit_if_old\fR().
+.SH NOTES
+.IP \(bu 2
+Public key records: \fIk=rsa\fR keys are base64 DER (SubjectPublicKeyInfo or
+PKCS#1); \fIk=ed25519\fR keys are the raw 32 byte key in base64 (RFC 8463)
+\- the SubjectPublicKeyInfo form is also accepted. The key record flags
+\fIt=y\fR (testing) and \fIt=s\fR (strict, \fIi=\fR must equal \fId=\fR), and the
+tags \fIh=\fR, \fIs=\fR and \fIg=\fR are honored.
+.IP \(bu 2
+Verification does not enforce RFC 8301: rsa\-sha1 signatures are accepted,
+RSA keys of 1024 bits or more are accepted.
+.IP \(bu 2
+A signature is rejected as \fBDKIM_BAD_IDENTITY\fR when \fIi=\fR is not under
+\fId=\fR, as \fBDKIM_SIGNATURE_EXPIRED\fR when \fIx=\fR has passed, and as
+\fBDKIM_STAT_INCOMPAT\fR when \fIv=\fR is not 1.
+.IP \(bu 2
+The total size of the header of a message is limited to 16 MB. There is no
+limit on the size of the body.
+.IP \(bu 2
+Contexts do not share state, so different contexts may be used by different
+threads. The base64 decoding table is initialized on first use without a
+lock; do the first call from one thread if you use threads.
+.IP \(bu 2
+\fBdkim_sign_domain\fR() and \fBdkim_verify_author_domain\fR() extract the
+domain from the first address in the header. They do not implement the full
+RFC 5322 address syntax.
+.SH EXAMPLES
+.SS Signing a message with two keys
+Reads a message on standard input and writes an RSA and an Ed25519 signature
+to standard output. The message is read once.
+.PP
+.if n .RS
+.nf
+/*
+ * ex_sign - sign the message on standard input with two keys
+ *
+ * cc -o ex_sign ex_sign.c dkim_functions.c -lcrypto
+ * ./ex_sign rsa.pem ed25519.pem < mail.txt > signatures.txt
+ */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <strings.h>
+#include <time.h>
+#include <unistd.h>
+#include "dkim_functions.h"
+
+/* header callback: return 1 to sign the header, 0 to leave it out */
+static int
+sign_this(const char *header)
+{
+	return strncasecmp(header, "Received:", 9) &&
+		strncasecmp(header, "Return-Path:", 12) &&
+		strncasecmp(header, "DKIM-Signature:", 15);
+}
+
+static char *
+read_file(const char *fn)
+{
+	FILE           *fp = fopen(fn, "r");
+	char           *buf;
+	long            n;
+
+	if (!fp)
+		return NULL;
+	fseek(fp, 0, SEEK_END);
+	n = ftell(fp);
+	rewind(fp);
+	if (!(buf = malloc(n + 1)))
+		return NULL;
+	buf[fread(buf, 1, n, fp)] = 0;
+	fclose(fp);
+	return buf;
+}
+
+int
+main(int argc, char **argv)
+{
+	DKIMSignOptions opts;
+	DKIMSign       *s;
+	char            buf[8192], *pem, *sig;
+	ssize_t         n;
+	int             ret;
+
+	if (argc != 3) {
+		fprintf(stderr, "usage: ex_sign rsa.pem ed25519.pem < mail\en");
+		return 100;
+	}
+	exit_if_old(111);        /* OpenSSL older than 1.1.1: give up at once */
+
+	memset(&opts, 0, sizeof(opts));
+	opts.pfnHeaderCallback = sign_this;
+	strcpy(opts.szDefaultDomain, "example.com"); /* used if no From: header */
+	if (!(s = dkim_sign_new(&opts))) {
+		fprintf(stderr, "dkim_sign_new failed\en");
+		return 111;
+	}
+	/* 1. feed the message, any chunk size, LF or CRLF line ends */
+	while ((n = read(0, buf, sizeof(buf))) > 0) {
+		if ((ret = dkim_sign_process(s, buf, n))) {
+			fprintf(stderr, "%s\en", dkim_status_text(ret, NULL));
+			dkim_sign_free(s);
+			return 111;
+		}
+	}
+	/* 2. one signature per call, the message is not read again */
+	opts.nCanon = DKIM_SIGN_RELAXED;
+	opts.nHash = DKIM_HASH_SHA256;
+	opts.expireTime = time(NULL) + 7 * 86400;
+	strcpy(opts.szSelector, "rsa");
+	if (!(pem = read_file(argv[1])) ||
+			(ret = dkim_sign_get(s, &opts, pem, &sig))) {
+		fprintf(stderr, "%s: %s\en", argv[1], ret ? dkim_status_text(ret, NULL) : "cannot read");
+		dkim_sign_free(s);
+		return 111;
+	}
+	fputs(sig, stdout);      /* "DKIM-Signature: ...\en" */
+	dkim_free(sig);
+	free(pem);
+
+	opts.nHash = DKIM_HASH_ED25519;
+	strcpy(opts.szSelector, "ed");
+	if (!(pem = read_file(argv[2])) ||
+			(ret = dkim_sign_get(s, &opts, pem, &sig))) {
+		fprintf(stderr, "%s: %s\en", argv[2], ret ? dkim_status_text(ret, NULL) : "cannot read");
+		dkim_sign_free(s);
+		return 111;
+	}
+	fputs(sig, stdout);
+	dkim_free(sig);
+	free(pem);
+	dkim_sign_free(s);
+	return 0;
+}
+.fi
+.if n .RE
+.SS Verifying a message
+Prints the result of every signature and the overall status. \fBdns_text\fR()
+is the program's own TXT record lookup.
+.PP
+.nf
+/*
+ * ex_verify - verify every DKIM-Signature of the message on standard input
+ *
+ * cc -o ex_verify ex_verify.c dkim_functions.c -lcrypto -lyourdns
+ * ./ex_verify < signed-mail.txt
+ */
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include "dkim_functions.h"
+
+extern char *dns_text(char *); /* your TXT lookup: "e=temp;" / "e=perm;" on error */
+
+static char *
+lookup(const char *name)
+{
+	return dns_text((char *) name);
+}
+
+int
+main(void)
+{
+	DKIMVerifyOptions opts;
+	DKIMVerifyDetails *d;
+	DKIMVerify     *v;
+	char            buf[8192];
+	ssize_t         n;
+	int             i, nsigs, ret;
+
+	exit_if_old(111);
+	memset(&opts, 0, sizeof(opts));
+	opts.nSubjectRequired = 1;       /* Subject: must be signed if present */
+	opts.pfnDnsCallback = lookup;
+	if (!(v = dkim_verify_new(&opts))) {
+		fprintf(stderr, "dkim_verify_new failed\en");
+		return 111;
+	}
+	while ((n = read(0, buf, sizeof(buf))) > 0) {
+		if ((ret = dkim_verify_process(v, buf, n))) {
+			fprintf(stderr, "%s\en", dkim_status_text(ret, NULL));
+			dkim_verify_free(v);
+			return 111;
+		}
+	}
+	if ((ret = dkim_verify_finish(v, &nsigs, &d))) {
+		fprintf(stderr, "%s\en", dkim_status_text(ret, NULL));
+		dkim_verify_free(v);
+		return 111;
+	}
+	for (i = 0; i < nsigs; i++)      /* one result per DKIM-Signature header */
+		printf("%d: d=%s s=%s a=%s %s (%d)\en", i + 1,
+				d[i].szDomain ? d[i].szDomain : "?",
+				d[i].szSelector ? d[i].szSelector : "?",
+				d[i].szAlgorithm ? d[i].szAlgorithm : "?",
+				dkim_code_name(d[i].nResult), d[i].nResult);
+	ret = dkim_verify_status(nsigs, d);  /* one good signature is enough */
+	printf("DKIM-Status: %s\en", dkim_status_text(ret, NULL));
+	dkim_verify_free(v);             /* invalidates d[] */
+	return ret < 0;
+}
+.fi
+.SS Testing without DNS
+.nf
+DKIMVerifyOptions opts;
+
+memset(&opts, 0, sizeof(opts));
+opts.pszSelectorOverride =
+    "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...";
+v = dkim_verify_new(&opts);   /* no DNS callback needed */
+.fi
+.SS Two signatures from different domains
+\fBd=\fR is taken from the From header unless \fBszDomain\fR is set. To sign
+the same message for another domain, create a second context, or set
+\fBszDomain\fR when creating the context:
+.PP
+.nf
+strcpy(opts.szDomain, "example.org");
+s = dkim_sign_new(&opts);
+.fi
+.SH SEE ALSO
+\fBqmail-dkim\fR(8), \fBdkim\fR(8), \fBdknewkey\fR(8), \fBOPENSSL_free\fR(3)
+.PP
+RFC 6376 (DKIM Signatures), RFC 8463 (Ed25519\-SHA256 for DKIM), RFC 8301
+(cryptographic algorithm and key usage update).

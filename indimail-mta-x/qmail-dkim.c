@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.88 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.89 2026-11-17 22:36:29+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stdlib.h>
@@ -104,8 +104,7 @@ sigbug(int x)
 /*
  * returns 1 if the header is to be signed.
  * EXCLUDE_DKIMSIGN is a colon separated list of header names. The names are
- * matched exactly (the old code did a prefix match, so excluding "To" also
- * excluded "Topic:").
+ * matched exactly
  */
 static int
 SignThisHeader(const char *szHeader)
@@ -503,8 +502,7 @@ writeHeaderNexit(int ret, int origRet)
  * Is the signaturedomains / nosignaturedomains logic to be applied to this
  * verification result? Controlled by the letters in DKIMPRACTICE; if that is
  * not set the letters of DKIMVERIFY are used. An empty string means "any
- * failure". (ADSP and SSP have been removed, this is what remains of
- * SIGN_PRACTICE=local.)
+ * failure".
  */
 int
 checkPractice(int dkimRet)
@@ -627,10 +625,6 @@ main(int argc, char *argv[])
 		if (env_get("UNSIGNED_FROM")) /*- accept signatures that do not cover every From: header */
 			vopts.nAllowUnsignedFromHeaders = 1;
 		vopts.nSubjectRequired = env_get("UNSIGNED_SUBJECT") ? 0 : 1;
-		/*
-		 * the man page says: set HONOR_BODYLENGTHTAG to honor l=. The old code
-		 * did the opposite (honored l= unless the variable was set).
-		 */
 		vopts.nHonorBodyLengthTag = env_get("HONOR_BODYLENGTHTAG") ? 1 : 0;
 		if (!(vctx = dkim_verify_new(&vopts)))
 			custom_error("qmail-dkim", "Z", "dkim initialization failed", 0, "X.3.0");
@@ -816,13 +810,16 @@ main(int argc, char *argv[])
 void
 getversion_qmail_dkim_c()
 {
-	const char     *x = "$Id: qmail-dkim.c,v 1.88 2026-11-17 19:00:16+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-dkim.c,v 1.89 2026-11-17 22:36:29+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.89  2026-11-17 22:36:29+05:30  Cprogrammer
+ * updated comments
+ *
  * Revision 1.88  2026-11-17 19:00:16+05:30  Cprogrammer
  * removed #ifdef lint
  *

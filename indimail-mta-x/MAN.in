@@ -113,6 +113,7 @@ f:::0644:/man1/:uenv.1:uenv.1
 f:::0644:/man3/:greylist.3:greylist.3
 f:::0644:/man3/:plugin_init.3:plugin_init.3
 f:::0644:/man3/:tlsacheck.3:tlsacheck.3
+f:::0644:/man3/:dkim_functions.3:dkim_functions.3
 f:::0644:/man5/:addresses.5:addresses.5
 f:::0644:/man5/:dot-qmail.5:dot-qmail.5
 f:::0644:/man5/:envelopes.5:envelopes.5
