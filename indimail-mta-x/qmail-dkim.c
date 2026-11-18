@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.89 2026-11-17 22:36:29+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.90 2026-11-19 01:02:25+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stdlib.h>
@@ -358,6 +358,8 @@ write_signature(const char *domain, DKIMSignOptions *opts, size_t selector_size)
 		}
 	}
 
+	if (!keyfn[0])
+		die(QQ_SYSTEM_MISCONFIG, 1);
 	if (keyfn[0] != '/') {
 		if (!controldir) {
 			if (!(controldir = env_get("CONTROLDIR")))
@@ -563,7 +565,14 @@ main(int argc, char *argv[])
 		restore_gid();
 		return (qmulti("DKIMQUEUE", argc, argv));
 	}
-	if (!dkimsign && !dkimverify && ptr) {
+	/*
+	 * set default signing key if
+	 * RELAYCLIENT is set
+	 * or
+	 * DKIMSIGN is set but set to an empty value
+	 * If RELAYCLIENT is not set, you likely should be verifying unless DKIMSIGN is set
+	 */
+	if ((!dkimsign && !dkimverify && ptr) || (dkimsign && !*dkimsign)) {
 		if (!(dkimsign = env_get("DKIMKEY"))) {
 			if (!stralloc_copys(&dkimfn, "domainkeys/%/default") ||
 					!stralloc_0(&dkimfn))
@@ -747,9 +756,9 @@ main(int argc, char *argv[])
 							}
 							ptr = nsigdomains.s + len;
 						}
-					}
-				}
-			}
+					} /*- if (!skip_nosignature_domain && ret == DKIM_NO_SIGNATURES) */
+				} /* if ((domain = dkim_verify_author_domain(vctx))) */
+			} /* if (checkPractice(ret)) */
 			dkim_verify_free(vctx);
 			vctx = 0;
 			writeHeaderNexit(ret, origRet);
@@ -810,13 +819,16 @@ main(int argc, char *argv[])
 void
 getversion_qmail_dkim_c()
 {
-	const char     *x = "$Id: qmail-dkim.c,v 1.89 2026-11-17 22:36:29+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-dkim.c,v 1.90 2026-11-19 01:02:25+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.90  2026-11-19 01:02:25+05:30  Cprogrammer
+ * fix setting of selector when DKIMSIGN is set but empty
+ *
  * Revision 1.89  2026-11-17 22:36:29+05:30  Cprogrammer
  * updated comments
  *

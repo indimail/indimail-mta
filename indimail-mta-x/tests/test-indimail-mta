@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.84 2026-11-09 23:20:55+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.85 2026-11-18 18:27:02+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -55,8 +55,6 @@ e822header=$bindir/822header
 e822body=$bindir/822body
 qmail_queue=$sbindir/qmail-queue
 qmail_multi=$sbindir/qmail-multi
-#dkim=$bindir/dkim
-#qmail_dkim=$sbindir/qmail-dkim
 dkim=$bindir/dkim
 qmail_dkim=$sbindir/qmail-dkim
 dknewkey=$bindir/dknewkey
@@ -7917,10 +7915,10 @@ test_dkim()
 			printf "    testing ed25519 "
 			;;
 		esac
+		ktype=$(cat $k.pub| grep "k="|sed 's/v=DKIM1;//'|cut -d= -f2|cut -d';' -f1)
 		if [ $verbose -gt 0 ] ; then
 			echo "testing real domain $real_domain $ktype DKIM record"
 		fi
-		ktype=$(cat $k.pub| grep "k="|sed 's/v=DKIM1;//'|cut -d= -f2|cut -d';' -f1)
 		case $ktype in
 			"rsa")
 			enc="2"
@@ -8893,10 +8891,232 @@ test_dkim()
 	elif [ $verbose -ne 0 ] ; then
 		echo "Test succeeded for qmail-dkim custom error"
 	fi
+
+	# Test No 13
+	# A valid signature whose d= domain differs from the From author domain
+	# is a third-party signature. The library deliberately counts this as a
+	# successful signature (DKIM_3PS_SIGNATURE is treated as success).
+	printf "\r%118s\r" " "
+	echo "13. testing third-party DKIM signature (d= differs from From domain)"
+	failed=0
+	selector=$(sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' $domainkey_dir/example.org/default.pub | tr -d '\n')
+	(
+	echo "From: postmaster@example.com"
+	echo "To: postmaster@example.com"
+	echo "Subject: Third party signature"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message"
+	) >$tmpdir/mail.txt
+	$dkim -d example.org -i postmaster@example.org -z 2 \
+		-s $domainkey_dir/example.org/default <$tmpdir/mail.txt >$tmpdir/sig.out
+	ret=$?
+	cat $tmpdir/sig.out $tmpdir/mail.txt >$tmpdir/result.out
+	if [ $ret -eq 0 ] && grep -qi 'd=example.org' $tmpdir/result.out &&
+		$dkim -vV -T "default=$selector" <$tmpdir/result.out >$out 2>$tmpdir/err.out
+	then
+		tcount=$(expr $tcount + 1)
+		echo "    third-party signature verified and accepted"
+	else
+		echo "FAILED: third-party signature ret=$ret"
+		cat $tmpdir/err.out
+		failed=1
+	fi
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/sig.out $tmpdir/result.out $tmpdir/err.out
+	if [ $failed -eq 1 ] ; then
+		echo "Test Failed for third-party DKIM signature"
+		exit 1
+	fi
+
+	# Test No 14
+	# qmail-dkim must verify a valid third-party signature using the supplied
+	# selector record (SELECTOR_DATA), without making a DNS query. By default
+	# a 3PS result is recorded in DKIM-Status and accepted. DKIMVERIFY=F asks
+	# qmail-dkim to reject the same result (F is DKIM_3PS_SIGNATURE).
+	printf "\r%118s\r" " "
+	echo "14. testing qmail-dkim third-party signature verification"
+	failed=0
+	selector=$(sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' $domainkey_dir/example.org/default.pub | tr -d '\n')
+	(
+	echo "From: postmaster@example.com"
+	echo "To: postmaster@example.com"
+	echo "Subject: qmail-dkim third-party verification"
+	echo "Date: $(date -R)"
+	echo
+	echo "Third-party signed test message"
+	) >$tmpdir/mail.txt
+	$dkim -d example.org -i postmaster@example.org -z 2 \
+		-s $domainkey_dir/example.org/default <$tmpdir/mail.txt >$tmpdir/sig.out
+	ret=$?
+	cat $tmpdir/sig.out $tmpdir/mail.txt >$tmpdir/signed.out
+	if [ $ret -ne 0 ] || ! grep -qi 'd=example.org' $tmpdir/signed.out ; then
+		echo "FAILED: could not create third-party signature for qmail-dkim test"
+		failed=1
+	else
+		# Empty DKIMVERIFY means record the result but do not reject it.
+		env - CONTROLDIR=$cntrldir DKIMVERIFY="" \
+			SELECTOR_DATA="$selector" DKIMQUEUE=/bin/cat \
+				$qmail_dkim <$tmpdir/signed.out >$tmpdir/result.out 2>$tmpdir/err.out
+		ret=$?
+		if [ $ret -eq 0 ] && grep -qi '^DKIM-Status:' $tmpdir/result.out ; then
+			tcount=$(expr $tcount + 1)
+			echo "    qmail-dkim accepted third-party signature and emitted DKIM-Status"
+		else
+			echo "FAILED: qmail-dkim did not accept third-party signature ret=$ret"
+			cat $tmpdir/err.out
+			failed=1
+		fi
+
+		# F is the DKIMVERIFY letter for DKIM_3PS_SIGNATURE (return code 5).
+		# The same signature must now be rejected.
+		env - CONTROLDIR=$cntrldir DKIMVERIFY=F \
+			SELECTOR_DATA="$selector" DKIMQUEUE=/bin/cat \
+				$qmail_dkim <$tmpdir/signed.out >$tmpdir/reject.out 2>$tmpdir/err.out
+		ret=$?
+		if [ $ret -ne 0 ] ; then
+			tcount=$(expr $tcount + 1)
+			echo "    DKIMVERIFY=F correctly rejected third-party signature"
+		else
+			echo "FAILED: DKIMVERIFY=F accepted third-party signature"
+			cat $tmpdir/reject.out $tmpdir/err.out
+			failed=1
+		fi
+	fi
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/sig.out $tmpdir/signed.out \
+		$tmpdir/result.out $tmpdir/reject.out $tmpdir/err.out
+	if [ $failed -eq 1 ] ; then
+		echo "Test Failed for qmail-dkim third-party signature verification"
+		exit 1
+	fi
+
+	# Test No 15
+	# Exercise dkim(8) signing options and verify locally with -T (no DNS).
+	printf "\r%118s\r" " "
+	echo "15. testing dkim(8) signing options and local verification"
+	failed=0
+	for canon in r s t u
+	do
+		(
+		echo "From: postmaster@example.com"
+		echo "To: postmaster@example.com"
+		echo "Subject: DKIM option test"
+		echo "X-Test-Exclude: must-not-be-signed"
+		echo "Date: $(date -R)"
+		echo
+		echo "Test message"
+		) >$tmpdir/mail.txt
+		selector=$(sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' $domainkey_dir/example.com/default.pub | tr -d '\n')
+		$dkim -c $canon -l -q -t -h -d example.com -i postmaster@example.com \
+			-x 3600 -X X-Test-Exclude -z 2 -s $domainkey_dir/example.com/default \
+			<$tmpdir/mail.txt >$tmpdir/sig.out
+		ret=$?
+		cat $tmpdir/sig.out $tmpdir/mail.txt >$tmpdir/result.out
+		if [ $ret -eq 0 ] &&
+			grep -qi 'c=.*' $tmpdir/result.out &&
+			grep -qi 'l=' $tmpdir/result.out &&
+			grep -qi 'q=' $tmpdir/result.out &&
+			grep -qi 't=' $tmpdir/result.out &&
+			grep -qi 'z=' $tmpdir/result.out &&
+			grep -qi 'x=' $tmpdir/result.out &&
+			! grep -qi 'X-Test-Exclude' $tmpdir/sig.out &&
+			$dkim -v -T "$selector" <$tmpdir/result.out >$out 2>$tmpdir/err.out
+		then
+			tcount=$(expr $tcount + 1)
+			echo "    canonicalization $canon and signing tags succeeded"
+		else
+			echo "FAILED: dkim signing options/canonicalization $canon ret=$ret"
+			cat $tmpdir/err.out
+			failed=1
+		fi
+	done
+	# -y overrides the key basename as selector; -x - suppresses x=.
+	$dkim -y customselector -x - -z 2 -s $domainkey_dir/example.com/default \
+		<$tmpdir/mail.txt >$tmpdir/sig.out
+	if [ $? -eq 0 ] && grep -qi 's=customselector' $tmpdir/sig.out &&
+		! grep -qi 'x=' $tmpdir/sig.out
+	then
+		tcount=$(expr $tcount + 1)
+		echo "    selector override (-y) and no-expiry (-x -) succeeded"
+	else
+		echo "FAILED: dkim -y/-x options"
+		failed=1
+	fi
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/sig.out $tmpdir/result.out $tmpdir/err.out
+	if [ $failed -eq 1 ] ; then
+		echo "Test Failed for dkim signing options"
+		exit 1
+	fi
+
+	# Test No 16
+	/bin/rm -f $cntrldir/dkimkeys
+	# Exercise qmail-dkim's signing options, identity/expiry overrides,
+	# custom queue selection and the unsigned-message verification path.
+	printf "\r%118s\r" " "
+	echo "16. testing qmail-dkim(8) environment options and queue handling"
+	failed=0
+	for i in example.com example.org
+	do
+		(
+		echo "From: postmaster@$i"
+		echo "To: postmaster@$i"
+		echo "Subject: qmail-dkim option test"
+		echo "Date: $(date -R)"
+		echo
+		echo "Test message"
+		) >$tmpdir/mail.txt
+		selector=$(sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' $domainkey_dir/$i/default.pub | tr -d '\n')
+		env - CONTROLDIR=$cntrldir DKIMSIGN="$domainkey_dir/%/default" \
+			DKIMSIGNOPTIONS="-z 2 -c s -q -t -h -l -x 3600" \
+			DKIMIDENTITY="postmaster@$i" DKIMEXPIRE=3600 \
+			DKIMQUEUE=/bin/cat $qmail_dkim <$tmpdir/mail.txt >$tmpdir/result.out
+		ret=$?
+		if [ $ret -eq 0 ] && [ "$(grep -ci '^DKIM-Signature:' $tmpdir/result.out)" -eq 1 ] &&
+			grep -qi 'i=postmaster@' $tmpdir/result.out &&
+			grep -qi 'l=' $tmpdir/result.out &&
+			$dkim -v -T "$selector" <$tmpdir/result.out >$out 2>$tmpdir/err.out
+		then
+			tcount=$(expr $tcount + 1)
+			echo "    $i qmail-dkim signing options and verification succeeded"
+		else
+			echo "FAILED: qmail-dkim signing options domain=$i ret=$ret"
+			cat $tmpdir/err.out
+			failed=1
+		fi
+	done
+	# No signature is neutral by default; qmail-dkim still emits DKIM-Status.
+	(
+	echo "From: postmaster@example.com"
+	echo "To: postmaster@example.com"
+	echo "Subject: unsigned"
+	echo "Date: $(date -R)"
+	echo
+	echo "Unsigned message"
+	) >$tmpdir/mail.txt
+	env - CONTROLDIR=$cntrldir DKIMVERIFY="" DKIMQUEUE=/bin/cat \
+		$qmail_dkim <$tmpdir/mail.txt >$tmpdir/result.out
+	ret=$?
+	if [ $ret -eq 0 ] && grep -qi '^DKIM-Status: no signatures' $tmpdir/result.out &&
+		! grep -qi '^DKIM-Signature:' $tmpdir/result.out
+	then
+		tcount=$(expr $tcount + 1)
+		echo "    unsigned message accepted and DKIM-Status emitted"
+	else
+		echo "FAILED: qmail-dkim unsigned-message default handling ret=$ret"
+		cat $tmpdir/result.out
+		failed=1
+	fi
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/result.out $tmpdir/err.out
+	if [ $failed -eq 1 ] ; then
+		echo "Test Failed for qmail-dkim environment options"
+		exit 1
+	fi
+
 	t2=$(date +"%s.%4N")
 	secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
+
+	echo
 	printf "\r%118s\r" " "
-	echo "DKIM tests [$secs sec]"
+	echo "DKIM Tests [$secs sec]"
 }
 
 do_cleanup()
@@ -9000,7 +9220,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=327
+	total_tests=332
 fi
 failed=0
 do_setup
@@ -9055,6 +9275,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.85  2026-11-18 18:27:02+05:30  Cprogrammer
+# fixed display of k= keyword
+#
 # Revision 1.84  2026-11-09 23:20:55+05:30  Cprogrammer
 # modified dkim tests for non-libdkim2
 #

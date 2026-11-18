@@ -272,6 +272,9 @@ private key exists, it will be used to sign the domain. You can also set
 \fI@controldir@/domainkeys/%/default\fR. \fBDKIMKEY\fR can also have %
 character that will be replaced by the domain in the From: header. If the
 private key does not exist, qmail-dkim will exit with return code 35.
+Setting \fBDKIMSIGN\fR to an empty value also makes qmail-dkim use
+\fI@controldir@/domainkeys/%/default\fR as the default key (which too can
+be overriden by setting \fBDKIMKEY\fR environment variable.
 
 By default \fBqmail-dkim\fR will use all of the headers when signing a
 message. You an exclude headers from gettng signed by setting a colon

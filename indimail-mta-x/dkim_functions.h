@@ -1,5 +1,5 @@
 /*-
- * $Id: dkim_functions.h,v 1.2 2026-11-10 15:12:27+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dkim_functions.h,v 1.3 2026-11-18 23:57:24+05:30 Cprogrammer Exp mbhangui $
  *
  * dkim_functions.h - DKIM (RFC 6376 / RFC 8463) signing and verification in C
  *
@@ -34,41 +34,41 @@ extern "C" {
  * environment variable (A = 0, B = 1 ... for >= 0; G = -1, H = -2 ...
  * for < 0) are unchanged from libdkim.
  */
-#define DKIM_SUCCESS                       0 /*- A */
-#define DKIM_FINISHED_BODY                 1 /*- B */
-#define DKIM_PARTIAL_SUCCESS               2 /*- C */
-#define DKIM_NEUTRAL                       3 /*- D */
-#define DKIM_SUCCESS_BUT_EXTRA             4 /*- E signature OK but l= did not cover whole body */
-#define DKIM_3PS_SIGNATURE                 5 /*- F verified, but d= is not the author's domain */
-#define DKIM_FAIL                         -1 /*- G */
-#define DKIM_BAD_SYNTAX                   -2 /*- H */
-#define DKIM_SIGNATURE_BAD                -3 /*- I */
-#define DKIM_SIGNATURE_BAD_BUT_TESTING    -4 /*- J */
-#define DKIM_SIGNATURE_EXPIRED            -5 /*- K */
-#define DKIM_SELECTOR_INVALID             -6 /*- L */
+#define DKIM_SUCCESS                        0 /*- A */
+#define DKIM_FINISHED_BODY                  1 /*- B */
+#define DKIM_PARTIAL_SUCCESS                2 /*- C */
+#define DKIM_NEUTRAL                        3 /*- D */
+#define DKIM_SUCCESS_BUT_EXTRA              4 /*- E signature OK but l= did not cover whole body */
+#define DKIM_3PS_SIGNATURE                  5 /*- F verified, but d= is not the author's domain */
+#define DKIM_FAIL                          -1 /*- G */
+#define DKIM_BAD_SYNTAX                    -2 /*- H */
+#define DKIM_SIGNATURE_BAD                 -3 /*- I */
+#define DKIM_SIGNATURE_BAD_BUT_TESTING     -4 /*- J */
+#define DKIM_SIGNATURE_EXPIRED             -5 /*- K */
+#define DKIM_SELECTOR_INVALID              -6 /*- L */
 #define DKIM_SELECTOR_GRANULARITY_MISMATCH -7 /*- M */
-#define DKIM_SELECTOR_KEY_REVOKED         -8 /*- N */
+#define DKIM_SELECTOR_KEY_REVOKED          -8 /*- N */
 #define DKIM_SELECTOR_DOMAIN_NAME_TOO_LONG -9 /*- O */
-#define DKIM_SELECTOR_DNS_TEMP_FAILURE   -10 /*- P */
-#define DKIM_SELECTOR_DNS_PERM_FAILURE   -11 /*- Q */
-#define DKIM_SELECTOR_PUBLIC_KEY_INVALID -12 /*- R */
-#define DKIM_NO_SIGNATURES               -13 /*- S */
-#define DKIM_NO_VALID_SIGNATURES         -14 /*- T */
-#define DKIM_BODY_HASH_MISMATCH          -15 /*- U */
-#define DKIM_SELECTOR_ALGORITHM_MISMATCH -16 /*- V */
-#define DKIM_STAT_INCOMPAT               -17 /*- W */
-#define DKIM_UNSIGNED_FROM               -18 /*- X */
-#define DKIM_BAD_IDENTITY                -19 /*- Y */
+#define DKIM_SELECTOR_DNS_TEMP_FAILURE    -10 /*- P */
+#define DKIM_SELECTOR_DNS_PERM_FAILURE    -11 /*- Q */
+#define DKIM_SELECTOR_PUBLIC_KEY_INVALID  -12 /*- R */
+#define DKIM_NO_SIGNATURES                -13 /*- S */
+#define DKIM_NO_VALID_SIGNATURES          -14 /*- T */
+#define DKIM_BODY_HASH_MISMATCH           -15 /*- U */
+#define DKIM_SELECTOR_ALGORITHM_MISMATCH  -16 /*- V */
+#define DKIM_STAT_INCOMPAT                -17 /*- W */
+#define DKIM_UNSIGNED_FROM                -18 /*- X */
+#define DKIM_BAD_IDENTITY                 -19 /*- Y */
 /* errors that have no DKIMVERIFY letter */
-#define DKIM_OUT_OF_MEMORY               -20
-#define DKIM_INVALID_CONTEXT             -21
-#define DKIM_NO_SENDER                   -22
-#define DKIM_BAD_PRIVATE_KEY             -23
-#define DKIM_BUFFER_TOO_SMALL            -24
-#define DKIM_EVP_SIGN_FAILURE            -25
-#define DKIM_EVP_DIGEST_FAILURE          -26
-#define DKIM_OPENSSL_TOO_OLD             -27 /*- OpenSSL < 1.1.1 on this system: no DKIM possible */
-#define DKIM_MAX_ERROR                  -100 /*- "no error recorded" marker */
+#define DKIM_OUT_OF_MEMORY                -20
+#define DKIM_INVALID_CONTEXT              -21
+#define DKIM_NO_SENDER                    -22
+#define DKIM_BAD_PRIVATE_KEY              -23
+#define DKIM_BUFFER_TOO_SMALL             -24
+#define DKIM_EVP_SIGN_FAILURE             -25
+#define DKIM_EVP_DIGEST_FAILURE           -26
+#define DKIM_OPENSSL_TOO_OLD              -27 /*- OpenSSL < 1.1.1 on this system: no DKIM possible */
+#define DKIM_MAX_ERROR                   -100 /*- "no error recorded" marker */
 
 /* canonicalization: header/body */
 #define DKIM_SIGN_SIMPLE                   0 /*- simple/simple   */
@@ -180,6 +180,9 @@ void         dkim_free(void *p);
 
 /*-
  * $Log: dkim_functions.h,v $
+ * Revision 1.3  2026-11-18 23:57:24+05:30  Cprogrammer
+ * minor changed in formatting
+ *
  * Revision 1.2  2026-11-10 15:12:27+05:30  Cprogrammer
  * fix compile (albeit with stub) on older openssl versions
  *

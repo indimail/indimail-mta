@@ -21,6 +21,10 @@ Release 3.2-1.1 Start 12/01/2026 End --/--/----
 09. dkim: improved usage display
 - 18/11/2026
 10. added man page for dkim functions - dkim_functions.3
+- 19/11/2026
+11. dkim_functions.c: fixed return value for 3rd party signatures
+12. qmail-dkim.c: fixed empty selector resulting from DKIMSIGN=""
+13. test-indimail-mta: added tests for 3rd party signatures
 
 * Thu Dec 18 2025 11:42:29 +0000 Manvendra Bhangui <indimail-mta@indimail.org> 3.1-1.1%{?dist}
 Release 3.1-1.1 Start 26/12/2024 End 18/12/2025

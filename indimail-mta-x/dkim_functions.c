@@ -1,5 +1,5 @@
 /*-
- * $Id: dkim_functions.c,v 1.4 2026-11-18 01:24:45+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dkim_functions.c,v 1.5 2026-11-19 00:00:43+05:30 Cprogrammer Exp mbhangui $
  *
  * dkim_functions.c - DKIM (RFC 6376 / RFC 8463) signing and verification
  *
@@ -1954,12 +1954,12 @@ dkim_verify_status(int nsigs, const DKIMVerifyDetails *details)
 	if (!nsigs || !details)
 		return DKIM_NO_SIGNATURES;
 	for (i = 0; i < nsigs; i++) {
-		/*-
-		 * DKIM_3PS_SIGNATURE counts as a good signature (that is what the old
-		 * code did); change it here if you want DKIMVERIFY=F to take effect.
-		 */
-		if (details[i].nResult == DKIM_SUCCESS || details[i].nResult == DKIM_3PS_SIGNATURE)
+		if (details[i].nResult == DKIM_SUCCESS)
 			return DKIM_SUCCESS;
+		else
+		if (details[i].nResult == DKIM_3PS_SIGNATURE)
+			return DKIM_3PS_SIGNATURE;
+		else
 		if (details[i].nResult == DKIM_SUCCESS_BUT_EXTRA) {
 			extra = 1; /*- verified, but l= left part of the body uncovered */
 			continue;
@@ -2010,6 +2010,9 @@ int             dkim_verify_status(int nsigs, const DKIMVerifyDetails *details) 
 
 /*-
  * $Log: dkim_functions.c,v $
+ * Revision 1.5  2026-11-19 00:00:43+05:30  Cprogrammer
+ * fixed return value for 3rd party signatures
+ *
  * Revision 1.4  2026-11-18 01:24:45+05:30  Cprogrammer
  * added attribution to claude
  *
