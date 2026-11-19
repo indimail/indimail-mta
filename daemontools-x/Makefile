@@ -19,7 +19,7 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@email\@,$(email),g' \
-	-e 's,@DATE\@,$(DATE),g'
+	-e 's{@DATE\@{$(DATE){g'
 
 it = envdir envuidgid rsvc setlock setuidgid softlimit svc svok \
 	svstat tai64n tai64nlocal tai64nunix tai2tai64n tai64n2tai \
