@@ -1,5 +1,5 @@
 /*-
- * $Id: dkim_functions.h,v 1.3 2026-11-18 23:57:24+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dkim_functions.h,v 1.4 2026-11-20 08:55:57+05:30 Cprogrammer Exp mbhangui $
  *
  * dkim_functions.h - DKIM (RFC 6376 / RFC 8463) signing and verification in C
  *
@@ -68,6 +68,7 @@ extern "C" {
 #define DKIM_EVP_SIGN_FAILURE             -25
 #define DKIM_EVP_DIGEST_FAILURE           -26
 #define DKIM_OPENSSL_TOO_OLD              -27 /*- OpenSSL < 1.1.1 on this system: no DKIM possible */
+#define DKIM_ALGORITHM_NOT_ALLOWED        -28 /*- rsa-sha1 refused by the crypto policy of the system (Fedora, RHEL ...) */
 #define DKIM_MAX_ERROR                   -100 /*- "no error recorded" marker */
 
 /* canonicalization: header/body */
@@ -123,6 +124,10 @@ typedef struct {
 	int             verbose;
 	dkim_dns_cb     pfnDnsCallback;            /*- required unless pszSelectorOverride is set */
 	const char     *pszSelectorOverride;       /*- use this key record instead of DNS */
+	int             nRejectSha1;               /*- 1: an rsa-sha1 signature that OpenSSL refuses to verify (crypto
+                                              *  policy of the system) is DKIM_SIGNATURE_BAD,
+                                              *  not DKIM_ALGORITHM_NOT_ALLOWED
+                                              */
 } DKIMVerifyOptions;
 
 typedef struct {
@@ -154,10 +159,16 @@ int          dkim_verify_finish(DKIMVerify *v, int *nsigs, DKIMVerifyDetails **d
 const char  *dkim_verify_author_domain(DKIMVerify *v); /*- domain of first From: header */
 void         dkim_verify_free(DKIMVerify *v);
 /*-
- * One verified signature is enough: DKIM_SUCCESS. Otherwise the first
- * failure; DKIM_NO_SIGNATURES if there were none.
+ * One good signature is enough, wherever it is among the signatures:
+ * DKIM_SUCCESS for a signature of the author's domain, else
+ * DKIM_3PS_SIGNATURE for a good signature of another domain, else
+ * DKIM_SUCCESS_BUT_EXTRA. Otherwise the first failure;
+ * DKIM_NO_SIGNATURES if there were none.
+ * dkim_verify_count() is the number of signatures that verified, to report
+ * "1 of 2 signatures verified".
  */
 int          dkim_verify_status(int nsigs, const DKIMVerifyDetails *details);
+int          dkim_verify_count(int nsigs, const DKIMVerifyDetails *details); /*- signatures that verified */
 
 /*-
  * Built against OpenSSL < 1.1.1 (no Ed25519) this file still compiles, but
@@ -180,6 +191,10 @@ void         dkim_free(void *p);
 
 /*-
  * $Log: dkim_functions.h,v $
+ * Revision 1.4  2026-11-20 08:55:57+05:30  Cprogrammer
+ * handle update-crypto-policy set to refuse SHA1
+ * fix for 3PS signatures
+ *
  * Revision 1.3  2026-11-18 23:57:24+05:30  Cprogrammer
  * minor changed in formatting
  *

@@ -48,7 +48,8 @@ above will make qmail-dkim call qmail-spamfilter instead of qmail-queue.
 (RFC-8463) encryption methods for signing and verification. By default
 RSA-SHA256 is used. A message may carry any number of DKIM-Signature
 headers. Each one is verified on its own and one good signature is enough
-for the message to pass. At most 10 signatures are checked.
+for the message to pass, wherever it is among the signatures. At most 10
+signatures are checked.
 \fBqmail-dkim\fR uses OpenSSL and the functions in dkim_functions.c for
 signing and verification.
 
@@ -79,7 +80,8 @@ If an entry for \fIdomain\fR exists in \fIdkimkeys\fR, the value of
 \fIdkimkeys\fR by setting \fBNODKIMKEYS\fR environment variable.
 
 If a private key file does not exist and does not have a % character, the
-message will be rejected with error 35.
+message will be rejected with exit code 88 and error "unable to read
+private key"
 
 If \fBRELAYCLIENT\fR or \fBAUTHINFO\fR environment variable is set,
 \fBqmail-dkim\fR will sign the message even if \fBDKIMSIGN\fR and
@@ -110,6 +112,12 @@ x <expire_time>      the expire time in seconds since epoch
 z <hash>             1 for RSA-SHA1, 2 for RSA-SHA256, 3 for
                      RSA-SHA1+RSA-SHA256, 4 for Ed25519-SHA256
 .fi
+
+Where the crypto policy of the system does not allow sha1 signatures (Fedora,
+RHEL), \fB-z 1\fR and \fB-z 3\fR fail with the temporary error
+\fIrsa-sha1 is not allowed by the crypto policy of this system\fR and the message
+is not signed. Use \fB-z 2\fR or \fB-z 4\fR, or allow sha1 with
+\fBupdate-crypto-policies --set DEFAULT:SHA1\fR.
 
 .EX
 DKIMSIGNOPTIONS="-z 2 -c r -q"
@@ -150,21 +158,38 @@ you omit the letter, qmail-dkim will not issue any error inspite of DKIM
 verification failure. It will return success and the email will get
 delivered.
 
+If some of the signatures of a message failed to verify but at least one
+verified, the status is still A (or F, E as above) and the message is not
+rejected, because a signature can be broken without any fault of the sender,
+e.g. by a mailing list. The \fBDKIM-Status\fR header then has a second line
+with the number of signatures that verified, for example
+
+.nf
+DKIM-Status: good
+        (1 of 2 signatures verified)
+.fi
+
+This line is for information only. It does not change the status and there is
+no letter for it. It is not added if all of the signatures verified, or none.
+
 The complete set of letters with the corresponding return status is given
 below
 .nf
 A - DKIM_SUCCESS                        - Function executed successfully
 B - DKIM_FINISHED_BODY                  - process result: no more message
                                           body is needed
-C - DKIM_PARTIAL_SUCCESS                - verify result: at least one
-                                          but not all signatures verified
+C - DKIM_PARTIAL_SUCCESS                - reserved. Never returned. A message
+                                          with at least one good signature
+                                          is A, even if others failed
 D - DKIM_NEUTRAL                        - verify result: no signatures
                                           verified but message is
                                           not suspicious
 E - DKIM_SUCCESS_BUT_EXTRA              - signature result: signature
                                           verified but it did not
                                           include all of the body
-F - DKIM_3PS_SIGNATURE                  - 3rd-party signature
+F - DKIM_3PS_SIGNATURE                  - 3rd-party signature: the only good
+                                          signatures are of a domain other
+                                          than the author's (From header)
 G - DKIM_FAIL                           - Function failed to execute
 H - DKIM_BAD_SYNTAX                     - signature error: DKIM-Signature
                                           could not parse or has bad
@@ -204,15 +229,21 @@ Y - DKIM_BAD_IDENTITY                   - signature error: invalid identity
 For example, if you want to permanently reject messages that have a
 signature that is expired, include the letter 'K' in the \fBDKIMVERIFY\fR
 environment variable. A conservative set of letters is
-\fBFGHIKLMNORTUVWjp\fR. Reject permanently 3PS, FAILURE, SYNTAX,
+\fBGHIKLMNORTUVWjp\fR. Reject permanently FAILURE, SYNTAX,
 SIGNATURE_BAD, SIGNATURE_EXPIRED, SELECTOR_INVALID, GRANULARITY_MISMATCH,
 SELECTOR_KEY_REVOKED, DOMAIN_NAME_TOO_LONG, SELECTOR_PUBLIC_KEY_INVALID,
 NO_VALID_SIGNATURES, BODY_HASH_MISMATCH, SELECTOR_ALGORITHM_MISMATCH,
 TAT_INCOMPAT errors, and temporarily SIGNATURE_BAD_BUT_TESTING and
 DNS_TEMP_FAILURE. Add in \fBS\fR if you want to reject messages that do not
-have a DKIM signature. You can use the control files \fBsignaturedomains\fR
-and \fBnosignaturedomains\fR (See Below) to further fine tune the action to
-be taken when a mail arrives with no DKIM signature. Note that
+have a DKIM signature. About having \fBF\fR in \fBDKIMVERIFY\fR,
+mailing-list mail whose author signature was broken by a footer will be
+rejected by any DKIMVERIFY that includes F, including the conservative set
+in the man page. The status shows 3rd party and the count line shows 1 of
+2.
+
+You can use the control files \fBsignaturedomains\fR and
+\fBnosignaturedomains\fR (See Below) to further fine tune the action to be
+taken when a mail arrives with no DKIM signature. Note that
 \fBqmail-dkim\fR always inserts the \fBDKIM-Status\fR header, so that
 messages can be rejected later at delivery time, or in the mail reader. In
 that case you may set \fBDKIMVERIFY\fR to an empty string or "p" to issue
@@ -224,6 +255,15 @@ header, set \fBUNSIGNED_SUBJECT\fR environment variable. If you want to
 honor the body length tag (l=), set \fBHONOR_BODYLENGTHTAG\fR environment
 variable.
 
+If the crypto policy of the system does not allow sha1 signatures (Fedora,
+RHEL), a signature with a=rsa-sha1 cannot be verified. The message is not
+rejected for that: DKIM-Status says \fIrsa-sha1 is not allowed by the crypto
+policy of this system\fR and there is no DKIMVERIFY letter for it. If you set
+the environment variable \fBREJECT_SHA1\fR, such a signature is a bad
+signature (I, DKIM_SIGNATURE_BAD) instead, which you can reject with the
+DKIMVERIFY letter \fBI\fR. \fBREJECT_SHA1\fR has no effect if the system allows
+sha1 signatures, rsa-sha1 signatures are verified then.
+
 When signature verification fails, the control files \fIsignaturedomains\fR
 and \fInosignaturedomains\fR (see below) can change the result. This is
 done only for the DKIMVERIFY letters that match the failure. To use a
@@ -234,7 +274,7 @@ variable \fBSIGN_PRACTICE\fR is ignored.
 
 You can have a control file \fIsignaturedomains\fR containing a list of
 domains which you know are sure to sign messages using DKIM. If a message
-comes from a domain listed in \fIRsignaturedomains\fR, and the signature
+comes from a domain listed in \fIsignaturedomains\fR, and the signature
 fails verification (any of DKIM failure status), \fBqmail-dkim\fR will
 keep the failure (DKIM_FAIL). The name of this control file can be
 overridden by the environment variable \fBSIGNATUREDOMAINS\fR.

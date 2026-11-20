@@ -154,9 +154,12 @@ split_selector(char *arg, char **record)
 }
 
 static void
-status_header(int ret)
+status_header(int ret, int nverified, int nsigs)
 {
 	printf("DKIM-Status: %s\n", dkim_status_text(ret, NULL));
+	/*- one good signature is enough, say so when others failed. Informational */
+	if (nverified > 0 && nverified < nsigs)
+		printf("\t(%d of %d signatures verified)\n", nverified, nsigs);
 }
 
 static char *
@@ -229,6 +232,8 @@ main(int argc, char **argv)
 	sopts.pfnHeaderCallback = SignThisHeader;
 	vopts.nSubjectRequired = 1;
 	vopts.pfnDnsCallback = dns_lookup;
+	if (getenv("REJECT_SHA1")) /*- crypto policy refuses rsa-sha1: report a bad signature */
+		vopts.nRejectSha1 = 1;
 	if ((p = getenv("DKIMSIGN_HEADER")) && *p)
 		sigheader = p;
 	excl = getenv("EXCLUDE_DKIMSIGN");
@@ -379,6 +384,8 @@ main(int argc, char **argv)
 			if ((ret = dkim_sign_get(s, &sopts, keys[i].key, &sig))) {
 				fprintf(stderr, "%s: ", keys[i].fn);
 				verror(ret);
+				if (ret == DKIM_ALGORITHM_NOT_ALLOWED)
+					fprintf(stderr, "%s: sign with -z 2 (rsa-sha256) or -z 4 (ed25519), or see update-crypto-policies(8)\n", program);
 				dkim_sign_free(s);
 				return 1;
 			}
@@ -393,7 +400,7 @@ main(int argc, char **argv)
 	} else {
 		DKIMVerify     *v;
 		DKIMVerifyDetails *d;
-		int             nsig = 0;
+		int             nsig = 0, nverified = 0;
 		const char     *dkimverify;
 
 		vopts.pszSelectorOverride = dnstext;
@@ -429,16 +436,18 @@ main(int argc, char **argv)
 						d[i].szSelector ? d[i].szSelector : "?",
 						d[i].szAlgorithm ? d[i].szAlgorithm : "?");
 				if (d[i].nResult >= 0)
-					fprintf(stderr, "Success\n");
+					fprintf(stderr, "Success%s\n", d[i].nResult == DKIM_3PS_SIGNATURE ? " (3rd party signature)" :
+							d[i].nResult == DKIM_SUCCESS_BUT_EXTRA ? " (l= did not cover the whole body)" : "");
 				else
 					fprintf(stderr, "Failure %d (%s)\n", d[i].nResult, dkim_code_name(d[i].nResult));
 			}
 		}
 		ret = dkim_verify_status(nsig, d);
+		nverified = dkim_verify_count(nsig, d); /*- d[] is freed below */
 		if (ret != DKIM_SUCCESS)
 			verror(ret);
 		dkim_verify_free(v);
-		status_header(ret);
+		status_header(ret, nverified, nsig);
 		if ((dkimverify = getenv("DKIMVERIFY"))) {
 			if (ret < 0) {
 				if (strchr(dkimverify, 'F' - ret))
@@ -460,13 +469,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.c,v 1.42 2026-11-16 17:38:43+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim.c,v 1.43 2026-11-20 08:54:41+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x++) x--;
 }
 
 /*
  * $Log: dkim.c,v $
+ * Revision 1.43  2026-11-20 08:54:41+05:30  Cprogrammer
+ * handle update-crypto-policy set to refuse SHA1
+ *
  * Revision 1.42  2026-11-16 17:38:43+05:30  Cprogrammer
  * improved usage output
  *

@@ -1,5 +1,5 @@
 /*
- * $Id: qmail-dkim.c,v 1.90 2026-11-19 01:02:25+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmail-dkim.c,v 1.91 2026-11-20 08:56:21+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <stdlib.h>
@@ -149,6 +149,8 @@ maybe_die_dkim(int e)
 		custom_error("qmail-dkim", "D", "Could not parse private key", 0, "X.7.5");
 	case DKIM_OPENSSL_TOO_OLD:
 		custom_error("qmail-dkim", "Z", "OpenSSL version too old on this system", 0, "X.3.0");
+	case DKIM_ALGORITHM_NOT_ALLOWED: /*- signing with rsa-sha1 */
+		custom_error("qmail-dkim", "Z", "rsa-sha1 is not allowed by the crypto policy of this system. Use rsa-sha256 or ed25519 (-z 2, -z 4 in DKIMSIGNOPTIONS)", 0, "X.3.0");
 	default:
 		return;
 	}
@@ -347,7 +349,7 @@ write_signature(const char *domain, DKIMSignOptions *opts, size_t selector_size)
 		} else { /*- has reading dkimkeys altered DKIMSIGNOPTIONS? */
 			ptr = env_get("DKIMSIGN");
 			/*- don't allow DKIMSIGN to be altered by dkimkeys */
-			if (str_diff(ptr, keyfn) && !env_put2("DKIMSIGN", keyfn))
+			if ((!ptr || str_diff(ptr, keyfn)) && !env_put2("DKIMSIGN", keyfn))
 				die(QQ_OUT_OF_MEMORY, 1);
 			ptr = env_get("DKIMSIGNOPTIONS");
 			if (!dkimsignoptions || str_diff(dkimsignoptions, ptr)) {
@@ -470,7 +472,7 @@ dkimverify_exit(int dkimRet, const char *status, const char *code)
 }
 
 void
-writeHeaderNexit(int ret, int origRet)
+writeHeaderNexit(int ret, int origRet, int nVerified, int nSigCount)
 {
 	const char     *dkimStatus, *code = 0;
 	char            strnum[FMT_ULONG];
@@ -492,6 +494,20 @@ writeHeaderNexit(int ret, int origRet)
 			strnum[fmt_ulong(strnum, origRet)] = 0;
 		if (!stralloc_cats(&dkimoutput, strnum) ||
 				!stralloc_cats(&dkimoutput, ")"))
+			die(QQ_OUT_OF_MEMORY, 0);
+	}
+	/*-
+	 * one good signature is enough, but say so when other signatures failed,
+	 * e.g. "(1 of 2 signatures verified)". Informational: the status does not change
+	 */
+	if (nVerified > 0 && nVerified < nSigCount) {
+		if (!stralloc_cats(&dkimoutput, "\n\t("))
+			die(QQ_OUT_OF_MEMORY, 0);
+		strnum[fmt_ulong(strnum, nVerified)] = 0;
+		if (!stralloc_cats(&dkimoutput, strnum) || !stralloc_cats(&dkimoutput, " of "))
+			die(QQ_OUT_OF_MEMORY, 0);
+		strnum[fmt_ulong(strnum, nSigCount)] = 0;
+		if (!stralloc_cats(&dkimoutput, strnum) || !stralloc_cats(&dkimoutput, " signatures verified)"))
 			die(QQ_OUT_OF_MEMORY, 0);
 	}
 	if (!stralloc_cats(&dkimoutput, "\n"))
@@ -543,7 +559,7 @@ main(int argc, char *argv[])
 	int             wstat;
 	int             verbose = 0;
 	unsigned int    len, token_len;
-	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0;
+	int             ret = 0, origRet = DKIM_MAX_ERROR, i, nSigCount = 0, nVerified = 0;
 	pid_t           pid;
 	unsigned long   death;
 	const char     *selector = NULL, *ptr;
@@ -582,6 +598,9 @@ main(int argc, char *argv[])
 	}
 	if (dkimsign) {
 		if (!(ptr = env_get("BOUNCEDOMAIN"))) {
+			/*- control_init() loads control/me, used when bouncehost is missing */
+			if (control_init() == -1)
+				custom_error("qmail-dkim", "Z", "unable to read me.", 0, "X.3.0");
 			if ((ret = control_readfile(&bouncehost, "bouncehost", 1)) == -1)
 				custom_error("qmail-dkim", "Z", "unable to read bouncehost.", 0, "X.3.0");
 			else
@@ -635,6 +654,8 @@ main(int argc, char *argv[])
 			vopts.nAllowUnsignedFromHeaders = 1;
 		vopts.nSubjectRequired = env_get("UNSIGNED_SUBJECT") ? 0 : 1;
 		vopts.nHonorBodyLengthTag = env_get("HONOR_BODYLENGTHTAG") ? 1 : 0;
+		/*- crypto policy refuses rsa-sha1: DKIM-Status is "signature bad" instead of "rsa-sha1 is not allowed" */
+		vopts.nRejectSha1 = env_get("REJECT_SHA1") ? 1 : 0;
 		if (!(vctx = dkim_verify_new(&vopts)))
 			custom_error("qmail-dkim", "Z", "dkim initialization failed", 0, "X.3.0");
 	}
@@ -705,13 +726,15 @@ main(int argc, char *argv[])
 						for (i = 0; i < nSigCount; i++) {
 							subprintf(subfderr, "Signature # %02d: ", i + 1);
 							if (pDetails[i].nResult >= 0)
-								subprintf(subfderr, "Success\n");
+								subprintf(subfderr, "Success%s\n", pDetails[i].nResult == DKIM_3PS_SIGNATURE ? " (3rd party signature)" :
+									pDetails[i].nResult == DKIM_SUCCESS_BUT_EXTRA ? " (l= did not cover the whole body)" : "");
 							else
 								subprintf(subfderr, "Failure %d\n", pDetails[i].nResult);
 						}
 						substdio_flush(subfderr);
 					}
 					ret = dkim_verify_status(nSigCount, pDetails);
+					nVerified = dkim_verify_count(nSigCount, pDetails); /*- details are freed below */
 				}
 			}
 			/*- what to do if DKIM Verification fails */
@@ -721,12 +744,11 @@ main(int argc, char *argv[])
 
 				origRet = ret;
 				if ((domain = dkim_verify_author_domain(vctx))) {
-					if (!(ptr = env_get("SIGNATUREDOMAINS"))) {
-						if (control_readfile(&sigdomains, "signaturedomains", 0) == -1)
-							custom_error("qmail-dkim", "Z", "unable to read signaturedomains.", 0, "X.3.0");
-					} else
-					if (!stralloc_copys(&sigdomains, ptr))
-						die(QQ_OUT_OF_MEMORY, 2);
+					/*- SIGNATUREDOMAINS overrides the name of the control file */
+					if (!(ptr = env_get("SIGNATUREDOMAINS")) || !*ptr)
+						ptr = "signaturedomains";
+					if (control_readfile(&sigdomains, ptr, 0) == -1)
+						custom_error("qmail-dkim", "Z", "unable to read signaturedomains.", 0, "X.3.0");
 					for (len = 0, ptr = sigdomains.s;len < sigdomains.len;) {
 						len += ((token_len = str_len(ptr)) + 1); /*- next domain */
 						if (!case_diffb(ptr, token_len, domain)) {
@@ -742,12 +764,11 @@ main(int argc, char *argv[])
 					 * A message that has a signature which fails is still a failure.
 					 */
 					if (!skip_nosignature_domain && ret == DKIM_NO_SIGNATURES) {
-						if (!(ptr = env_get("NOSIGNATUREDOMAINS"))) {
-							if (control_readfile(&nsigdomains, "nosignaturedomains", 0) == -1)
-								custom_error("qmail-dkim", "Z", "unable to read nosignaturedomains.", 0, "X.3.0");
-						} else
-						if (!stralloc_copys(&nsigdomains, ptr))
-							die(QQ_OUT_OF_MEMORY, 2);
+						/*- NOSIGNATUREDOMAINS overrides the name of the control file */
+						if (!(ptr = env_get("NOSIGNATUREDOMAINS")) || !*ptr)
+							ptr = "nosignaturedomains";
+						if (control_readfile(&nsigdomains, ptr, 0) == -1)
+							custom_error("qmail-dkim", "Z", "unable to read nosignaturedomains.", 0, "X.3.0");
 						for (len = 0, ptr = nsigdomains.s;len < nsigdomains.len;) {
 							len += ((token_len = str_len(ptr)) + 1); /*- next domain */
 							if (*ptr == '*' || !case_diffb(ptr, token_len, domain)) {
@@ -761,7 +782,7 @@ main(int argc, char *argv[])
 			} /* if (checkPractice(ret)) */
 			dkim_verify_free(vctx);
 			vctx = 0;
-			writeHeaderNexit(ret, origRet);
+			writeHeaderNexit(ret, origRet, nVerified, nSigCount);
 		} /*- if (dkimverify) */
 	}
 	if (pipe(pim) == -1)
@@ -819,13 +840,17 @@ main(int argc, char *argv[])
 void
 getversion_qmail_dkim_c()
 {
-	const char     *x = "$Id: qmail-dkim.c,v 1.90 2026-11-19 01:02:25+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmail-dkim.c,v 1.91 2026-11-20 08:56:21+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) x;
 }
 
 /*
  * $Log: qmail-dkim.c,v $
+ * Revision 1.91  2026-11-20 08:56:21+05:30  Cprogrammer
+ * handle update-crypto-policy set to refuse SHA1
+ * fix for 3PS signatures
+ *
  * Revision 1.90  2026-11-19 01:02:25+05:30  Cprogrammer
  * fix setting of selector when DKIMSIGN is set but empty
  *

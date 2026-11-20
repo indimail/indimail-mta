@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: test-indimail-mta,v 1.85 2026-11-18 18:27:02+05:30 Cprogrammer Exp mbhangui $
+# $Id: test-indimail-mta,v 1.86 2026-11-20 08:53:50+05:30 Cprogrammer Exp mbhangui $
 #
 start=$(date +'%s')
 user=$(whoami)
@@ -7840,6 +7840,263 @@ test_ezmlm_idx()
 	fi
 }
 
+#
+# helper functions used by the additional DKIM tests (13 onwards)
+#
+
+# t_ok description: record a successful check
+t_ok()
+{
+	tcount=$(expr $tcount + 1)
+	if [ $verbose -gt 0 ] ; then
+		echo "SUCCESS: $1"
+	fi
+	echo SUCCESS ======================== >$out
+	printf "succeeded\n"
+}
+
+# t_bad description: record a failed check
+t_bad()
+{
+	echo "FAILED : $1"
+	printf "failed\n"
+	echo FAILURE ======================== >$out
+	echo >>$out
+	failed=1
+}
+
+# bad collects the reasons for a failed case, t_done reports the case.
+bad=""
+
+# chk what expected actual
+chk()
+{
+	if [ "$2" != "$3" ] ; then
+		bad="$bad [$1: expected=$2 got=$3]"
+	fi
+}
+
+# chks what file substring: first line of file must contain substring
+chks()
+{
+	if ! head -1 $2 | grep -F -- "$3" > /dev/null 2>&1 ; then
+		bad="$bad [$1: expected [$3] got [$(head -1 $2)]]"
+	fi
+}
+
+# chkgrep what file substring: some line of file must contain substring
+chkgrep()
+{
+	if ! grep -F -- "$3" $2 > /dev/null 2>&1 ; then
+		bad="$bad [$1: [$3] not found]"
+	fi
+}
+
+# chknogrep what file substring: no line of file may contain substring
+chknogrep()
+{
+	if grep -F -- "$3" $2 > /dev/null 2>&1 ; then
+		bad="$bad [$1: [$3] found]"
+	fi
+}
+
+# t_done description
+t_done()
+{
+	if [ -z "$bad" ] ; then
+		t_ok "$1"
+	else
+		t_bad "$1$bad"
+	fi
+	bad=""
+}
+
+# t_start heading
+t_start()
+{
+	printf "\r%118s\r" " "
+	echo "$1"
+	failed=0
+}
+
+# t_end description
+t_end()
+{
+	if [ $verbose -eq 0 -a $failed -eq 0 ] ; then
+		printf "\r%118s\r" " "
+		printf "\rSuccess\n"
+		echo
+	fi
+	if [ $failed -eq 1 ] ; then
+		echo "Test Failed for $1"
+		exit 1
+	elif [ $verbose -ne 0 ] ; then
+		echo "All Tests succeeded for $1"
+	fi
+}
+
+# mkmail domain: write a test mail with From/To in domain to stdout
+mkmail()
+{
+	echo "From: postmaster@$1"
+	echo "To: postmaster@$1"
+	echo "Subject: Test"
+	echo "Date: $(date -R)"
+	echo
+	echo "Test message"
+}
+
+# pubrec keyfile: DNS TXT record text of keyfile.pub
+pubrec()
+{
+	cat $1.pub |sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' | tr -d '\n'
+}
+
+# sigflat: DKIM-Signature headers on stdin, unfolded, one header per line
+sigflat()
+{
+	tr '\n' ' ' | sed -e 's/\t/ /g' -e 's/ DKIM-Signature:/\nDKIM-Signature:/g' -e 's/^DKIM-Signature:/DKIM-Signature:/'
+	echo
+}
+
+# sigtag file tag [n]: value of tag in the n'th (default 1st) DKIM-Signature of file
+sigtag()
+{
+	sigflat < $1 | sed -n "${3:-1}p" | sed -n "s/.* $2=\([^;]*\)[; ].*/\1/p"
+}
+
+# hastag file tag [n]: 0 if the tag is present in the n'th signature
+hastag()
+{
+	sigflat < $1 | sed -n "${3:-1}p" | grep " $2=" > /dev/null
+}
+
+# dkimv letters record [dkim options]: verify mail on stdin with dkim, DNS bypassed using record.
+# exit status of dkim is returned, stderr in $tmpdir/err.out, stdout in $tmpdir/stat.out
+dkimv()
+{
+	_l="$1"
+	_r="$2"
+	shift 2
+	DKIMVERIFY="$_l" $dkim -v -T "$_r" "$@" >$tmpdir/stat.out 2>$tmpdir/err.out
+	return $?
+}
+
+# qdv letters record [env settings]: verify mail on stdin with qmail-dkim, public key from record.
+# exit status of qmail-dkim is returned, output in $tmpdir/qout.out, error message in $tmpdir/err.out
+qdv()
+{
+	_l="$1"
+	_r="$2"
+	shift 2
+	if [ -n "$_r" ] ; then
+		env - CONTROLDIR=$tmpdir/ctl DKIMVERIFY="$_l" SELECTOR_DATA="$_r" DKIMQUEUE=/bin/cat ERROR_FD=2 "$@" \
+			$qmail_dkim >$tmpdir/qout.out 2>$tmpdir/err.out
+	else
+		env - CONTROLDIR=$tmpdir/ctl DKIMVERIFY="$_l" DKIMQUEUE=/bin/cat ERROR_FD=2 "$@" \
+			$qmail_dkim >$tmpdir/qout.out 2>$tmpdir/err.out
+	fi
+	return $?
+}
+
+# qsign key [env settings]: sign mail on stdin with qmail-dkim using key (DKIMSIGN=key)
+qsign()
+{
+	_k="$1"
+	shift 1
+	env - CONTROLDIR=$tmpdir/ctl DKIMSIGN="$_k" DKIMQUEUE=/bin/cat ERROR_FD=2 "$@" \
+		$qmail_dkim >$tmpdir/qout.out 2>$tmpdir/err.out
+	return $?
+}
+
+# chkrange what low high actual
+chkrange()
+{
+	if [ -z "$4" ] || [ "$4" -lt "$2" ] || [ "$4" -gt "$3" ] ; then
+		bad="$bad [$1: expected $2..$3 got=$4]"
+	fi
+}
+
+# hlist_has file header: 0 if header is in h= of the first signature
+hlist_has()
+{
+	# h= may be folded (whitespace after a colon), strip it
+	sigtag $1 h | tr -d ' ' | tr ':' '\n' | grep -i -x "$2" > /dev/null
+}
+
+# sv_check label tag expected [dkim options]: sign $tmpdir/mail.txt with $rsa_key using
+# the options, check that tag has the expected value (- = tag must be absent) and verify
+sv_check()
+{
+	_label="$1"
+	_tag="$2"
+	_exp="$3"
+	shift 3
+	printf "    testing %-34s " "$_label"
+	$dkim "$@" -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	chk "sign exit" 0 $?
+	if [ "$_exp" = "-" ] ; then
+		hastag $tmpdir/sig.out $_tag
+		chk "$_tag= absent" 1 $?
+	else
+		chk "$_tag=" "$_exp" "$(sigtag $tmpdir/sig.out $_tag)"
+	fi
+	(cat $tmpdir/sig.out $tmpdir/mail.txt) | dkimv "$vfy_all" "$rsa_rec"
+	chk "verify exit" 0 $?
+	t_done "dkim $*"
+}
+
+# msgh headers: test message with the headers (a printf format) added to Subject, Date and a body
+msgh()
+{
+	printf "$1"
+	printf "Subject: Test\nDate: %s\n\nTest message\n" "$(date -R)"
+}
+
+# qdomain label expected headers [env settings]: sign with qmail-dkim, check d=
+qdomain()
+{
+	_label="$1"
+	_exp="$2"
+	_hdrs="$3"
+	shift 3
+	printf "    testing qmail-dkim %-40s " "$_label"
+	msgh "$_hdrs" | qsign $rsa_key "$@"
+	chk "exit" 0 $?
+	chk "d=" "$_exp" "$(sigtag $tmpdir/qout.out d)"
+	t_done "qmail-dkim d=$_exp ($_label)"
+}
+
+# ddomain label expected headers [dkim options]: sign with dkim, check d=
+ddomain()
+{
+	_label="$1"
+	_exp="$2"
+	_hdrs="$3"
+	shift 3
+	printf "    testing dkim %-46s " "$_label"
+	msgh "$_hdrs" | $dkim "$@" -s $rsa_key > $tmpdir/sig.out 2>$tmpdir/err.out
+	chk "exit" 0 $?
+	chk "d=" "$_exp" "$(sigtag $tmpdir/sig.out d)"
+	t_done "dkim d=$_exp ($_label)"
+}
+
+# sha1_refused label dkim-option: the crypto policy of the system (Fedora, RHEL ...) does not allow
+# rsa-sha1. dkim must say that (not "evp signing failure") and must not sign
+sha1_refused()
+{
+	printf "    testing %-34s " "$1 (rsa-sha1 not allowed)"
+	$dkim $2 -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out 2>$tmpdir/err.out
+	if [ $? -eq 0 ] ; then
+		bad="$bad [exit 0, rsa-sha1 is not allowed]"
+	fi
+	chk "signatures" 0 $(grep -c '^DKIM-Signature' $tmpdir/sig.out)
+	chkgrep "message" $tmpdir/err.out "rsa-sha1 is not allowed by the crypto policy of this system"
+	chkgrep "hint" $tmpdir/err.out "sign with -z 2"
+	t_done "dkim $2 refused by the crypto policy"
+}
+
+
 test_dkim()
 {
 	t1=$(date +"%s.%4N")
@@ -8892,231 +9149,1059 @@ test_dkim()
 		echo "Test succeeded for qmail-dkim custom error"
 	fi
 
+	#
+	# Additional tests: behaviour of dkim and qmail-dkim as described in their man pages.
+	# DNS is never used, public keys are passed with dkim -T / qmail-dkim SELECTOR_DATA.
+	#
+	/bin/rm -rf $tmpdir/ctl $tmpdir/sc
+	mkdir -p $tmpdir/ctl $tmpdir/sc
+	ln -s $domainkey_dir $tmpdir/ctl/domainkeys
+	rsa_key=$domainkey_dir/example.com/dkimkeys1
+	ed_key=$domainkey_dir/example.com/ed25519
+	rsa_rec=$(pubrec $rsa_key)
+	ed_rec=$(pubrec $ed_key)
+	vfy_all="GHIJKLMNOPQRSTUVWXY" # every DKIM failure is a permanent error
+	bad=""
+	# The crypto policy of some systems (Fedora, RHEL ...) makes OpenSSL refuse rsa-sha1 signatures,
+	# rsa-sha256 works with the same key. Tests that need rsa-sha1 are replaced by a check of the
+	# error message on those systems. Any other failure of "dkim -z 1" shows in the tests below
+	sha1_ok=1
+	mkmail example.com > $tmpdir/mail.txt
+	if ! $dkim -z 1 -s $rsa_key < $tmpdir/mail.txt > /dev/null 2> $tmpdir/err.out ; then
+		if grep "crypto policy" $tmpdir/err.out > /dev/null 2>&1 ; then
+			sha1_ok=0
+		fi
+	fi
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/err.out
+
 	# Test No 13
-	# A valid signature whose d= domain differs from the From author domain
-	# is a third-party signature. The library deliberately counts this as a
-	# successful signature (DKIM_3PS_SIGNATURE is treated as success).
-	printf "\r%118s\r" " "
-	echo "13. testing third-party DKIM signature (d= differs from From domain)"
-	failed=0
-	selector=$(sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' $domainkey_dir/example.org/default.pub | tr -d '\n')
-	(
-	echo "From: postmaster@example.com"
-	echo "To: postmaster@example.com"
-	echo "Subject: Third party signature"
-	echo "Date: $(date -R)"
-	echo
-	echo "Test message"
-	) >$tmpdir/mail.txt
-	$dkim -d example.org -i postmaster@example.org -z 2 \
-		-s $domainkey_dir/example.org/default <$tmpdir/mail.txt >$tmpdir/sig.out
-	ret=$?
-	cat $tmpdir/sig.out $tmpdir/mail.txt >$tmpdir/result.out
-	if [ $ret -eq 0 ] && grep -qi 'd=example.org' $tmpdir/result.out &&
-		$dkim -vV -T "default=$selector" <$tmpdir/result.out >$out 2>$tmpdir/err.out
-	then
-		tcount=$(expr $tcount + 1)
-		echo "    third-party signature verified and accepted"
-	else
-		echo "FAILED: third-party signature ret=$ret"
-		cat $tmpdir/err.out
-		failed=1
-	fi
-	/bin/rm -f $tmpdir/mail.txt $tmpdir/sig.out $tmpdir/result.out $tmpdir/err.out
-	if [ $failed -eq 1 ] ; then
-		echo "Test Failed for third-party DKIM signature"
-		exit 1
-	fi
+	t_start "13. testing dkim -c canonicalization (r,s,t,u): c= tag and whitespace tolerance of relaxed/simple"
+	mkmail example.com > $tmpdir/mail.txt
+	sed -e 's/^Subject: Test$/Subject:    Test   /' $tmpdir/mail.txt > $tmpdir/mail.hdr
+	sed -e 's/^Test message$/Test    message   /' $tmpdir/mail.txt > $tmpdir/mail.body
+	for i in rsa ed25519
+	do
+		if [ $i = rsa ] ; then
+			key=$rsa_key; rec="$rsa_rec"; zopt="-z 2"
+		else
+			key=$ed_key; rec="$ed_rec"; zopt="-z 4"
+		fi
+		for c in r s t u
+		do
+			# what happens to a signature if header/body whitespace is changed after signing
+			case $c in
+				r) ctag=relaxed/relaxed; hdr=good; body=good ;;
+				s) ctag=simple/simple; hdr="RSA/ED25519 verify failed"; body="does not hash to bh" ;;
+				t) ctag=relaxed/simple; hdr=good; body="does not hash to bh" ;;
+				u) ctag=simple/relaxed; hdr="RSA/ED25519 verify failed"; body=good ;;
+			esac
+			printf "    testing %-8s -c %s (%s) " $i $c $ctag
+			$dkim $zopt -c $c -s $key < $tmpdir/mail.txt > $tmpdir/sig.out
+			chk "c= tag" $ctag "$(sigtag $tmpdir/sig.out c)"
+			(cat $tmpdir/sig.out $tmpdir/mail.txt) | dkimv "$vfy_all" "$rec"
+			chk "unmodified mail exit" 0 $?
+			(cat $tmpdir/sig.out $tmpdir/mail.hdr) | dkimv "" "$rec"
+			chks "header whitespace changed" $tmpdir/stat.out "$hdr"
+			(cat $tmpdir/sig.out $tmpdir/mail.body) | dkimv "" "$rec"
+			chks "body whitespace changed" $tmpdir/stat.out "$body"
+			t_done "dkim $i -c $c"
+		done
+	done
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/mail.hdr $tmpdir/mail.body $tmpdir/sig.out
+	t_end "$dkim canonicalization"
 
 	# Test No 14
-	# qmail-dkim must verify a valid third-party signature using the supplied
-	# selector record (SELECTOR_DATA), without making a DNS query. By default
-	# a 3PS result is recorded in DKIM-Status and accepted. DKIMVERIFY=F asks
-	# qmail-dkim to reject the same result (F is DKIM_3PS_SIGNATURE).
-	printf "\r%118s\r" " "
-	echo "14. testing qmail-dkim third-party signature verification"
-	failed=0
-	selector=$(sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' $domainkey_dir/example.org/default.pub | tr -d '\n')
-	(
-	echo "From: postmaster@example.com"
-	echo "To: postmaster@example.com"
-	echo "Subject: qmail-dkim third-party verification"
-	echo "Date: $(date -R)"
-	echo
-	echo "Third-party signed test message"
-	) >$tmpdir/mail.txt
-	$dkim -d example.org -i postmaster@example.org -z 2 \
-		-s $domainkey_dir/example.org/default <$tmpdir/mail.txt >$tmpdir/sig.out
+	t_start "14. testing dkim signing options (-l -q -t -h -i -x -d -y -z) and the DKIM-Signature tags they produce"
+	mkmail example.com > $tmpdir/mail.txt
+	now=$(date +%s)
+	if [ $sha1_ok -eq 0 ] ; then
+		echo "    rsa-sha1 is not allowed by the crypto policy of this system: checking the error message instead of rsa-sha1 signatures"
+	fi
+	printf "    testing %-34s " "default options"
+	$dkim -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	chk "a=" rsa-sha256 "$(sigtag $tmpdir/sig.out a)"
+	chk "c=" relaxed/relaxed "$(sigtag $tmpdir/sig.out c)"
+	chk "d=" example.com "$(sigtag $tmpdir/sig.out d)"
+	chk "s=" dkimkeys1 "$(sigtag $tmpdir/sig.out s)"
+	chkrange "x= (now + 604800)" $(expr $now + 604800 - 60) $(expr $now + 604800 + 60) "$(sigtag $tmpdir/sig.out x)"
+	for tag in l q t i z
+	do
+		hastag $tmpdir/sig.out $tag
+		chk "$tag= absent" 1 $?
+	done
+	hlist_has $tmpdir/sig.out from
+	chk "from in h=" 0 $?
+	t_done "dkim default tags"
+	sv_check "-l body length" l 14 -l
+	sv_check "-q query method" q dns/txt -q
+	# -t is the time the message was signed. Allow for the clock having moved on
+	printf "    testing %-34s " "-t timestamp"
+	$dkim -t -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	chkrange "t=" $now $(expr $now + 60) "$(sigtag $tmpdir/sig.out t)"
+	(cat $tmpdir/sig.out $tmpdir/mail.txt) | dkimv "$vfy_all" "$rsa_rec"
+	chk "verify exit" 0 $?
+	t_done "dkim -t"
+	printf "    testing %-34s " "-h copied headers (z=)"
+	$dkim -h -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	hastag $tmpdir/sig.out z
+	chk "z= present" 0 $?
+	# z= is dkim-quoted-printable: the blank after "From:" is "=20"
+	chk "z= has From" 1 "$(sigtag $tmpdir/sig.out z | grep -c 'From:=20postmaster@example.com')"
+	chk "z= has bad '=' escapes" 0 "$(sigtag $tmpdir/sig.out z | grep -c '=[^0-9A-F]')"
+	(cat $tmpdir/sig.out $tmpdir/mail.txt) | dkimv "$vfy_all" "$rsa_rec"
+	chk "verify exit" 0 $?
+	t_done "dkim -h"
+	sv_check "-i identity" i bob@example.com -i bob@example.com
+	sv_check "-i identity in subdomain" i bob@mail.example.com -i bob@mail.example.com
+	printf "    testing %-34s " "-i identity outside domain"
+	$dkim -i bob@evil.org -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out 2>$tmpdir/err.out
 	ret=$?
-	cat $tmpdir/sig.out $tmpdir/mail.txt >$tmpdir/signed.out
-	if [ $ret -ne 0 ] || ! grep -qi 'd=example.org' $tmpdir/signed.out ; then
-		echo "FAILED: could not create third-party signature for qmail-dkim test"
-		failed=1
+	if [ $ret -eq 0 ] ; then
+		bad="$bad [-i bob@evil.org was accepted]"
+	fi
+	chk "no signature" 0 $(grep -c DKIM-Signature $tmpdir/sig.out)
+	t_done "dkim -i bob@evil.org rejected"
+	printf "    testing %-34s " "-x expire time"
+	$dkim -x 100 -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	chkrange "x= (now + 100)" $(expr $now + 100 - 5) $(expr $now + 100 + 60) "$(sigtag $tmpdir/sig.out x)"
+	t_done "dkim -x 100"
+	sv_check "-x - (no expire time)" x - -x -
+	sv_check "-d domain" d other.org -d other.org
+	sv_check "-y selector" s mysel -y mysel
+	if [ $sha1_ok -eq 1 ] ; then
+		sv_check "-z 1 (rsa-sha1)" a rsa-sha1 -z 1
 	else
-		# Empty DKIMVERIFY means record the result but do not reject it.
-		env - CONTROLDIR=$cntrldir DKIMVERIFY="" \
-			SELECTOR_DATA="$selector" DKIMQUEUE=/bin/cat \
-				$qmail_dkim <$tmpdir/signed.out >$tmpdir/result.out 2>$tmpdir/err.out
-		ret=$?
-		if [ $ret -eq 0 ] && grep -qi '^DKIM-Status:' $tmpdir/result.out ; then
-			tcount=$(expr $tcount + 1)
-			echo "    qmail-dkim accepted third-party signature and emitted DKIM-Status"
-		else
-			echo "FAILED: qmail-dkim did not accept third-party signature ret=$ret"
-			cat $tmpdir/err.out
-			failed=1
-		fi
-
-		# F is the DKIMVERIFY letter for DKIM_3PS_SIGNATURE (return code 5).
-		# The same signature must now be rejected.
-		env - CONTROLDIR=$cntrldir DKIMVERIFY=F \
-			SELECTOR_DATA="$selector" DKIMQUEUE=/bin/cat \
-				$qmail_dkim <$tmpdir/signed.out >$tmpdir/reject.out 2>$tmpdir/err.out
-		ret=$?
-		if [ $ret -ne 0 ] ; then
-			tcount=$(expr $tcount + 1)
-			echo "    DKIMVERIFY=F correctly rejected third-party signature"
-		else
-			echo "FAILED: DKIMVERIFY=F accepted third-party signature"
-			cat $tmpdir/reject.out $tmpdir/err.out
-			failed=1
-		fi
+		sha1_refused "-z 1" "-z 1"
 	fi
-	/bin/rm -f $tmpdir/mail.txt $tmpdir/sig.out $tmpdir/signed.out \
-		$tmpdir/result.out $tmpdir/reject.out $tmpdir/err.out
-	if [ $failed -eq 1 ] ; then
-		echo "Test Failed for qmail-dkim third-party signature verification"
-		exit 1
+	sv_check "-z 2 (rsa-sha256)" a rsa-sha256 -z 2
+	if [ $sha1_ok -eq 1 ] ; then
+		printf "    testing %-34s " "-z 3 (rsa-sha1 + rsa-sha256)"
+		$dkim -z 3 -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+		chk "signatures" 2 $(grep -c '^DKIM-Signature' $tmpdir/sig.out)
+		chk "1st a=" rsa-sha1 "$(sigtag $tmpdir/sig.out a 1)"
+		chk "2nd a=" rsa-sha256 "$(sigtag $tmpdir/sig.out a 2)"
+		(cat $tmpdir/sig.out $tmpdir/mail.txt) | dkimv "$vfy_all" "$rsa_rec" -V
+		chk "verify exit" 0 $?
+		chk "both verified" 2 $(grep -c Success $tmpdir/err.out)
+		t_done "dkim -z 3"
+	else
+		sha1_refused "-z 3" "-z 3"
 	fi
+	printf "    testing %-34s " "-z 4 (ed25519)"
+	$dkim -z 4 -s $ed_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	chk "a=" ed25519-sha256 "$(sigtag $tmpdir/sig.out a)"
+	(cat $tmpdir/sig.out $tmpdir/mail.txt) | dkimv "$vfy_all" "$ed_rec"
+	chk "verify exit" 0 $?
+	t_done "dkim -z 4"
+	printf "    testing %-34s " "-z 4 with an rsa key"
+	$dkim -z 4 -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out 2>$tmpdir/err.out
+	if [ $? -eq 0 ] ; then
+		bad="$bad [rsa key accepted for ed25519]"
+	fi
+	chkgrep "error message" $tmpdir/err.out "does not match"
+	t_done "dkim -z 4 rsa key rejected"
+	printf "    testing %-34s " "-z 2 with an ed25519 key"
+	$dkim -z 2 -s $ed_key < $tmpdir/mail.txt > $tmpdir/sig.out 2>$tmpdir/err.out
+	if [ $? -eq 0 ] ; then
+		bad="$bad [ed25519 key accepted for rsa]"
+	fi
+	chkgrep "error message" $tmpdir/err.out "does not match"
+	t_done "dkim -z 2 ed25519 key rejected"
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/sig.out $tmpdir/err.out
+	t_end "$dkim signing options"
 
 	# Test No 15
-	# Exercise dkim(8) signing options and verify locally with -T (no DNS).
-	printf "\r%118s\r" " "
-	echo "15. testing dkim(8) signing options and local verification"
-	failed=0
-	for canon in r s t u
-	do
-		(
-		echo "From: postmaster@example.com"
-		echo "To: postmaster@example.com"
-		echo "Subject: DKIM option test"
-		echo "X-Test-Exclude: must-not-be-signed"
-		echo "Date: $(date -R)"
-		echo
-		echo "Test message"
-		) >$tmpdir/mail.txt
-		selector=$(sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' $domainkey_dir/example.com/default.pub | tr -d '\n')
-		$dkim -c $canon -l -q -t -h -d example.com -i postmaster@example.com \
-			-x 3600 -X X-Test-Exclude -z 2 -s $domainkey_dir/example.com/default \
-			<$tmpdir/mail.txt >$tmpdir/sig.out
-		ret=$?
-		cat $tmpdir/sig.out $tmpdir/mail.txt >$tmpdir/result.out
-		if [ $ret -eq 0 ] &&
-			grep -qi 'c=.*' $tmpdir/result.out &&
-			grep -qi 'l=' $tmpdir/result.out &&
-			grep -qi 'q=' $tmpdir/result.out &&
-			grep -qi 't=' $tmpdir/result.out &&
-			grep -qi 'z=' $tmpdir/result.out &&
-			grep -qi 'x=' $tmpdir/result.out &&
-			! grep -qi 'X-Test-Exclude' $tmpdir/sig.out &&
-			$dkim -v -T "$selector" <$tmpdir/result.out >$out 2>$tmpdir/err.out
-		then
-			tcount=$(expr $tcount + 1)
-			echo "    canonicalization $canon and signing tags succeeded"
-		else
-			echo "FAILED: dkim signing options/canonicalization $canon ret=$ret"
-			cat $tmpdir/err.out
-			failed=1
-		fi
-	done
-	# -y overrides the key basename as selector; -x - suppresses x=.
-	$dkim -y customselector -x - -z 2 -s $domainkey_dir/example.com/default \
-		<$tmpdir/mail.txt >$tmpdir/sig.out
-	if [ $? -eq 0 ] && grep -qi 's=customselector' $tmpdir/sig.out &&
-		! grep -qi 'x=' $tmpdir/sig.out
-	then
-		tcount=$(expr $tcount + 1)
-		echo "    selector override (-y) and no-expiry (-x -) succeeded"
-	else
-		echo "FAILED: dkim -y/-x options"
-		failed=1
-	fi
-	/bin/rm -f $tmpdir/mail.txt $tmpdir/sig.out $tmpdir/result.out $tmpdir/err.out
-	if [ $failed -eq 1 ] ; then
-		echo "Test Failed for dkim signing options"
-		exit 1
-	fi
-
-	# Test No 16
-	/bin/rm -f $cntrldir/dkimkeys
-	# Exercise qmail-dkim's signing options, identity/expiry overrides,
-	# custom queue selection and the unsigned-message verification path.
-	printf "\r%118s\r" " "
-	echo "16. testing qmail-dkim(8) environment options and queue handling"
-	failed=0
-	for i in example.com example.org
-	do
-		(
-		echo "From: postmaster@$i"
-		echo "To: postmaster@$i"
-		echo "Subject: qmail-dkim option test"
-		echo "Date: $(date -R)"
-		echo
-		echo "Test message"
-		) >$tmpdir/mail.txt
-		selector=$(sed -e 's/.*(//' -e 's/).*//' -e '/^$/d' -e 's/"//g' -e 's/\t//g' $domainkey_dir/$i/default.pub | tr -d '\n')
-		env - CONTROLDIR=$cntrldir DKIMSIGN="$domainkey_dir/%/default" \
-			DKIMSIGNOPTIONS="-z 2 -c s -q -t -h -l -x 3600" \
-			DKIMIDENTITY="postmaster@$i" DKIMEXPIRE=3600 \
-			DKIMQUEUE=/bin/cat $qmail_dkim <$tmpdir/mail.txt >$tmpdir/result.out
-		ret=$?
-		if [ $ret -eq 0 ] && [ "$(grep -ci '^DKIM-Signature:' $tmpdir/result.out)" -eq 1 ] &&
-			grep -qi 'i=postmaster@' $tmpdir/result.out &&
-			grep -qi 'l=' $tmpdir/result.out &&
-			$dkim -v -T "$selector" <$tmpdir/result.out >$out 2>$tmpdir/err.out
-		then
-			tcount=$(expr $tcount + 1)
-			echo "    $i qmail-dkim signing options and verification succeeded"
-		else
-			echo "FAILED: qmail-dkim signing options domain=$i ret=$ret"
-			cat $tmpdir/err.out
-			failed=1
-		fi
-	done
-	# No signature is neutral by default; qmail-dkim still emits DKIM-Status.
+	t_start "15. testing dkim excluded headers: default list, -X, EXCLUDE_DKIMSIGN, From is always signed"
 	(
 	echo "From: postmaster@example.com"
 	echo "To: postmaster@example.com"
-	echo "Subject: unsigned"
+	echo "Subject: Test"
 	echo "Date: $(date -R)"
+	echo "Received: from localhost by example.com"
+	echo "X-Spam: no"
+	echo "X-Mailer: test"
+	echo "Authentication-Results: example.com; dkim=none"
+	echo "Return-Path: <postmaster@example.com>"
+	echo "Topic: Tests"
+	echo "Message-ID: <1@example.com>"
 	echo
-	echo "Unsigned message"
-	) >$tmpdir/mail.txt
-	env - CONTROLDIR=$cntrldir DKIMVERIFY="" DKIMQUEUE=/bin/cat \
-		$qmail_dkim <$tmpdir/mail.txt >$tmpdir/result.out
+	echo "Test message"
+	) > $tmpdir/mail.txt
+	printf "    testing %-34s " "default exclusions"
+	$dkim -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	for h in from to subject date x-mailer topic message-id
+	do
+		hlist_has $tmpdir/sig.out $h
+		chk "$h in h=" 0 $?
+	done
+	for h in received x-spam authentication-results return-path
+	do
+		hlist_has $tmpdir/sig.out $h
+		chk "$h not in h=" 1 $?
+	done
+	t_done "dkim default exclusions"
+	printf "    testing %-34s " "-X Subject:Date"
+	$dkim -X Subject:Date -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	for h in subject date
+	do
+		hlist_has $tmpdir/sig.out $h
+		chk "$h not in h=" 1 $?
+	done
+	for h in from to topic
+	do
+		hlist_has $tmpdir/sig.out $h
+		chk "$h in h=" 0 $?
+	done
+	t_done "dkim -X Subject:Date"
+	printf "    testing %-34s " "-X To (exact name match)"
+	$dkim -X To -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	hlist_has $tmpdir/sig.out to
+	chk "to not in h=" 1 $?
+	hlist_has $tmpdir/sig.out topic
+	chk "topic still in h=" 0 $?
+	t_done "dkim -X To"
+	printf "    testing %-34s " "-X From (From always signed)"
+	$dkim -X From -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	hlist_has $tmpdir/sig.out from
+	chk "from in h=" 0 $?
+	t_done "dkim -X From"
+	printf "    testing %-34s " "EXCLUDE_DKIMSIGN"
+	EXCLUDE_DKIMSIGN=To:Topic $dkim -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	for h in to topic
+	do
+		hlist_has $tmpdir/sig.out $h
+		chk "$h not in h=" 1 $?
+	done
+	hlist_has $tmpdir/sig.out subject
+	chk "subject in h=" 0 $?
+	t_done "dkim EXCLUDE_DKIMSIGN"
+	printf "    testing %-34s " "-X takes precedence over env"
+	EXCLUDE_DKIMSIGN=To:Topic $dkim -X Subject -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	hlist_has $tmpdir/sig.out subject
+	chk "subject not in h=" 1 $?
+	for h in to topic
+	do
+		hlist_has $tmpdir/sig.out $h
+		chk "$h in h=" 0 $?
+	done
+	t_done "dkim -X over EXCLUDE_DKIMSIGN"
+	printf "    testing %-34s " "qmail-dkim EXCLUDE_DKIMSIGN"
+	qsign $rsa_key EXCLUDE_DKIMSIGN=To:Subject < $tmpdir/mail.txt
+	chk "exit" 0 $?
+	for h in to subject
+	do
+		hlist_has $tmpdir/qout.out $h
+		chk "$h not in h=" 1 $?
+	done
+	for h in from topic date
+	do
+		hlist_has $tmpdir/qout.out $h
+		chk "$h in h=" 0 $?
+	done
+	t_done "qmail-dkim EXCLUDE_DKIMSIGN"
+	# an excluded header may change in transit without breaking the signature
+	printf "    testing %-34s " "excluded header changed"
+	$dkim -X Subject -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	sed -e 's/^Subject: Test$/Subject: Changed/' $tmpdir/mail.txt > $tmpdir/mail.chg
+	(cat $tmpdir/sig.out $tmpdir/mail.chg) | dkimv "$vfy_all" "$rsa_rec" -S
+	chk "verify exit" 0 $?
+	$dkim -s $rsa_key < $tmpdir/mail.txt > $tmpdir/sig.out
+	(cat $tmpdir/sig.out $tmpdir/mail.chg) | dkimv "" "$rsa_rec"
+	chks "signed header changed fails" $tmpdir/stat.out "RSA/ED25519 verify failed"
+	t_done "excluded header changed"
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/mail.chg $tmpdir/sig.out $tmpdir/qout.out
+	t_end "$dkim excluded headers"
+
+
+	# Test No 16
+	t_start "16. testing unsigned Subject/From: dkim -S -f, qmail-dkim UNSIGNED_SUBJECT UNSIGNED_FROM"
+	sc=$tmpdir/sc
+	mkmail example.com > $sc/mail.txt
+	# a second From header that the signature does not cover, added after signing
+	(echo "From: ceo@example.com"; cat $sc/mail.txt) > $sc/mail.from2
+	$dkim -X Subject -s $rsa_key < $sc/mail.txt > $sc/sig.nosubj
+	$dkim -s $rsa_key < $sc/mail.txt > $sc/sig.good
+	printf "    testing %-40s " "dkim: Subject not in h="
+	(cat $sc/sig.nosubj $sc/mail.txt) | dkimv "H" "$rsa_rec"
+	chk "exit" 14 $?
+	chks "status" $tmpdir/stat.out "could not parse or has bad tags/values"
+	(cat $sc/sig.nosubj $sc/mail.txt) | dkimv "$vfy_all" "$rsa_rec" -S
+	chk "exit with -S" 0 $?
+	chks "status with -S" $tmpdir/stat.out good
+	t_done "dkim -S"
+	printf "    testing %-40s " "dkim: second From not in h="
+	(cat $sc/sig.good $sc/mail.from2) | dkimv "X" "$rsa_rec"
+	chk "exit" 14 $?
+	chks "status" $tmpdir/stat.out "not all message's From headers in signature"
+	# NOTE: the dkim man page describes -f as "issue error if not all From headers are in the signature".
+	# That is the default. -f is "allow unsigned From" (see dkim -H)
+	(cat $sc/sig.good $sc/mail.from2) | dkimv "$vfy_all" "$rsa_rec" -f
+	chk "exit with -f" 0 $?
+	chks "status with -f" $tmpdir/stat.out good
+	t_done "dkim -f"
+	printf "    testing %-40s " "qmail-dkim: UNSIGNED_SUBJECT"
+	(cat $sc/sig.nosubj $sc/mail.txt) | qdv "H" "$rsa_rec"
+	chk "exit" 88 $?
+	chks "error" $tmpdir/err.out "Dqmail-dkim: signature error: DKIM-Signature could not parse or has bad tags/values"
+	(cat $sc/sig.nosubj $sc/mail.txt) | qdv "$vfy_all" "$rsa_rec" UNSIGNED_SUBJECT=1
+	chk "exit with UNSIGNED_SUBJECT" 0 $?
+	chks "status with UNSIGNED_SUBJECT" $tmpdir/qout.out "DKIM-Status: good"
+	t_done "qmail-dkim UNSIGNED_SUBJECT"
+	printf "    testing %-40s " "qmail-dkim: UNSIGNED_FROM"
+	(cat $sc/sig.good $sc/mail.from2) | qdv "X" "$rsa_rec"
+	chk "exit" 88 $?
+	chks "error" $tmpdir/err.out "Dqmail-dkim: signature error: not all message's From headers in signature"
+	(cat $sc/sig.good $sc/mail.from2) | qdv "$vfy_all" "$rsa_rec" UNSIGNED_FROM=1
+	chk "exit with UNSIGNED_FROM" 0 $?
+	chks "status with UNSIGNED_FROM" $tmpdir/qout.out "DKIM-Status: good"
+	t_done "qmail-dkim UNSIGNED_FROM"
+	t_end "unsigned Subject/From"
+
+	# Test No 17
+	t_start "17. testing body length tag: dkim -l, qmail-dkim HONOR_BODYLENGTHTAG"
+	$dkim -l -s $rsa_key < $sc/mail.txt > $sc/sig.l
+	(cat $sc/mail.txt; echo "text appended by somebody else") > $sc/mail.app
+	printf "    testing %-40s " "dkim: l= not honored"
+	(cat $sc/sig.l $sc/mail.app) | dkimv "U" "$rsa_rec"
+	chk "exit" 14 $?
+	chks "status" $tmpdir/stat.out "message body does not hash to bh value"
+	t_done "dkim l= ignored without -l"
+	printf "    testing %-40s " "dkim -l: l= honored"
+	(cat $sc/sig.l $sc/mail.app) | dkimv "E" "$rsa_rec" -l -V
+	chk "exit (E is an error)" 14 $?
+	chks "status" $tmpdir/stat.out "signature verified but it did not include all of the body"
+	chkgrep "details" $tmpdir/err.out "Success (l= did not cover the whole body)"
+	(cat $sc/sig.l $sc/mail.app) | dkimv "$vfy_all" "$rsa_rec" -l
+	chk "exit (E not an error)" 0 $?
+	(cat $sc/sig.l $sc/mail.txt) | dkimv "$vfy_all" "$rsa_rec" -l
+	chk "exit unmodified mail" 0 $?
+	chks "status unmodified mail" $tmpdir/stat.out good
+	t_done "dkim -l"
+	printf "    testing %-40s " "qmail-dkim: l= not honored"
+	(cat $sc/sig.l $sc/mail.app) | qdv "" "$rsa_rec"
+	chk "exit" 0 $?
+	chks "status" $tmpdir/qout.out "DKIM-Status: signature verify error: message body does not hash to bh value"
+	t_done "qmail-dkim l= ignored"
+	printf "    testing %-40s " "qmail-dkim: HONOR_BODYLENGTHTAG"
+	(cat $sc/sig.l $sc/mail.app) | qdv "" "$rsa_rec" HONOR_BODYLENGTHTAG=1
+	chk "exit" 0 $?
+	chks "status" $tmpdir/qout.out "DKIM-Status: signature result: signature verified but it did not include all of the body"
+	(cat $sc/sig.l $sc/mail.app) | qdv "E" "$rsa_rec" HONOR_BODYLENGTHTAG=1
+	chk "exit (E is an error)" 88 $?
+	t_done "qmail-dkim HONOR_BODYLENGTHTAG"
+	t_end "body length tag"
+
+	# Test No 18
+	t_start "18. testing dkim and qmail-dkim DKIMVERIFY: exit codes, error message and DKIM-Status for each result"
+	# messages. Every message is derived from a good signature and then damaged in one way
+	$dkim -i bob@example.com -s $rsa_key < $sc/mail.txt > $sc/sig.ident
+	$dkim -x 1 -s $rsa_key < $sc/mail.txt > $sc/sig.exp
+	sleep 2 # let the signature expire
+	cp $sc/mail.txt $sc/m.nosig
+	(cat $sc/sig.good; sed -e 's/Test message/Tampered message/' $sc/mail.txt) > $sc/m.body
+	(cat $sc/sig.good; sed -e 's/^Subject: Test$/Subject: Tampered/' $sc/mail.txt) > $sc/m.hdr
+	(cat $sc/sig.exp $sc/mail.txt) > $sc/m.exp
+	(sed -e 's/v=1;/v=2;/' $sc/sig.good; cat $sc/mail.txt) > $sc/m.v2
+	(sed -e 's/a=rsa-sha256;/a=rsa-sha999;/' $sc/sig.good; cat $sc/mail.txt) > $sc/m.algo
+	(sed -e 's/d=example.com;/d=example.com; i=x@evil.org;/' $sc/sig.good; cat $sc/mail.txt) > $sc/m.identbad
+	(cat $sc/sig.good $sc/mail.from2) > $sc/m.from2
+	(cat $sc/sig.good $sc/mail.txt) > $sc/m.good
+	(cat $sc/sig.ident $sc/mail.txt) > $sc/m.ident
+	(cat $sc/sig.ident; sed -e 's/^Subject: Test$/Subject: Tampered/' $sc/mail.txt) > $sc/m.identhdr
+	# public key records
+	rec_revoked="v=DKIM1; k=rsa; p="
+	rec_junk="v=DKIM1; k=rsa; p=AAAA"
+	rec_v2=$(echo "$rsa_rec" | sed -e 's/v=DKIM1;/v=DKIM2;/')
+	rec_g=$(echo "$rsa_rec" | sed -e 's/v=DKIM1;/v=DKIM1; g=sales;/')
+	rec_testing=$(echo "$rsa_rec" | sed -e 's/v=DKIM1;/v=DKIM1; t=y;/')
+	# letter|message|record|text of DKIM-Status
+	cat > $sc/table <<EOT
+A|good|rsa_rec|good
+S|nosig|rsa_rec|no signatures
+U|body|rsa_rec|signature verify error: message body does not hash to bh value
+I|hdr|rsa_rec|signature error: RSA/ED25519 verify failed
+J|hdr|rec_testing|signature error: RSA/ED25519 verify failed but testing
+J|body|rec_testing|signature error: RSA/ED25519 verify failed but testing
+K|exp|rsa_rec|signature error: x= is old
+N|good|rec_revoked|signature error: selector p= empty
+R|good|rec_junk|signature error: selector p= value invalid or wrong format
+V|good|ed_rec|signature error: selector h= doesn't match signature a=
+L|good|rec_v2|signature error: selector doesn't parse or contains invalid values
+M|ident|rec_g|signature error: selector g= doesn't match i=
+W|v2|rsa_rec|signature error: incompatible v=
+H|algo|rsa_rec|signature error: DKIM-Signature could not parse or has bad tags/values
+Y|identbad|rsa_rec|signature error: invalid identify in signature
+X|from2|rsa_rec|signature error: not all message's From headers in signature
+EOT
+	while IFS='|' read letter msg recname text
+	do
+		eval rec=\"\$$recname\"
+		low=$(echo $letter | tr 'A-Z' 'a-z')
+		printf "    testing %-40s " "DKIMVERIFY=$letter $msg [$recname]"
+		# dkim: exit 14 (permanent) for the letter, 88 (temporary) for the lower case letter, 0 otherwise
+		dkimv "$letter" "$rec" < $sc/m.$msg
+		chk "dkim $letter exit" 14 $?
+		chks "dkim status" $tmpdir/stat.out "DKIM-Status: $text"
+		dkimv "$low" "$rec" < $sc/m.$msg
+		chk "dkim $low exit" 88 $?
+		dkimv "Z" "$rec" < $sc/m.$msg
+		chk "dkim Z exit" 0 $?
+		# qmail-dkim: custom error D(permanent)/Z(temporary) on ERROR_FD and exit 88. no error: DKIM-Status header + message
+		qdv "$letter" "$rec" < $sc/m.$msg
+		chk "qmail-dkim $letter exit" 88 $?
+		chks "qmail-dkim error" $tmpdir/err.out "Dqmail-dkim: $text"
+		qdv "$low" "$rec" < $sc/m.$msg
+		chk "qmail-dkim $low exit" 88 $?
+		chks "qmail-dkim error" $tmpdir/err.out "Zqmail-dkim: $text"
+		qdv "Z" "$rec" < $sc/m.$msg
+		chk "qmail-dkim Z exit" 0 $?
+		chks "qmail-dkim DKIM-Status" $tmpdir/qout.out "DKIM-Status: $text"
+		chkgrep "qmail-dkim message" $tmpdir/qout.out "Subject: "
+		qdv "" "$rec" < $sc/m.$msg
+		chk "qmail-dkim empty exit" 0 $?
+		t_done "DKIMVERIFY=$letter $msg"
+	done < $sc/table
+	# DKIMVERIFY not set: dkim reports a problem with the exit code. qmail-dkim only adds the header
+	printf "    testing %-40s " "DKIMVERIFY not set"
+	$dkim -v -T "$rsa_rec" < $sc/m.body > /dev/null 2>&1
+	if [ $? -eq 0 ] ; then
+		bad="$bad [dkim: exit 0 for a bad signature]"
+	fi
+	$dkim -v -T "$rsa_rec" < $sc/m.good > /dev/null 2>&1
+	chk "dkim good exit" 0 $?
+	env - CONTROLDIR=$tmpdir/ctl SELECTOR_DATA="$rsa_rec" DKIMQUEUE=/bin/cat $qmail_dkim < $sc/m.body > $tmpdir/qout.out 2>&1
+	chk "qmail-dkim exit" 0 $?
+	chks "qmail-dkim DKIM-Status" $tmpdir/qout.out "DKIM-Status: signature verify error: message body does not hash to bh value"
+	t_done "DKIMVERIFY not set"
+	t_end "DKIMVERIFY"
+
+	# Test No 19
+	t_start "19. testing dkim -T selector=record (several -T options, one record per selector)"
+	$dkim -y rsa -z 2 -s $rsa_key -y ed -z 4 -s $ed_key < $sc/mail.txt > $sc/sig.two
+	(cat $sc/sig.two $sc/mail.txt) > $sc/m.two
+	chk "signatures" 2 $(grep -c '^DKIM-Signature' $sc/sig.two)
+	printf "    testing %-50s " "-T rsa=rsa-record -T ed=ed25519-record"
+	DKIMVERIFY=$vfy_all $dkim -vV -T "rsa=$rsa_rec" -T "ed=$ed_rec" < $sc/m.two > $tmpdir/stat.out 2>$tmpdir/err.out
+	chk "exit" 0 $?
+	chk "signatures verified" 2 $(grep -c ': Success' $tmpdir/err.out)
+	chkgrep "rsa signature" $tmpdir/err.out "s=rsa a=rsa-sha256: Success"
+	chkgrep "ed25519 signature" $tmpdir/err.out "s=ed a=ed25519-sha256: Success"
+	chknogrep "no count line when all verified" $tmpdir/stat.out "signatures verified)"
+	t_done "dkim -T rsa= -T ed="
+	printf "    testing %-50s " "-T ed=ed25519-record -T rsa=rsa-record (order)"
+	DKIMVERIFY=$vfy_all $dkim -vV -T "ed=$ed_rec" -T "rsa=$rsa_rec" < $sc/m.two > $tmpdir/stat.out 2>$tmpdir/err.out
+	chk "exit" 0 $?
+	chk "signatures verified" 2 $(grep -c ': Success' $tmpdir/err.out)
+	t_done "dkim -T ed= -T rsa="
+	printf "    testing %-50s " "records swapped between selectors"
+	DKIMVERIFY=$vfy_all $dkim -vV -T "rsa=$ed_rec" -T "ed=$rsa_rec" < $sc/m.two > $tmpdir/stat.out 2>$tmpdir/err.out
+	chk "exit (every signature failed)" 14 $?
+	chk "signatures failed" 2 $(grep -c 'ALGORITHM MISMATCH' $tmpdir/err.out)
+	chknogrep "no count line when none verified" $tmpdir/stat.out "signatures verified)"
+	t_done "dkim -T swapped records"
+	printf "    testing %-50s " "one good signature is enough"
+	DKIMVERIFY=$vfy_all $dkim -vV -T "rsa=$rsa_rec" -T "ed=$rsa_rec" < $sc/m.two > $tmpdir/stat.out 2>$tmpdir/err.out
+	chk "exit" 0 $?
+	chk "signatures verified" 1 $(grep -c ': Success' $tmpdir/err.out)
+	chk "signatures failed" 1 $(grep -c 'Failure' $tmpdir/err.out)
+	chks "status" $tmpdir/stat.out "DKIM-Status: good"
+	# the failed signature is reported on a second (informational) line of DKIM-Status
+	chk "2nd line of DKIM-Status" "(1 of 2 signatures verified)" "$(sed -n 2p $tmpdir/stat.out | tr -d '\t')"
+	chk "lines of DKIM-Status" 2 $(wc -l < $tmpdir/stat.out)
+	t_done "dkim one good, one bad signature"
+	printf "    testing %-50s " "qmail-dkim: one good, one bad signature"
+	qdv "$vfy_all" "$rsa_rec" < $sc/m.two
+	chk "exit" 0 $?
+	chks "status" $tmpdir/qout.out "DKIM-Status: good"
+	chk "2nd line of DKIM-Status" "(1 of 2 signatures verified)" "$(sed -n 2p $tmpdir/qout.out | tr -d '\t')"
+	# the line is a continuation of the DKIM-Status header, it starts with a tab
+	chk "continuation line" 1 $(sed -n 2p $tmpdir/qout.out | grep -c "^	(1 of 2")
+	qdv "$vfy_all" "$ed_rec" < $sc/m.two
+	chk "exit (ed25519 verified instead)" 0 $?
+	chk "2nd line of DKIM-Status" "(1 of 2 signatures verified)" "$(sed -n 2p $tmpdir/qout.out | tr -d '\t')"
+	t_done "qmail-dkim one good, one bad signature"
+	printf "    testing %-50s " "-T record without selector applies to all"
+	DKIMVERIFY=$vfy_all $dkim -vV -T "$rsa_rec" < $sc/m.two > $tmpdir/stat.out 2>$tmpdir/err.out
+	chk "exit" 0 $?
+	chkgrep "rsa signature" $tmpdir/err.out "s=rsa a=rsa-sha256: Success"
+	chkgrep "ed25519 signature" $tmpdir/err.out "s=ed a=ed25519-sha256: Failure -16"
+	t_done "dkim -T record"
+	t_end "$dkim -T selector=record"
+
+	# Test No 20
+	t_start "20. testing that at most 10 signatures of a message are checked"
+	wrong_key=$domainkey_dir/example.com/default # a different rsa key
+	wk=""
+	for i in 1 2 3 4 5 6 7 8 9 10
+	do
+		wk="$wk -s $wrong_key"
+	done
+	printf "    testing %-50s " "10 bad signatures + 1 good one"
+	$dkim $wk -s $rsa_key < $sc/mail.txt > $sc/sig.many
+	chk "signatures" 11 $(grep -c '^DKIM-Signature' $sc/sig.many)
+	(cat $sc/sig.many $sc/mail.txt) | dkimv "I" "$rsa_rec" -V
+	chk "exit (11th signature not checked)" 14 $?
+	chk "signatures checked" 10 $(grep -c 'Signature #' $tmpdir/err.out)
+	chk "signatures verified" 0 $(grep -c ': Success' $tmpdir/err.out)
+	t_done "11 signatures"
+	printf "    testing %-50s " "9 bad signatures + 1 good one"
+	$dkim $(echo $wk | sed -e 's/-s [^ ]* //') -s $rsa_key < $sc/mail.txt > $sc/sig.many
+	chk "signatures" 10 $(grep -c '^DKIM-Signature' $sc/sig.many)
+	(cat $sc/sig.many $sc/mail.txt) | dkimv "$vfy_all" "$rsa_rec" -V
+	chk "exit (10th signature is good)" 0 $?
+	chk "signatures checked" 10 $(grep -c 'Signature #' $tmpdir/err.out)
+	chk "signatures verified" 1 $(grep -c ': Success' $tmpdir/err.out)
+	chk "2nd line of DKIM-Status" "(1 of 10 signatures verified)" "$(sed -n 2p $tmpdir/stat.out | tr -d '\t')"
+	t_done "10 signatures"
+	printf "    testing %-50s " "qmail-dkim with 11 signatures"
+	$dkim $wk -s $rsa_key < $sc/mail.txt > $sc/sig.many
+	(cat $sc/sig.many $sc/mail.txt) | qdv "I" "$rsa_rec" VERBOSE=1
+	chk "exit" 88 $?
+	chk "signatures checked" 10 $(grep -c 'Signature #' $tmpdir/err.out)
+	t_done "qmail-dkim 11 signatures"
+	t_end "signature limit"
+
+	# Test No 21
+	t_start "21. testing 3rd party signatures (d= not the domain of the From header) and DKIMVERIFY=F"
+	(echo "From: user@mail.example.com"; echo "To: postmaster@example.com"; echo "Subject: Test"; echo; echo "Test message") > $sc/mail.sub
+	$dkim -d thirdparty.org -s $rsa_key < $sc/mail.txt > $sc/sig.3p
+	(cat $sc/sig.3p $sc/mail.txt) > $sc/m.3p
+	printf "    testing %-50s " "d=thirdparty.org, From example.com"
+	chk "d=" thirdparty.org "$(sigtag $sc/sig.3p d)"
+	dkimv "$vfy_all" "$rsa_rec" -V < $sc/m.3p
+	chk "exit (F is not in the letters)" 0 $?
+	chkgrep "details" $tmpdir/err.out "d=thirdparty.org s=dkimkeys1 a=rsa-sha256: Success (3rd party signature)"
+	chks "status" $tmpdir/stat.out "DKIM-Status: signature result: 3rd party signature"
+	t_done "dkim 3rd party signature"
+	printf "    testing %-50s " "DKIMVERIFY=F: only a 3rd party signature"
+	dkimv "F" "$rsa_rec" < $sc/m.3p
+	chk "dkim F exit" 14 $?
+	dkimv "f" "$rsa_rec" < $sc/m.3p
+	chk "dkim f exit" 88 $?
+	dkimv "FGHIKLMNORTUVWjp" "$rsa_rec" < $sc/m.3p
+	chk "dkim conservative set of the man page" 14 $?
+	qdv "F" "$rsa_rec" < $sc/m.3p
+	chk "qmail-dkim F exit" 88 $?
+	chks "qmail-dkim error" $tmpdir/err.out "Dqmail-dkim: signature result: 3rd party signature"
+	qdv "f" "$rsa_rec" < $sc/m.3p
+	chk "qmail-dkim f exit" 88 $?
+	chks "qmail-dkim error" $tmpdir/err.out "Zqmail-dkim: signature result: 3rd party signature"
+	qdv "$vfy_all" "$rsa_rec" VERBOSE=1 < $sc/m.3p
+	chk "qmail-dkim exit (F is not in the letters)" 0 $?
+	chks "qmail-dkim DKIM-Status" $tmpdir/qout.out "DKIM-Status: signature result: 3rd party signature"
+	chkgrep "qmail-dkim details" $tmpdir/err.out "Success (3rd party signature)"
+	t_done "DKIMVERIFY=F 3rd party signature"
+	printf "    testing %-50s " "d=example.com, From example.com (author)"
+	(cat $sc/sig.good $sc/mail.txt) | dkimv "F$vfy_all" "$rsa_rec" -V
+	chk "exit (author signature is not 3rd party)" 0 $?
+	chknogrep "details" $tmpdir/err.out "3rd party"
+	chks "status" $tmpdir/stat.out "DKIM-Status: good"
+	t_done "dkim author signature"
+	printf "    testing %-50s " "d=example.com, From mail.example.com (subdomain)"
+	$dkim -d example.com -s $rsa_key < $sc/mail.sub > $sc/sig.up
+	(cat $sc/sig.up $sc/mail.sub) | dkimv "F$vfy_all" "$rsa_rec" -V
+	chk "exit" 0 $?
+	chknogrep "details" $tmpdir/err.out "3rd party"
+	t_done "dkim d= is a parent of the From domain"
+	printf "    testing %-50s " "d=mail.example.com, From example.com"
+	$dkim -d mail.example.com -s $rsa_key < $sc/mail.txt > $sc/sig.down
+	(cat $sc/sig.down $sc/mail.txt) | dkimv "F" "$rsa_rec" -V
+	chk "exit (d= is a subdomain: 3rd party)" 14 $?
+	chkgrep "details" $tmpdir/err.out "3rd party signature"
+	t_done "dkim d= is a subdomain of the From domain"
+	# one good signature of the author is enough, wherever it is: mailing lists put theirs on top
+	printf "    testing %-50s " "3rd party signature above the author's"
+	(cat $sc/sig.3p $sc/sig.good $sc/mail.txt) | dkimv "F$vfy_all" "$rsa_rec" -V
+	chk "exit" 0 $?
+	chk "3rd party signatures" 1 $(grep -c 'Success (3rd party signature)' $tmpdir/err.out)
+	chk "signatures verified" 2 $(grep -c ': Success' $tmpdir/err.out)
+	chks "status" $tmpdir/stat.out "DKIM-Status: good"
+	chknogrep "no count line" $tmpdir/stat.out "signatures verified)"
+	(cat $sc/sig.3p $sc/sig.good $sc/mail.txt) | qdv "F$vfy_all" "$rsa_rec"
+	chk "qmail-dkim exit" 0 $?
+	chks "qmail-dkim status" $tmpdir/qout.out "DKIM-Status: good"
+	t_done "dkim 3rd party above author signature"
+	printf "    testing %-50s " "3rd party signature below the author's"
+	(cat $sc/sig.good $sc/sig.3p $sc/mail.txt) | dkimv "F$vfy_all" "$rsa_rec" -V
+	chk "exit" 0 $?
+	chks "status" $tmpdir/stat.out "DKIM-Status: good"
+	(cat $sc/sig.good $sc/sig.3p $sc/mail.txt) | qdv "F$vfy_all" "$rsa_rec"
+	chk "qmail-dkim exit" 0 $?
+	chks "qmail-dkim status" $tmpdir/qout.out "DKIM-Status: good"
+	t_done "dkim 3rd party below author signature"
+	# a mailing list adds a footer, which breaks the author's signature, and signs the result
+	printf "    testing %-50s " "mailing list: author's signature broken"
+	(cat $sc/mail.txt; echo; echo "-- list footer") > $sc/mail.list
+	$dkim -d list.example.net -s $rsa_key < $sc/mail.list > $sc/sig.list
+	(cat $sc/sig.list $sc/sig.good $sc/mail.list) | dkimv "$vfy_all" "$rsa_rec" -V
+	chk "exit" 0 $?
+	chkgrep "author's signature failed" $tmpdir/err.out "d=example.com s=dkimkeys1 a=rsa-sha256: Failure -15"
+	chkgrep "list signature good" $tmpdir/err.out "d=list.example.net s=dkimkeys1 a=rsa-sha256: Success (3rd party signature)"
+	chks "status" $tmpdir/stat.out "DKIM-Status: signature result: 3rd party signature"
+	chk "2nd line of DKIM-Status" "(1 of 2 signatures verified)" "$(sed -n 2p $tmpdir/stat.out | tr -d '\t')"
+	t_done "dkim mailing list"
+	printf "    testing %-50s " "3rd party signature, tampered message"
+	(cat $sc/sig.3p; sed -e 's/Test message/Tampered message/' $sc/mail.txt) | dkimv "U" "$rsa_rec"
+	chk "exit" 14 $?
+	t_done "dkim 3rd party signature tampered"
+	t_end "3rd party signatures"
+
+
+	# Test No 22
+	t_start "22. testing the domain (d=): Return-Path, Sender, From, X-Bounced-Address, BOUNCEDOMAIN, bouncehost, me"
+	/bin/rm -f $tmpdir/ctl/bouncehost $tmpdir/ctl/me
+	qdomain "From" from.example.org "From: a@from.example.org\n"
+	qdomain "Sender before From" sender.example.org "Sender: a@sender.example.org\nFrom: b@from.example.org\n"
+	qdomain "Return-Path before Sender and From" ret.example.org "Return-Path: <r@ret.example.org>\nSender: a@sender.example.org\nFrom: b@from.example.org\n"
+	qdomain "From before X-Bounced-Address" from.example.org "From: b@from.example.org\nX-Bounced-Address: z@xb.example.org\n"
+	qdomain "X-Bounced-Address" xb.example.org "To: b@to.example.org\nX-Bounced-Address: z@xb.example.org\n"
+	qdomain "From with display name" from.example.org "From: Joe Bloggs <joe@from.example.org>\n"
+	qdomain "Return-Path: <> uses BOUNCEDOMAIN" bounce.example.net "Return-Path: <>\nFrom: b@from.example.org\n" BOUNCEDOMAIN=bounce.example.net
+	qdomain "BOUNCEDOMAIN=user@domain" bd.example.net "To: b@to.example.org\n" BOUNCEDOMAIN=user@bd.example.net
+	qdomain "BOUNCEDOMAIN=domain" bd2.example.net "To: b@to.example.org\n" BOUNCEDOMAIN=bd2.example.net
+	echo bh.example.net > $tmpdir/ctl/bouncehost
+	qdomain "control file bouncehost" bh.example.net "To: b@to.example.org\n"
+	qdomain "BOUNCEDOMAIN overrides bouncehost" env.example.net "To: b@to.example.org\n" BOUNCEDOMAIN=env.example.net
+	qdomain "domain in message beats bouncehost" from.example.org "From: b@from.example.org\n"
+	/bin/rm -f $tmpdir/ctl/bouncehost
+	echo me.example.net > $tmpdir/ctl/me
+	qdomain "control file me (no bouncehost)" me.example.net "To: b@to.example.org\n"
+	/bin/rm -f $tmpdir/ctl/me
+	printf "    testing qmail-dkim %-40s " "no domain anywhere"
+	msgh "To: b@to.example.org\n" | qsign $rsa_key
+	chk "exit" 88 $?
+	chks "error" $tmpdir/err.out "Zqmail-dkim: Could not find From: or Sender: header in message"
+	t_done "qmail-dkim no domain"
+	ddomain "From" from.example.org "From: a@from.example.org\n"
+	ddomain "Sender before From" sender.example.org "Sender: a@sender.example.org\nFrom: b@from.example.org\n"
+	ddomain "Return-Path before Sender and From" ret.example.org "Return-Path: <r@ret.example.org>\nSender: a@sender.example.org\nFrom: b@from.example.org\n"
+	ddomain "X-Bounced-Address" xb.example.org "To: b@to.example.org\nX-Bounced-Address: z@xb.example.org\n"
+	ddomain "-d overrides the headers" mine.example.org "Sender: a@sender.example.org\nFrom: b@from.example.org\n" -d mine.example.org
+	printf "    testing dkim %-46s " "no domain anywhere"
+	msgh "To: b@to.example.org\n" | $dkim -s $rsa_key > $tmpdir/sig.out 2>$tmpdir/err.out
+	if [ $? -eq 0 ] ; then
+		bad="$bad [dkim: exit 0]"
+	fi
+	chkgrep "error" $tmpdir/err.out "Could not find From: or Sender: header in message"
+	t_done "dkim no domain"
+	t_end "signing domain"
+
+	# Test No 23
+	t_start "23. testing qmail-dkim signing: RELAYCLIENT/AUTHINFO, DKIMSIGN, DKIMKEY, DKIMSIGNOPTIONS, DKIMIDENTITY, DKIMEXPIRE"
+	mkmail example.com > $sc/mail.txt
+	now=$(date +%s)
+	# environment for qmail-dkim: the keys directory is $tmpdir/ctl/domainkeys
+	qs()
+	{
+		env - CONTROLDIR=$tmpdir/ctl DKIMQUEUE=/bin/cat ERROR_FD=2 "$@" $qmail_dkim <$sc/mail.txt >$tmpdir/qout.out 2>$tmpdir/err.out
+	}
+	printf "    testing %-52s " "RELAYCLIENT: domainkeys/example.com/default"
+	qs RELAYCLIENT=
+	chk "exit" 0 $?
+	chk "s=" default "$(sigtag $tmpdir/qout.out s)"
+	chk "d=" example.com "$(sigtag $tmpdir/qout.out d)"
+	cp $tmpdir/qout.out $sc/q.out
+	qdv "$vfy_all" "$(pubrec $domainkey_dir/example.com/default)" < $sc/q.out
+	chk "verify exit" 0 $?
+	t_done "RELAYCLIENT default key"
+	printf "    testing %-52s " "AUTHINFO: domainkeys/example.com/default"
+	qs AUTHINFO=user
+	chk "exit" 0 $?
+	chk "s=" default "$(sigtag $tmpdir/qout.out s)"
+	t_done "AUTHINFO default key"
+	printf "    testing %-52s " "RELAYCLIENT: domainkeys/default for other domain"
+	sed -e 's/example\.com/other.example.net/g' $sc/mail.txt > $sc/mail.other
+	env - CONTROLDIR=$tmpdir/ctl RELAYCLIENT= DKIMQUEUE=/bin/cat ERROR_FD=2 $qmail_dkim <$sc/mail.other >$tmpdir/qout.out 2>$tmpdir/err.out
+	chk "exit" 0 $?
+	chk "d=" other.example.net "$(sigtag $tmpdir/qout.out d)"
+	cp $tmpdir/qout.out $sc/q.out
+	qdv "$vfy_all" "$(pubrec $domainkey_dir/default)" < $sc/q.out
+	chk "verify exit (domainkeys/default key)" 0 $?
+	t_done "RELAYCLIENT domainkeys/default"
+	printf "    testing %-52s " "DKIMKEY=domainkeys/%/dkimkeys1"
+	qs RELAYCLIENT= DKIMKEY=domainkeys/%/dkimkeys1
+	chk "exit" 0 $?
+	chk "s=" dkimkeys1 "$(sigtag $tmpdir/qout.out s)"
+	t_done "DKIMKEY"
+	printf "    testing %-52s " "DKIMKEY with % and no key: not signed"
+	qs RELAYCLIENT= DKIMKEY=domainkeys/%/nokey
+	chk "exit" 0 $?
+	chk "signatures" 0 $(grep -c '^DKIM-Signature' $tmpdir/qout.out)
+	chkgrep "message passed on" $tmpdir/qout.out "Subject: Test"
+	t_done "DKIMKEY % no key"
+	printf "    testing %-52s " "DKIMKEY without % and no key: error"
+	qs RELAYCLIENT= DKIMKEY=domainkeys/example.com/nokey
 	ret=$?
-	if [ $ret -eq 0 ] && grep -qi '^DKIM-Status: no signatures' $tmpdir/result.out &&
-		! grep -qi '^DKIM-Signature:' $tmpdir/result.out
-	then
-		tcount=$(expr $tcount + 1)
-		echo "    unsigned message accepted and DKIM-Status emitted"
+	if [ $ret -ne 35 -a $ret -ne 88 ] ; then
+		bad="$bad [exit $ret, expected 35 or 88]"
+	fi
+	chk "signatures" 0 $(grep -c '^DKIM-Signature' $tmpdir/qout.out)
+	t_done "DKIMKEY no key"
+	printf "    testing %-52s " "RELAYCLIENT with DKIMSIGN: DKIMSIGN wins"
+	qs RELAYCLIENT= DKIMSIGN=$rsa_key
+	chk "exit" 0 $?
+	chk "s=" dkimkeys1 "$(sigtag $tmpdir/qout.out s)"
+	t_done "RELAYCLIENT + DKIMSIGN"
+	printf "    testing %-52s " "RELAYCLIENT with DKIMVERIFY: verifies"
+	qs RELAYCLIENT= DKIMVERIFY=S
+	chk "exit" 88 $?
+	chks "error" $tmpdir/err.out "Dqmail-dkim: no signatures"
+	t_done "RELAYCLIENT + DKIMVERIFY"
+	printf "    testing %-52s " "RELAYCLIENT_NODKIMVERIFY"
+	qs RELAYCLIENT= DKIMVERIFY=S RELAYCLIENT_NODKIMVERIFY=
+	chk "exit" 0 $?
+	chk "DKIM-Status" 0 $(grep -c '^DKIM-Status' $tmpdir/qout.out)
+	chk "DKIM-Signature" 0 $(grep -c '^DKIM-Signature' $tmpdir/qout.out)
+	cmp -s $sc/mail.txt $tmpdir/qout.out
+	chk "message unchanged" 0 $?
+	t_done "RELAYCLIENT_NODKIMVERIFY"
+	printf "    testing %-52s " "none of RELAYCLIENT, DKIMSIGN, DKIMVERIFY: verify"
+	qs
+	chk "exit" 0 $?
+	chks "DKIM-Status" $tmpdir/qout.out "DKIM-Status: no signatures"
+	t_done "no environment"
+	printf "    testing %-52s " "RELAYCLIENT, dkimkeys entry, no DKIMSIGN"
+	echo "example.com:$domainkey_dir/example.com/dkimkeys2:DKIMSIGNOPTIONS=-z 4" > $tmpdir/ctl/dkimkeys
+	qs RELAYCLIENT=
+	chk "exit" 0 $?
+	chk "a=" ed25519-sha256 "$(sigtag $tmpdir/qout.out a)"
+	chk "s=" dkimkeys2 "$(sigtag $tmpdir/qout.out s)"
+	/bin/rm -f $tmpdir/ctl/dkimkeys
+	t_done "RELAYCLIENT + dkimkeys"
+	# rsa-sha1 where the system allows it, else rsa-sha256: the other options are tested either way
+	zopt="-z 1"
+	zalg=rsa-sha1
+	if [ $sha1_ok -eq 0 ] ; then
+		zopt="-z 2"
+		zalg=rsa-sha256
+	fi
+	printf "    testing %-52s " "DKIMSIGNOPTIONS=\"-c s -l -q -t -h $zopt\""
+	qs RELAYCLIENT= DKIMSIGNOPTIONS="-c s -l -q -t -h $zopt"
+	chk "exit" 0 $?
+	chk "c=" simple/simple "$(sigtag $tmpdir/qout.out c)"
+	chk "a=" $zalg "$(sigtag $tmpdir/qout.out a)"
+	chk "l=" 14 "$(sigtag $tmpdir/qout.out l)"
+	chk "q=" dns/txt "$(sigtag $tmpdir/qout.out q)"
+	chkrange "t=" $now $(expr $now + 60) "$(sigtag $tmpdir/qout.out t)"
+	hastag $tmpdir/qout.out z
+	chk "z= present" 0 $?
+	cp $tmpdir/qout.out $sc/q.out
+	qdv "$vfy_all" "$(pubrec $domainkey_dir/example.com/default)" < $sc/q.out
+	chk "verify exit" 0 $?
+	t_done "DKIMSIGNOPTIONS"
+	if [ $sha1_ok -eq 1 ] ; then
+		printf "    testing %-52s " "DKIMSIGNOPTIONS=\"-z 3\" (two signatures)"
+		qs RELAYCLIENT= DKIMSIGNOPTIONS="-z 3"
+		chk "signatures" 2 $(grep -c '^DKIM-Signature' $tmpdir/qout.out)
+		chk "1st a=" rsa-sha1 "$(sigtag $tmpdir/qout.out a 1)"
+		chk "2nd a=" rsa-sha256 "$(sigtag $tmpdir/qout.out a 2)"
+		t_done "DKIMSIGNOPTIONS -z 3"
 	else
-		echo "FAILED: qmail-dkim unsigned-message default handling ret=$ret"
-		cat $tmpdir/result.out
-		failed=1
+		for z in 1 3
+		do
+			printf "    testing %-52s " "DKIMSIGNOPTIONS=\"-z $z\" (rsa-sha1 not allowed)"
+			qs RELAYCLIENT= DKIMSIGNOPTIONS="-z $z"
+			chk "exit" 88 $?
+			chk "signatures" 0 $(grep -c '^DKIM-Signature' $tmpdir/qout.out)
+			chks "error" $tmpdir/err.out "Zqmail-dkim: rsa-sha1 is not allowed by the crypto policy of this system"
+			t_done "qmail-dkim -z $z refused by the crypto policy"
+		done
 	fi
-	/bin/rm -f $tmpdir/mail.txt $tmpdir/result.out $tmpdir/err.out
-	if [ $failed -eq 1 ] ; then
-		echo "Test Failed for qmail-dkim environment options"
-		exit 1
+	printf "    testing %-52s " "DKIMSIGNOPTIONS=\"-z 4\" (ed25519)"
+	qs DKIMSIGN=$ed_key DKIMSIGNOPTIONS="-z 4"
+	chk "exit" 0 $?
+	chk "a=" ed25519-sha256 "$(sigtag $tmpdir/qout.out a)"
+	cp $tmpdir/qout.out $sc/q.out
+	qdv "$vfy_all" "$ed_rec" < $sc/q.out
+	chk "verify exit" 0 $?
+	t_done "DKIMSIGNOPTIONS -z 4"
+	printf "    testing %-52s " "invalid DKIMSIGNOPTIONS"
+	qs RELAYCLIENT= DKIMSIGNOPTIONS="-c x"
+	chk "exit" 88 $?
+	chks "error" $tmpdir/err.out "Zqmail-dkim: Invalid DKIMSIGNOPTIONS"
+	t_done "invalid DKIMSIGNOPTIONS"
+	printf "    testing %-52s " "default expire time"
+	qs RELAYCLIENT=
+	chkrange "x= (now + 604800)" $(expr $now + 604800 - 60) $(expr $now + 604800 + 60) "$(sigtag $tmpdir/qout.out x)"
+	t_done "default x="
+	printf "    testing %-52s " "DKIMSIGNOPTIONS -x 100"
+	qs RELAYCLIENT= DKIMSIGNOPTIONS="-x 100"
+	chkrange "x= (now + 100)" $(expr $now + 100 - 5) $(expr $now + 100 + 60) "$(sigtag $tmpdir/qout.out x)"
+	t_done "DKIMSIGNOPTIONS -x"
+	printf "    testing %-52s " "DKIMEXPIRE takes precedence over -x"
+	qs RELAYCLIENT= DKIMSIGNOPTIONS="-x 100" DKIMEXPIRE=5000
+	chkrange "x= (now + 5000)" $(expr $now + 5000 - 5) $(expr $now + 5000 + 60) "$(sigtag $tmpdir/qout.out x)"
+	t_done "DKIMEXPIRE"
+	printf "    testing %-52s " "DKIMSIGNOPTIONS -i identity"
+	qs RELAYCLIENT= DKIMSIGNOPTIONS="-i alice@example.com"
+	chk "i=" alice@example.com "$(sigtag $tmpdir/qout.out i)"
+	t_done "DKIMSIGNOPTIONS -i"
+	printf "    testing %-52s " "DKIMIDENTITY takes precedence over -i"
+	qs RELAYCLIENT= DKIMSIGNOPTIONS="-i alice@example.com" DKIMIDENTITY=bob@example.com
+	chk "i=" bob@example.com "$(sigtag $tmpdir/qout.out i)"
+	t_done "DKIMIDENTITY"
+	t_end "qmail-dkim signing environment"
+
+	# Test No 24
+	t_start "24. testing qmail-dkim queue program: arguments, DKIMQUEUE, QUEUEPROG"
+	mkmail example.com > $sc/mail.txt
+	printf "    testing %-52s " "argument beats DKIMQUEUE"
+	env - CONTROLDIR=$tmpdir/ctl DKIMQUEUE=/bin/false $qmail_dkim /bin/cat <$sc/mail.txt >$tmpdir/qout.out 2>$tmpdir/err.out
+	chk "exit" 0 $?
+	chkgrep "message" $tmpdir/qout.out "Test message"
+	t_done "qmail-dkim argument"
+	printf "    testing %-52s " "DKIMQUEUE beats QUEUEPROG"
+	env - CONTROLDIR=$tmpdir/ctl DKIMQUEUE=/bin/cat QUEUEPROG=/bin/false $qmail_dkim <$sc/mail.txt >$tmpdir/qout.out 2>$tmpdir/err.out
+	chk "exit" 0 $?
+	chkgrep "message" $tmpdir/qout.out "Test message"
+	t_done "qmail-dkim DKIMQUEUE"
+	printf "    testing %-52s " "QUEUEPROG"
+	env - CONTROLDIR=$tmpdir/ctl QUEUEPROG=/bin/cat $qmail_dkim <$sc/mail.txt >$tmpdir/qout.out 2>$tmpdir/err.out
+	chk "exit" 0 $?
+	chkgrep "message" $tmpdir/qout.out "Test message"
+	t_done "qmail-dkim QUEUEPROG"
+	printf "    testing %-52s " "queue program fails"
+	env - CONTROLDIR=$tmpdir/ctl DKIMQUEUE=/bin/false $qmail_dkim <$sc/mail.txt >$tmpdir/qout.out 2>$tmpdir/err.out
+	if [ $? -eq 0 ] ; then
+		bad="$bad [exit 0, queue program failed]"
 	fi
+	t_done "qmail-dkim queue failure"
+	t_end "qmail-dkim queue program"
+
+	# Test No 25
+	t_start "25. testing qmail-dkim signaturedomains, nosignaturedomains, DKIMPRACTICE and their environment variables"
+	mkmail example.com > $sc/mail.txt
+	mkmail example.org > $sc/mail.org
+	$dkim -s $rsa_key < $sc/mail.txt > $sc/sig.good
+	(cat $sc/sig.good; sed -e 's/Test message/Tampered message/' $sc/mail.txt) > $sc/m.body
+	(cat $sc/sig.good $sc/mail.txt) > $sc/m.good
+	neutral="DKIM-Status: verify result: no signatures verified but message is not suspicious"
+	/bin/rm -f $tmpdir/ctl/signaturedomains $tmpdir/ctl/nosignaturedomains
+	printf "    testing %-56s " "no control files: unsigned mail is rejected"
+	qdv "S" "" < $sc/mail.txt
+	chk "exit" 88 $?
+	chks "error" $tmpdir/err.out "Dqmail-dkim: no signatures"
+	t_done "no control files"
+	echo "example.com" > $tmpdir/ctl/nosignaturedomains
+	printf "    testing %-56s " "nosignaturedomains example.com, mail from example.com"
+	qdv "S" "" < $sc/mail.txt
+	chk "exit" 0 $?
+	chks "DKIM-Status" $tmpdir/qout.out "$neutral"
+	chkgrep "old status" $tmpdir/qout.out "(old=NO SIGNATURES:-13)"
+	t_done "nosignaturedomains match"
+	printf "    testing %-56s " "nosignaturedomains example.com, mail from example.org"
+	qdv "S" "" < $sc/mail.org
+	chk "exit" 88 $?
+	chks "error" $tmpdir/err.out "Dqmail-dkim: no signatures"
+	t_done "nosignaturedomains no match"
+	printf "    testing %-56s " "nosignaturedomains example.com, tampered signature"
+	qdv "U" "$rsa_rec" < $sc/m.body
+	chk "exit (a failing signature is still a failure)" 88 $?
+	chks "error" $tmpdir/err.out "Dqmail-dkim: signature verify error: message body does not hash to bh value"
+	t_done "nosignaturedomains failing signature"
+	printf "    testing %-56s " "nosignaturedomains example.com, good signature"
+	qdv "S" "$rsa_rec" < $sc/m.good
+	chk "exit" 0 $?
+	chks "DKIM-Status" $tmpdir/qout.out "DKIM-Status: good"
+	t_done "nosignaturedomains good signature"
+	echo '*' > $tmpdir/ctl/nosignaturedomains
+	printf "    testing %-56s " "nosignaturedomains *"
+	qdv "S" "" < $sc/mail.org
+	chk "exit" 0 $?
+	chks "DKIM-Status" $tmpdir/qout.out "$neutral"
+	t_done "nosignaturedomains *"
+	echo "example.com" > $tmpdir/ctl/signaturedomains
+	printf "    testing %-56s " "signaturedomains example.com + nosignaturedomains *"
+	qdv "S" "" < $sc/mail.txt
+	chk "exit (example.com must sign)" 88 $?
+	chks "error" $tmpdir/err.out "Dqmail-dkim: no signatures"
+	qdv "S" "" < $sc/mail.org
+	chk "exit (example.org need not sign)" 0 $?
+	qdv "U" "$rsa_rec" < $sc/m.body
+	chk "exit (failure of example.com kept)" 88 $?
+	t_done "signaturedomains"
+	printf "    testing %-56s " "SIGNATUREDOMAINS / NOSIGNATUREDOMAINS name the files"
+	/bin/rm -f $tmpdir/ctl/signaturedomains $tmpdir/ctl/nosignaturedomains
+	echo "example.com" > $tmpdir/ctl/mynosig
+	echo "example.com" > $tmpdir/ctl/mysig
+	qdv "S" "" NOSIGNATUREDOMAINS=mynosig < $sc/mail.txt
+	chk "exit NOSIGNATUREDOMAINS" 0 $?
+	chks "DKIM-Status" $tmpdir/qout.out "$neutral"
+	qdv "S" "" NOSIGNATUREDOMAINS=$tmpdir/ctl/mynosig < $sc/mail.txt
+	chk "exit NOSIGNATUREDOMAINS (path)" 0 $?
+	qdv "S" "" NOSIGNATUREDOMAINS=mynosig < $sc/mail.org
+	chk "exit other domain" 88 $?
+	qdv "S" "" NOSIGNATUREDOMAINS=mynosig SIGNATUREDOMAINS=mysig < $sc/mail.txt
+	chk "exit SIGNATUREDOMAINS" 88 $?
+	t_done "SIGNATUREDOMAINS NOSIGNATUREDOMAINS"
+	/bin/rm -f $tmpdir/ctl/mynosig $tmpdir/ctl/mysig
+	echo "example.com" > $tmpdir/ctl/nosignaturedomains
+	printf "    testing %-56s " "DKIMPRACTICE selects the results the lists apply to"
+	qdv "S" "" DKIMPRACTICE=S < $sc/mail.txt
+	chk "exit DKIMPRACTICE=S" 0 $?
+	qdv "S" "" DKIMPRACTICE=U < $sc/mail.txt
+	chk "exit DKIMPRACTICE=U" 88 $?
+	qdv "S" "" DKIMPRACTICE= < $sc/mail.txt
+	chk "exit DKIMPRACTICE empty (any failure)" 0 $?
+	qdv "U" "" < $sc/mail.txt
+	chk "exit DKIMVERIFY=U (letters of DKIMVERIFY are used)" 0 $?
+	chks "DKIM-Status" $tmpdir/qout.out "DKIM-Status: no signatures"
+	chknogrep "no old status" $tmpdir/qout.out "(old="
+	t_done "DKIMPRACTICE"
+	/bin/rm -f $tmpdir/ctl/nosignaturedomains
+	t_end "signaturedomains"
+
+	# Test No 26
+	t_start "26. testing dkim command line: usage, errors, removed -p, line endings"
+	mkmail example.com > $sc/mail.txt
+	printf "    testing %-56s " "dkim -H"
+	$dkim -H > /dev/null 2>$tmpdir/err.out
+	chk "exit" 1 $?
+	chkgrep "usage" $tmpdir/err.out "usage: dkim"
+	t_done "dkim -H"
+	printf "    testing %-56s " "dkim -Q (unknown option)"
+	$dkim -Q -s $rsa_key < $sc/mail.txt > /dev/null 2>$tmpdir/err.out
+	chk "exit" 1 $?
+	t_done "dkim -Q"
+	printf "    testing %-56s " "dkim without -s"
+	$dkim < $sc/mail.txt > /dev/null 2>$tmpdir/err.out
+	chk "exit" 1 $?
+	chkgrep "message" $tmpdir/err.out "Private Key(s) not provided"
+	t_done "dkim no key"
+	printf "    testing %-56s " "dkim -s missing-file"
+	$dkim -s $tmpdir/nokey < $sc/mail.txt > /dev/null 2>$tmpdir/err.out
+	chk "exit" 1 $?
+	t_done "dkim missing key file"
+	printf "    testing %-56s " "dkim -z 9, -c x"
+	$dkim -z 9 -s $rsa_key < $sc/mail.txt > /dev/null 2>$tmpdir/err.out
+	chk "exit -z 9" 1 $?
+	chkgrep "message" $tmpdir/err.out "unrecognized hash"
+	$dkim -c x -s $rsa_key < $sc/mail.txt > /dev/null 2>$tmpdir/err.out
+	chk "exit -c x" 1 $?
+	chkgrep "message" $tmpdir/err.out "unrecognized canonicalization"
+	t_done "dkim bad -z, -c"
+	# SSP and ADSP are gone, so is the -p option (dkim.9 still describes it)
+	printf "    testing %-56s " "dkim -p (SSP/ADSP removed)"
+	$dkim -p 1 -s $rsa_key < $sc/mail.txt > $sc/sig.out 2>$tmpdir/err.out
+	chk "exit" 1 $?
+	chk "signatures" 0 $(grep -c '^DKIM-Signature' $sc/sig.out)
+	chkgrep "usage" $tmpdir/err.out "usage: dkim"
+	t_done "dkim -p"
+	printf "    testing %-56s " "dkim -v on mail without signature"
+	dkimv "" "$rsa_rec" < $sc/mail.txt
+	chk "exit (DKIMVERIFY empty)" 0 $?
+	chks "DKIM-Status" $tmpdir/stat.out "DKIM-Status: no signatures"
+	dkimv "S" "$rsa_rec" < $sc/mail.txt
+	chk "exit (DKIMVERIFY=S)" 14 $?
+	printf "" | $dkim -v -T "$rsa_rec" > $tmpdir/stat.out 2>/dev/null
+	chks "DKIM-Status (empty input)" $tmpdir/stat.out "DKIM-Status: no signatures"
+	t_done "dkim -v no signatures"
+	# the signature does not depend on the line endings (LF or CRLF) of the mail
+	printf "    testing %-56s " "line endings LF and CRLF"
+	sed -e 's/$/\r/' $sc/mail.txt > $sc/mail.crlf
+	for c in r s t u
+	do
+		$dkim -c $c -s $rsa_key < $sc/mail.txt > $sc/sig.lf
+		$dkim -c $c -s $rsa_key < $sc/mail.crlf > $sc/sig.crlf
+		(cat $sc/sig.lf $sc/mail.crlf) | dkimv "$vfy_all" "$rsa_rec"
+		chk "-c $c signed LF, verified CRLF" 0 $?
+		(sed -e 's/$/\r/' $sc/sig.crlf; cat $sc/mail.crlf) | dkimv "$vfy_all" "$rsa_rec"
+		chk "-c $c signed CRLF, verified CRLF" 0 $?
+		(cat $sc/sig.crlf $sc/mail.txt) | dkimv "$vfy_all" "$rsa_rec"
+		chk "-c $c signed CRLF, verified LF" 0 $?
+	done
+	t_done "line endings"
+	t_end "dkim command line"
+
+	# Test No 27
+	t_start "27. testing REJECT_SHA1: rsa-sha1 signature verified when the crypto policy of the system does not allow sha1"
+	mkmail example.com > $sc/mail.txt
+	not_allowed="DKIM-Status: rsa-sha1 is not allowed by the crypto policy of this system"
+	bad_sig="DKIM-Status: signature error: RSA/ED25519 verify failed"
+	if [ $sha1_ok -eq 1 ] ; then
+		# sha1 signatures are allowed, they are verified. REJECT_SHA1 changes nothing
+		$dkim -z 1 -s $rsa_key < $sc/mail.txt > $sc/sig.sha1
+		(cat $sc/sig.sha1 $sc/mail.txt) > $sc/m.sha1
+		printf "    testing %-56s " "sha1 allowed: rsa-sha1 signature is verified"
+		chk "a=" rsa-sha1 "$(sigtag $sc/sig.sha1 a)"
+		dkimv "$vfy_all" "$rsa_rec" < $sc/m.sha1
+		chk "dkim exit" 0 $?
+		chks "dkim status" $tmpdir/stat.out "DKIM-Status: good"
+		qdv "$vfy_all" "$rsa_rec" < $sc/m.sha1
+		chk "qmail-dkim exit" 0 $?
+		chks "qmail-dkim status" $tmpdir/qout.out "DKIM-Status: good"
+		t_done "rsa-sha1 verified"
+		printf "    testing %-56s " "sha1 allowed: REJECT_SHA1 has no effect"
+		REJECT_SHA1=1
+		export REJECT_SHA1
+		dkimv "$vfy_all" "$rsa_rec" < $sc/m.sha1
+		chk "dkim exit" 0 $?
+		chks "dkim status" $tmpdir/stat.out "DKIM-Status: good"
+		unset REJECT_SHA1
+		qdv "$vfy_all" "$rsa_rec" REJECT_SHA1=1 < $sc/m.sha1
+		chk "qmail-dkim exit" 0 $?
+		chks "qmail-dkim status" $tmpdir/qout.out "DKIM-Status: good"
+		t_done "REJECT_SHA1 with sha1 allowed"
+	else
+		# sha1 signatures cannot be made here. OpenSSL refuses to verify before it looks at the signature,
+		# only the body hash (sha1) has to be right. Make a message that has an rsa-sha1 signature
+		bh=$(printf 'Test message\r\n' | openssl dgst -sha1 -binary | openssl base64)
+		$dkim -z 2 -s $rsa_key < $sc/mail.txt | sed -e 's/a=rsa-sha256/a=rsa-sha1/' -e "s|bh=[^; ]*;|bh=$bh;|" > $sc/sig.sha1
+		(cat $sc/sig.sha1 $sc/mail.txt) > $sc/m.sha1
+		dkimv "" "$rsa_rec" < $sc/m.sha1
+		if ! head -1 $tmpdir/stat.out | grep -F "$not_allowed" > /dev/null ; then
+			# OpenSSL does not refuse verification of rsa-sha1 (or only after accepting the digest)
+			echo "    OpenSSL does not refuse to verify rsa-sha1 on this system: REJECT_SHA1 cannot be tested"
+		else
+			printf "    testing %-56s " "sha1 not allowed: not a bad signature"
+			chk "a=" rsa-sha1 "$(sigtag $sc/sig.sha1 a)"
+			dkimv "$vfy_all" "$rsa_rec" < $sc/m.sha1
+			chk "dkim exit (no DKIMVERIFY letter)" 0 $?
+			chks "dkim status" $tmpdir/stat.out "$not_allowed"
+			dkimv "I" "$rsa_rec" < $sc/m.sha1
+			chk "dkim exit DKIMVERIFY=I" 0 $?
+			qdv "$vfy_all" "$rsa_rec" < $sc/m.sha1
+			chk "qmail-dkim exit" 0 $?
+			chks "qmail-dkim status" $tmpdir/qout.out "$not_allowed"
+			t_done "rsa-sha1 not allowed"
+			printf "    testing %-56s " "sha1 not allowed: REJECT_SHA1 is a bad signature"
+			REJECT_SHA1=1
+			export REJECT_SHA1
+			dkimv "" "$rsa_rec" < $sc/m.sha1
+			chk "dkim exit (no DKIMVERIFY)" 0 $?
+			chks "dkim status" $tmpdir/stat.out "$bad_sig"
+			dkimv "I" "$rsa_rec" < $sc/m.sha1
+			chk "dkim exit DKIMVERIFY=I" 14 $?
+			dkimv "i" "$rsa_rec" < $sc/m.sha1
+			chk "dkim exit DKIMVERIFY=i" 88 $?
+			unset REJECT_SHA1
+			qdv "" "$rsa_rec" REJECT_SHA1=1 < $sc/m.sha1
+			chk "qmail-dkim exit (no DKIMVERIFY)" 0 $?
+			chks "qmail-dkim status" $tmpdir/qout.out "$bad_sig"
+			qdv "I" "$rsa_rec" REJECT_SHA1=1 < $sc/m.sha1
+			chk "qmail-dkim exit DKIMVERIFY=I" 88 $?
+			chks "qmail-dkim error" $tmpdir/err.out "Dqmail-dkim: signature error: RSA/ED25519 verify failed"
+			qdv "i" "$rsa_rec" REJECT_SHA1=1 < $sc/m.sha1
+			chk "qmail-dkim exit DKIMVERIFY=i" 88 $?
+			chks "qmail-dkim error" $tmpdir/err.out "Zqmail-dkim: signature error: RSA/ED25519 verify failed"
+			t_done "REJECT_SHA1 rsa-sha1 not allowed"
+			printf "    testing %-56s " "sha1 not allowed: rsa-sha256 signature is not affected"
+			REJECT_SHA1=1
+			export REJECT_SHA1
+			$dkim -z 2 -s $rsa_key < $sc/mail.txt > $sc/sig.256
+			(cat $sc/sig.256 $sc/mail.txt) | dkimv "F$vfy_all" "$rsa_rec"
+			chk "dkim exit" 0 $?
+			chks "dkim status" $tmpdir/stat.out "DKIM-Status: good"
+			unset REJECT_SHA1
+			t_done "REJECT_SHA1 rsa-sha256"
+		fi
+	fi
+	t_end "REJECT_SHA1"
 
 	t2=$(date +"%s.%4N")
 	secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
-
-	echo
 	printf "\r%118s\r" " "
-	echo "DKIM Tests [$secs sec]"
+	echo "DKIM tests [$secs sec]"
 }
 
 do_cleanup()
@@ -9220,7 +10305,7 @@ fi
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=332
+	total_tests=465
 fi
 failed=0
 do_setup
@@ -9275,6 +10360,9 @@ exit 0
 
 #
 # $Log: test-indimail-mta,v $
+# Revision 1.86  2026-11-20 08:53:50+05:30  Cprogrammer
+# added additional dkim tests using claude
+#
 # Revision 1.85  2026-11-18 18:27:02+05:30  Cprogrammer
 # fixed display of k= keyword
 #

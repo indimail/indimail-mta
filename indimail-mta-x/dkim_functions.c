@@ -1,5 +1,5 @@
 /*-
- * $Id: dkim_functions.c,v 1.5 2026-11-19 00:00:43+05:30 Cprogrammer Exp mbhangui $
+ * $Id: dkim_functions.c,v 1.6 2026-11-20 08:55:34+05:30 Cprogrammer Exp mbhangui $
  *
  * dkim_functions.c - DKIM (RFC 6376 / RFC 8463) signing and verification
  *
@@ -99,6 +99,7 @@ dkim_status_text(int code, const char **enhanced)
 	case DKIM_EVP_SIGN_FAILURE:              t = "signing error: evp signing failure"; c = "X.3.0"; break;
 	case DKIM_EVP_DIGEST_FAILURE:            t = "signing error: evp digest failure"; c = "X.3.0"; break;
 	case DKIM_OPENSSL_TOO_OLD:               t = "OpenSSL version too old on this system"; c = "X.3.0"; break;
+	case DKIM_ALGORITHM_NOT_ALLOWED:         t = "rsa-sha1 is not allowed by the crypto policy of this system"; c = "X.3.0"; break;
 	default:                                 t = "error"; c = "X.3.0"; break;
 	}
 	if (enhanced)
@@ -137,6 +138,7 @@ dkim_code_name(int code)
 	case DKIM_UNSIGNED_FROM:                 return "UNSIGNED FROM";
 	case DKIM_BAD_IDENTITY:                  return "BAD IDENTITY";
 	case DKIM_OPENSSL_TOO_OLD:               return "OPENSSL TOO OLD";
+	case DKIM_ALGORITHM_NOT_ALLOWED:         return "ALGORITHM NOT ALLOWED";
 	}
 	return "Unknown error";
 }
@@ -897,18 +899,38 @@ sign_finish(DKIMSign *s)
 	return 0;
 }
 
+/*
+ * Domain for d= when none was given. Same rule as libdkim: the first of
+ * Return-Path, Sender, From, X-Bounced-Address that is present in the message
+ * is used (the last one if the header is repeated). If that header holds no
+ * usable domain (e.g. Return-Path: <>) the caller falls back to the default
+ * domain; the following headers are not tried.
+ */
+static int
+signing_domain(const hdrlist *hl, char *out, size_t outsz)
+{
+	static const char *const names[] = { "Return-Path", "Sender", "From", "X-Bounced-Address", NULL };
+	int             k, i;
+
+	for (k = 0; names[k]; k++) {
+		for (i = hl->n - 1; i >= 0; i--) {
+			if (hdr_is(&hl->v[i], names[k]))
+				return addr_domain(hl->v[i].raw + hl->v[i].colon + 1, out, outsz);
+		}
+	}
+	return 0;
+}
+
 const char     *
 dkim_sign_domain(DKIMSign *s)
 {
-	static const char *const names[] = { "From", "Sender", "Return-Path", "X-Bounced-Address", NULL };
-
 	if (!s)
 		return NULL;
 	if (s->opts.szDomain[0])
 		return s->opts.szDomain;
 	if (!s->domain_done) {
 		if (s->msg.headers_done || sign_finish(s) == 0) {
-			if (!find_domain(&s->msg.hl, names, s->domain, sizeof(s->domain))) {
+			if (!signing_domain(&s->msg.hl, s->domain, sizeof(s->domain))) {
 				if (s->opts.szDefaultDomain[0]) {
 					strncpy(s->domain, s->opts.szDefaultDomain, sizeof(s->domain) - 1);
 					s->domain[sizeof(s->domain) - 1] = 0;
@@ -983,8 +1005,8 @@ tag_more(dbuf *b, size_t *col, const char *piece)
 static int
 dkim_qp(dbuf *out, const char *s, size_t n)
 {
+	static const char hex[] = "0123456789ABCDEF";
 	size_t          i;
-	static stralloc t;
 
 	for (i = 0; i < n; i++) {
 		unsigned char   c = s[i];
@@ -992,10 +1014,8 @@ dkim_qp(dbuf *out, const char *s, size_t n)
 		if (c == '\r' || c == '\n')
 			continue;
 		if (c < 0x21 || c > 0x7e || c == ';' || c == '=' || c == '|') {
-			if (qsprintf(&t, "=%02X", c) == -1)
-				return -1;
-			if (dbuf_cats(out, t.s))
-				return -1;
+			if (dbuf_catc(out, '=') || dbuf_catc(out, hex[c >> 4]) || dbuf_catc(out, hex[c & 15]))
+ 				return -1;
 		} else
 		if (dbuf_catc(out, c))
 			return -1;
@@ -1010,10 +1030,52 @@ no_passphrase_cb(char *buf, int size, int rwflag, void *u)
 	return 0;
 }
 
+/*-
+ * Some systems (Fedora, RHEL ... through their crypto policy) make OpenSSL
+ * refuse rsa-sha1 signatures. The key is fine, rsa-sha256 works. Find out if
+ * that is why a signature with md failed: sign a few bytes with the key.
+ * returns 1 if OpenSSL signs with md, 0 if not
+ */
+static int
+rsa_sign_probe(EVP_PKEY *pkey, const EVP_MD *md)
+{
+	EVP_MD_CTX     *c = EVP_MD_CTX_new();
+	unsigned char  *sig = NULL;
+	size_t          len = 0;
+	int             ok = 0;
+
+	if (!c)
+		return 0;
+	if (EVP_DigestSignInit(c, NULL, md, NULL, pkey) == 1 &&
+			EVP_DigestSign(c, NULL, &len, (const unsigned char *) "x", 1) == 1 &&
+			(sig = malloc(len)) &&
+			EVP_DigestSign(c, sig, &len, (const unsigned char *) "x", 1) == 1)
+		ok = 1;
+	free(sig);
+	EVP_MD_CTX_free(c);
+	ERR_clear_error();
+	return ok;
+}
+
+/*- same for verifying: 1 if EVP_DigestVerifyInit() accepts md for the key */
+static int
+rsa_verify_probe(EVP_PKEY *pkey, const EVP_MD *md)
+{
+	EVP_MD_CTX     *c = EVP_MD_CTX_new();
+	int             ok;
+
+	if (!c)
+		return 0;
+	ok = EVP_DigestVerifyInit(c, NULL, md, NULL, pkey) == 1;
+	EVP_MD_CTX_free(c);
+	ERR_clear_error();
+	return ok;
+}
+
 static int
 sign_one(DKIMSign *s, const DKIMSignOptions *o, int hash, EVP_PKEY *pkey, dbuf *out)
 {
-	int             hc_relaxed, bc_relaxed, is_ed = (hash == DKIM_HASH_ED25519), i, r = 0, nsel = 0, from_ok = 0;
+	int             hc_relaxed, bc_relaxed, is_ed = (hash == DKIM_HASH_ED25519), i, r = 0, nsel = 0;
 	const char     *alg, *p;
 	const char     *domain;
 	char            numbuf[64];
@@ -1027,11 +1089,10 @@ sign_one(DKIMSign *s, const DKIMSignOptions *o, int hash, EVP_PKEY *pkey, dbuf *
 
 	if (!(domain = dkim_sign_domain(s)))
 		return DKIM_NO_SENDER;
-	for (i = 0; i < s->msg.hl.n; i++)
-		if (hdr_is(&s->msg.hl.v[i], "from"))
-			from_ok = 1;
-	if (!from_ok && !s->opts.szDomain[0] && !s->opts.szDefaultDomain[0])
-		return DKIM_NO_SENDER;
+	/*
+	 * like libdkim: a message without a From header is signed as long as a
+	 * domain was found (Return-Path, Sender, X-Bounced-Address, default domain)
+	 */
 	if (o->szIdentity[0]) {
 		const char     *at = strchr(o->szIdentity, '@');
 
@@ -1200,7 +1261,12 @@ sign_one(DKIMSign *s, const DKIMSignOptions *o, int hash, EVP_PKEY *pkey, dbuf *
 				EVP_DigestSign(mc, NULL, &siglen, (unsigned char *) hdata.s, hdata.len) != 1 ||
 				!(sigbytes = malloc(siglen)) ||
 				EVP_DigestSign(mc, sigbytes, &siglen, (unsigned char *) hdata.s, hdata.len) != 1) {
-			r = DKIM_EVP_SIGN_FAILURE;
+			ERR_clear_error();
+			/*- rsa-sha1 refused but rsa-sha256 works with this key: crypto policy of the system */
+			if (hash == DKIM_HASH_SHA1 && !rsa_sign_probe(pkey, EVP_sha1()) && rsa_sign_probe(pkey, EVP_sha256()))
+				r = DKIM_ALGORITHM_NOT_ALLOWED;
+			else
+				r = DKIM_EVP_SIGN_FAILURE;
 			goto done;
 		}
 	}
@@ -1747,7 +1813,7 @@ verify_one(DKIMVerify *v, vsig *sg)
 		goto done;
 	}
 	if (bl != sg->bh.dlen || memcmp(bhbytes, sg->bh.digest, bl)) {
-		r = DKIM_BODY_HASH_MISMATCH;
+		r = testing ? DKIM_SIGNATURE_BAD_BUT_TESTING : DKIM_BODY_HASH_MISMATCH;
 		goto done;
 	}
 
@@ -1842,7 +1908,7 @@ verify_one(DKIMVerify *v, vsig *sg)
 	}
 	{
 		EVP_MD_CTX     *mc = EVP_MD_CTX_new();
-		int             ok = 0;
+		int             ok = 0, refused = 0;
 
 		if (!mc) {
 			r = DKIM_OUT_OF_MEMORY;
@@ -1858,11 +1924,23 @@ verify_one(DKIMVerify *v, vsig *sg)
 		} else {
 			if (EVP_DigestVerifyInit(mc, NULL, sg->hash == DKIM_HASH_SHA1 ? EVP_sha1() : EVP_sha256(), NULL, pkey) == 1)
 				ok = EVP_DigestVerify(mc, sigbytes, sl, (unsigned char *) hdata.s, hdata.len) == 1;
+			else
+				refused = 1; /*- OpenSSL did not even try */
 		}
 		EVP_MD_CTX_free(mc);
 		ERR_clear_error();
 		if (!ok) {
-			r = testing ? DKIM_SIGNATURE_BAD_BUT_TESTING : DKIM_SIGNATURE_BAD;
+			/*-
+			 * rsa-sha1 refused but rsa-sha256 accepted for the same key: the crypto
+			 * policy of this system. It says nothing about the signature, so it is
+			 * not reported as a bad signature (which would reject the mail), unless
+			 * the caller wants rsa-sha1 signatures that cannot be verified to be bad
+			 * (nRejectSha1, REJECT_SHA1)
+			 */
+			if (refused && sg->hash == DKIM_HASH_SHA1 && !v->opts.nRejectSha1 && rsa_verify_probe(pkey, EVP_sha256()))
+				r = DKIM_ALGORITHM_NOT_ALLOWED;
+			else
+				r = testing ? DKIM_SIGNATURE_BAD_BUT_TESTING : DKIM_SIGNATURE_BAD;
 			goto done;
 		}
 	}
@@ -1949,17 +2027,31 @@ dkim_verify_free(DKIMVerify *v)
 int
 dkim_verify_status(int nsigs, const DKIMVerifyDetails *details)
 {
-	int             i, ret = DKIM_FAIL, failed = 0, extra = 0;
+	int             i, ret = DKIM_FAIL, failed = 0, extra = 0, tps = 0;
 
 	if (!nsigs || !details)
 		return DKIM_NO_SIGNATURES;
+	/*-
+	 * Every signature is looked at, whatever the order of the signature
+	 * headers: a mailing list puts its (3rd party) signature above the
+	 * author's, and the author's good signature must still win.
+	 * Order of preference:
+	 *   a good signature of the author            DKIM_SUCCESS
+	 *   a good signature of a 3rd party           DKIM_3PS_SIGNATURE
+	 *   a good signature that left body uncovered DKIM_SUCCESS_BUT_EXTRA
+	 *   otherwise the first failure
+	 * One good signature is enough, a signature that failed on the way
+	 * (e.g. a mailing list footer broke the author's signature) is not
+	 * reported as a failure. See dkim_verify_count().
+	 */
 	for (i = 0; i < nsigs; i++) {
 		if (details[i].nResult == DKIM_SUCCESS)
 			return DKIM_SUCCESS;
 		else
-		if (details[i].nResult == DKIM_3PS_SIGNATURE)
-			return DKIM_3PS_SIGNATURE;
-		else
+		if (details[i].nResult == DKIM_3PS_SIGNATURE) {
+			tps = 1;
+			continue;
+		} else
 		if (details[i].nResult == DKIM_SUCCESS_BUT_EXTRA) {
 			extra = 1; /*- verified, but l= left part of the body uncovered */
 			continue;
@@ -1969,7 +2061,25 @@ dkim_verify_status(int nsigs, const DKIMVerifyDetails *details)
 			failed = 1;
 		}
 	}
+	if (tps)
+		return DKIM_3PS_SIGNATURE;
 	return extra ? DKIM_SUCCESS_BUT_EXTRA : ret;
+}
+
+/*-
+ * number of signatures that verified (nResult >= 0)
+ */
+int
+dkim_verify_count(int nsigs, const DKIMVerifyDetails *details)
+{
+	int             i, n = 0;
+
+	if (!details)
+		return 0;
+	for (i = 0; i < nsigs; i++)
+		if (details[i].nResult >= 0)
+			n++;
+	return n;
 }
 
 #else /*- OPENSSL_VERSION_NUMBER < 0x10101000L */
@@ -2005,11 +2115,16 @@ int             dkim_verify_finish(DKIMVerify *v, int *nsigs, DKIMVerifyDetails 
 const char     *dkim_verify_author_domain(DKIMVerify *v) { (void) v; return NULL; }
 void            dkim_verify_free(DKIMVerify *v) { (void) v; }
 int             dkim_verify_status(int nsigs, const DKIMVerifyDetails *details) { (void) nsigs; (void) details; return DKIM_OPENSSL_TOO_OLD; }
+int             dkim_verify_count(int nsigs, const DKIMVerifyDetails *details) { (void) nsigs; (void) details; return 0; }
 
 #endif /*- OPENSSL_VERSION_NUMBER >= 0x10101000L */
 
 /*-
  * $Log: dkim_functions.c,v $
+ * Revision 1.6  2026-11-20 08:55:34+05:30  Cprogrammer
+ * handle update-crypto-policy set to refuse SHA1
+ * fix for 3PS signatures
+ *
  * Revision 1.5  2026-11-19 00:00:43+05:30  Cprogrammer
  * fixed return value for 3rd party signatures
  *

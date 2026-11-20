@@ -40,7 +40,11 @@ option, you can pass \fB-y\fR, \fB-z\fR option before the \fB-s\fR option.
 
 .TP
 -z \fIhash\fR
-1 - sha1, 2 - sha256, 3 - sha1+sha256, 4 - ed25519
+1 - sha1, 2 - sha256, 3 - sha1+sha256, 4 - ed25519. rsa-sha1 is deprecated
+(RFC 8301). Where the crypto policy of the system does not allow sha1
+signatures (Fedora, RHEL), 1 and 3 fail with \fIrsa-sha1 is not allowed by the
+crypto policy of this system\fR. Use 2 or 4, or allow sha1 with
+\fBupdate-crypto-policies --set DEFAULT:SHA1\fR.
 
 .TP
 -y \fIselector\fR
@@ -92,10 +96,6 @@ tag may be used by some mailbox providers in the process of diagnosing a
 verification error. Its value is not well defined.
 
 .TP
--p \fIssp\fR | \fIadsp\fR
-0 - disable practice (default), 1- SSP, or 2 - ADSP verification
-
-.TP
 -c \fIcanonicalization\fR
 r for relaxed [DEFAULT], s - simple, t relaxed/simple, u - simple/relaxed
 
@@ -110,8 +110,8 @@ the identity, if not provided it will not be included
 
 .TP
 -x \fIexpire_time\fR
-the expire time in seconds since epoch ( DEFAULT = current time + 604800).
-If set to - then it will not be included
+the expire time in seconds from current time ( DEFAULT = current time +
+604800). If set to - then it will not be included
 
 .TP
 -T \fIselectorRecord\fR
@@ -136,6 +136,14 @@ this help
 .SH Return Value
 When signing, \fBdkim\fR returns 0 on success and non-zero on any failure.
 
+When verifying, if the crypto policy of the system does not allow sha1
+signatures (Fedora, RHEL), a signature with a=rsa-sha1 cannot be verified.
+DKIM-Status is then \fIrsa-sha1 is not allowed by the crypto policy of this
+system\fR, for which there is no DKIMVERIFY letter. If the environment variable
+\fBREJECT_SHA1\fR is set, such a signature is a bad signature (I,
+DKIM_SIGNATURE_BAD) instead. \fBREJECT_SHA1\fR has no effect if the system
+allows sha1 signatures.
+
 When verifying, you can set the environment variable \fBDKIMVERIFY\fR to
 set the exit code corresponding to the DKIM verifcation status by setting
 \fBDKIMVERIFY\fR environment variable to a desired set of letters.
@@ -147,21 +155,38 @@ want a temporary error to be returned (exit code 88). If you omit the
 letter, \fBdkim\fR will not issue any error inspite of DKIM verification
 failure. It will return success.
 
+If some of the signatures of a message failed to verify but at least one
+verified, the status is still A (or F, E as above) and the message is not
+rejected, because a signature can be broken without any fault of the sender,
+e.g. by a mailing list. The \fBDKIM-Status\fR header then has a second line
+with the number of signatures that verified, for example
+
+.nf
+DKIM-Status: good
+        (1 of 2 signatures verified)
+.fi
+
+This line is for information only. It does not change the status and there is
+no letter for it. It is not added if all of the signatures verified, or none.
+
 The complete set of letters with the corresponding return status is given
 below
 .nf
 A - DKIM_SUCCESS                        - Function executed successfully
 B - DKIM_FINISHED_BODY                  - process result: no more message
                                           body is needed
-C - DKIM_PARTIAL_SUCCESS                - verify result: at least one
-                                          but not all signatures verified
+C - DKIM_PARTIAL_SUCCESS                - reserved. Never returned. A message
+                                          with at least one good signature
+                                          is A, even if others failed
 D - DKIM_NEUTRAL                        - verify result: no signatures
                                           verified but message is
                                           not suspicious
 E - DKIM_SUCCESS_BUT_EXTRA              - signature result: signature
                                           verified but it did not
                                           include all of the body
-F - DKIM_3PS_SIGNATURE                  - 3rd-party signature
+F - DKIM_3PS_SIGNATURE                  - 3rd-party signature: the only good
+                                          signatures are of a domain other
+                                          than the author's (From header)
 G - DKIM_FAIL                           - Function failed to execute
 H - DKIM_BAD_SYNTAX                     - signature error: DKIM-Signature
                                           could not parse or has bad

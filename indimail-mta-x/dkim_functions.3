@@ -2,7 +2,7 @@
 .SH NAME
 dkim_sign_new, dkim_sign_process, dkim_sign_domain, dkim_sign_get, dkim_sign_free,
 dkim_verify_new, dkim_verify_process, dkim_verify_finish, dkim_verify_author_domain,
-dkim_verify_status, dkim_verify_free, dkim_status_text, dkim_code_name, dkim_free,
+dkim_verify_status, dkim_verify_count, dkim_verify_free, dkim_status_text, dkim_code_name, dkim_free,
 exit_if_old \- sign and verify mail with DKIM (RFC 6376, RFC 8463)
 .SH SYNOPSIS
 .nf
@@ -21,6 +21,7 @@ exit_if_old \- sign and verify mail with DKIM (RFC 6376, RFC 8463)
 .B                                DKIMVerifyDetails **\fIdetails\fB);
 .B const char *dkim_verify_author_domain(DKIMVerify *\fIv\fB);
 .B int         dkim_verify_status(int \fInsigs\fB, const DKIMVerifyDetails *\fIdetails\fB);
+.B int         dkim_verify_count(int \fInsigs\fB, const DKIMVerifyDetails *\fIdetails\fB);
 .B void        dkim_verify_free(DKIMVerify *\fIv\fB);
 .sp
 .B const char *dkim_status_text(int \fIcode\fB, const char **\fIenhanced\fB);
@@ -155,6 +156,11 @@ released with \fBOPENSSL_free\fR(3), or the literal strings \fB"e=temp;"\fR
 exist). The library frees the returned string. Required unless
 \fBpszSelectorOverride\fR is set.
 .TP
+.B nRejectSha1
+Non\-zero: an rsa\-sha1 signature that OpenSSL refuses to verify because of the
+crypto policy of the system is reported as \fBDKIM_SIGNATURE_BAD\fR instead of
+\fBDKIM_ALGORITHM_NOT_ALLOWED\fR. No effect if the system allows rsa\-sha1.
+.TP
 .B pszSelectorOverride
 If not NULL, this text is used as the key record for every signature and
 \fBpfnDnsCallback\fR is not called. Useful for testing.
@@ -243,12 +249,21 @@ signature whose \fId=\fR is neither this domain nor a parent of it, but which
 verifies, has the result \fBDKIM_3PS_SIGNATURE\fR. The pointer is valid until
 \fBdkim_verify_free\fR().
 .SS dkim_verify_status()
-Reduces the details to one status code for the message. A good signature
-(\fBDKIM_SUCCESS\fR or \fBDKIM_3PS_SIGNATURE\fR) gives \fBDKIM_SUCCESS\fR, no
-matter how many other signatures failed. If there is none, but a signature
-verified without covering the whole body, \fBDKIM_SUCCESS_BUT_EXTRA\fR is
-returned. Otherwise the result of the first failed signature is returned.
-\fBDKIM_NO_SIGNATURES\fR is returned if \fInsigs\fR is 0.
+Reduces the details to one status code for the message. One good signature
+is enough, wherever it is among the signatures (a mailing list puts its own
+signature above the author's): if the signature of the author's domain
+verified the result is \fBDKIM_SUCCESS\fR, no matter how many other
+signatures failed. If only signatures of other domains verified the result is
+\fBDKIM_3PS_SIGNATURE\fR. If the only good signatures left part of the body
+uncovered it is \fBDKIM_SUCCESS_BUT_EXTRA\fR. Otherwise the result of the
+first failed signature is returned. \fBDKIM_NO_SIGNATURES\fR is returned if
+\fInsigs\fR is 0. \fBDKIM_PARTIAL_SUCCESS\fR is never returned.
+.SS dkim_verify_count()
+Returns the number of signatures in \fIdetails\fR that verified (\fInResult\fR
+>= 0). A program can use it together with \fInsigs\fR to report, for example,
+"1 of 2 signatures verified" when \fBdkim_verify_status\fR() says the message
+is good although other signatures failed. Returns 0 if OpenSSL is older
+than 1.1.1.
 .SS dkim_verify_free()
 Releases the context and everything returned by \fBdkim_verify_finish\fR().
 NULL is allowed.
@@ -284,7 +299,7 @@ DKIM_SUCCESS	0 (A)	T{
 good
 T}
 DKIM_FINISHED_BODY	1 (B)	T{
-(not produced)
+reserved, not produced
 T}
 DKIM_PARTIAL_SUCCESS	2 (C)	T{
 (not produced)
@@ -296,7 +311,7 @@ DKIM_SUCCESS_BUT_EXTRA	4 (E)	T{
 verified, l= left part of body uncovered
 T}
 DKIM_3PS_SIGNATURE	5 (F)	T{
-verified, d= is not the author's domain
+verified, d= is not the author's domain (and no signature of the author verified)
 T}
 DKIM_FAIL	\-1 (G)	T{
 general failure
@@ -379,6 +394,9 @@ T}
 DKIM_OPENSSL_TOO_OLD	\-27	T{
 OpenSSL older than 1.1.1
 T}
+DKIM_ALGORITHM_NOT_ALLOWED	\-28	T{
+rsa\-sha1 refused by the crypto policy of the system
+T}
 DKIM_MAX_ERROR	\-100	T{
 marker, never returned
 T}
@@ -391,6 +409,18 @@ return a pointer return NULL, and \fBdkim_status_text\fR() gives "OpenSSL
 version too old on this system". A program can test for this once at start up
 with \fBexit_if_old\fR().
 .SH NOTES
+.IP \(bu 2
+Some systems (Fedora, RHEL and others, through their crypto policy) make OpenSSL
+refuse rsa\-sha1 signatures, although rsa\-sha256 works with the same key.
+\fBdkim_sign_get\fR() then fails with \fBDKIM_ALGORITHM_NOT_ALLOWED\fR, not with
+\fBDKIM_EVP_SIGN_FAILURE\fR. A signature with \fIa=rsa\-sha1\fR that is verified
+gets that result instead of \fBDKIM_SIGNATURE_BAD\fR, so that a message is not
+rejected for something that is not wrong with the signature (set
+\fInRejectSha1\fR to get \fBDKIM_SIGNATURE_BAD\fR). The result has no
+\fBDKIMVERIFY\fR letter. The system administrator can allow rsa\-sha1 again (for
+Fedora and RHEL: \fBupdate\-crypto\-policies \-\-set DEFAULT:SHA1\fR). If OpenSSL
+refuses only after having accepted the digest, this cannot be told apart from a
+bad signature and \fBDKIM_SIGNATURE_BAD\fR is returned.
 .IP \(bu 2
 Public key records: \fIk=rsa\fR keys are base64 DER (SubjectPublicKeyInfo or
 PKCS#1); \fIk=ed25519\fR keys are the raw 32 byte key in base64 (RFC 8463)
@@ -557,7 +587,7 @@ main(void)
 	DKIMVerify     *v;
 	char            buf[8192];
 	ssize_t         n;
-	int             i, nsigs, ret;
+	int             i, nok, nsigs, ret;
 
 	exit_if_old(111);
 	memset(&opts, 0, sizeof(opts));
@@ -586,7 +616,10 @@ main(void)
 				d[i].szAlgorithm ? d[i].szAlgorithm : "?",
 				dkim_code_name(d[i].nResult), d[i].nResult);
 	ret = dkim_verify_status(nsigs, d);  /* one good signature is enough */
+	nok = dkim_verify_count(nsigs, d);   /* how many of them verified */
 	printf("DKIM-Status: %s\en", dkim_status_text(ret, NULL));
+	if (nok > 0 && nok < nsigs)
+		printf("\t(%d of %d signatures verified)\en", nok, nsigs);
 	dkim_verify_free(v);             /* invalidates d[] */
 	return ret < 0;
 }
