@@ -1,5 +1,5 @@
 /*
- * $Id: svscan.c,v 1.47 2026-11-10 22:00:15+05:30 Cprogrammer Exp mbhangui $
+ * $Id: svscan.c,v 1.48 2026-11-21 00:04:26+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <signal.h>
@@ -26,6 +26,9 @@
 #include <substdio.h>
 #include <open.h>
 #include <sgetopt.h>
+#ifdef __CYGWIN__
+#include <limits.h>
+#endif
 #include "auto_sysconfdir.h"
 
 #define SERVICES 1000
@@ -782,7 +785,12 @@ get_lock(char *sdir)
 {
 	int             fd, n, fdsource;
 	pid_t           pid;
-	char            strnum[FMT_ULONG], buf[10]; /* buf should be able to hold length of "svscan\n" */
+#ifdef __CYGWIN__
+	char            strnum[FMT_ULONG], buf[PATH_MAX], *base;
+#else
+ 	char            strnum[FMT_ULONG], buf[10]; /* buf should be able to hold length of "svscan\n" */
+#endif
+
 
 	if (1 == svpid) { /*- we are running under a docker container as init */
 		if (unlink(pidfile) == -1 && errno != error_noent)
@@ -833,6 +841,33 @@ get_lock(char *sdir)
 			strerr_die2sys(111, FATAL, "unable to delete lock: ");
 		return (1);
 	}
+#ifdef __CYGWIN__
+	/*- open 'exename' to get the full executable path on Cygwin */
+	if ((fd = open("exename", O_RDONLY, 0)) == -1) { /*- process is now dead */
+		if (fchdir(fdsource) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+		close(fdsource);
+		if (unlink(pidfile) == -1)
+			strerr_die2sys(111, FATAL, "unable to delete lock: ");
+		return (1);
+	}
+	if ((n = read(fd, buf, sizeof(buf) - 1)) <= 0) {
+		close(fd);
+		if (fchdir(fdsource) == -1)
+			strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
+		close(fdsource);
+		if (unlink(pidfile) == -1)
+			strerr_die2sys(111, FATAL, "unable to delete lock: ");
+		return (1);
+	}
+	close(fd);
+	buf[n] = 0;
+	n = str_rchr(buf, '/');
+	base = buf[n] ? buf + n + 1 : buf;
+	if (!str_diff(base, "svscan") || !str_diff(base, "svscan.exe")) { /*- indeed pid is svscan process */
+		strerr_die5x(111, FATAL, "[", base, "] ", "already running");
+	}
+#else
 	/*- open 'comm' to get the command name */
 	if ((fd = open("comm", O_RDONLY, 0)) == -1) { /*- process is now dead */
 		if (fchdir(fdsource) == -1)
@@ -852,18 +887,12 @@ get_lock(char *sdir)
 		return (1);
 	}
 	close(fd);
+	buf[n] = 0;
 	if (!str_diff(buf, "svscan\n")) { /*- indeed pid is svscan process */
 		buf[6] = 0;
 		strerr_die5x(111, FATAL, "[", buf, "] ", "already running");
 	}
-	/*
-	if (buf[0] == 's' && buf[1] == 'v' && buf[2] == 's' &&
-		buf[3] == 'c' && buf[4] == 'a' && buf[5] == 'n' && buf[6] == '\n') {
-		buf[6] = 0;
-		strerr_warn5(FATAL, "[", buf, "] ", "already running", 0);
-		_exit (111);
-	}
-	*/
+#endif
 	/*- some non-svscan process is running with pid */
 	if (fchdir(fdsource) == -1)
 		strerr_die4sys(111, FATAL, "unable to switch back to ", sdir, ": ");
@@ -1059,13 +1088,16 @@ main(int argc, char **argv)
 void
 getversion_svscan_c()
 {
-	const char     *y = "$Id: svscan.c,v 1.47 2026-11-10 22:00:15+05:30 Cprogrammer Exp mbhangui $";
+	const char     *y = "$Id: svscan.c,v 1.48 2026-11-21 00:04:26+05:30 Cprogrammer Exp mbhangui $";
 
 	(void) y;
 }
 
 /*
  * $Log: svscan.c,v $
+ * Revision 1.48  2026-11-21 00:04:26+05:30  Cprogrammer
+ * fix for CYGWIN
+ *
  * Revision 1.47  2026-11-10 22:00:15+05:30  Cprogrammer
  * fix compiler warning
  *

@@ -1,5 +1,5 @@
 /* 
- * $Id: waitfor.c,v 1.1 2026-07-12 20:01:51+05:30 Cprogrammer Exp mbhangui $
+ * $Id: waitfor.c,v 1.2 2026-11-21 00:04:33+05:30 Cprogrammer Exp mbhangui $
  */
 #define _GNU_SOURCE
 #include <poll.h>
@@ -23,6 +23,7 @@
 #include <qprintf.h>
 #include <sgetopt.h>
 #if defined(__sun__)
+#include <sys/stat.h>
 #include <stralloc.h>
 #endif
 
@@ -61,7 +62,7 @@ main(int argc, char *argv[])
 	struct pollfd   pfd;
 #endif
 #if defined(__sun__)
-	stralloc        path;
+	stralloc        path = {0};
 #endif
 #if defined(__FreeBSD__) || defined(__OpenBSD__)
 	char            strnum[FMT_ULONG];
@@ -152,14 +153,14 @@ main(int argc, char *argv[])
 	if (verbose && substdio_flush(subfdout) == -1)
 		strerr_die1sys(i, "unable to write to descriptor 1: ");
 #elif defined(__sun__)
-    qsnprintf(&path, sizeof(path), "/proc/%d", (int) target_pid);
+    qsprintf(&path, "/proc/%d", (int) target_pid);
     for (;;) {
         struct stat st;
-        if (stat(path, &st) < 0) {
+        if (stat(path.s, &st) < 0) {
             if (errno == ENOENT)
 				i = 0;
 			else
-				i = 1;
+				i = errno;
 			break;
         }
         usleep(100000);   /* 100 ms */
@@ -168,18 +169,22 @@ main(int argc, char *argv[])
 		if (verbose && subprintf(subfdout, "PID %d terminated!\n", target_pid) == -1)
 			strerr_die1sys(111, "unable to write to descriptor 1: ");
 	} else
-	if (verbose && subprintf(subfdout, "PID %d unblocked due to alternative event flags: %d\n",
-				target_pid, pfd.revents) == -1)
+	if (verbose && subprintf(subfdout, "PID %d unblocked due to error errno=[%d]\n",
+			target_pid, i) == -1)
 		strerr_die1sys(111, "unable to write to descriptor 1: ");
 	if (verbose && substdio_flush(subfdout) == -1)
 		strerr_die1sys(i, "unable to write to descriptor 1: ");
 #else
     for (;;) {
         if (kill(target_pid, 0) < 0) {
-            if (errno == ESRCH)
+            if (errno == ESRCH) {
 				i = 0;
-			else
+				break;
+			} else
+			if (errno == EPERM) {
 				i = errno;
+				break;
+			}
         }
         usleep(100000);   /* 100 ms */
     }
@@ -198,6 +203,9 @@ main(int argc, char *argv[])
 
 /*
  * $Log: waitfor.c,v $
+ * Revision 1.2  2026-11-21 00:04:33+05:30  Cprogrammer
+ * fix for sun/solaris
+ *
  * Revision 1.1  2026-07-12 20:01:51+05:30  Cprogrammer
  * Initial revision
  *
