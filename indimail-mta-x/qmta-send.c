@@ -1,5 +1,5 @@
 /*
- * $Id: qmta-send.c,v 1.34 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $
+ * $Id: qmta-send.c,v 1.35 2026-11-22 00:57:03+05:30 Cprogrammer Exp mbhangui $
  */
 #include <unistd.h>
 #include <ctype.h>
@@ -1812,7 +1812,7 @@ I tried to deliver a bounce message to this address, but the bounce bounced!\n\
 			for (brep = orig_recip.s; *brep != ':' && brep < orig_recip.s + orig_recip.len; brep++);
 			if (*brep == ':') {
 				*brep++ = 0;
-				for (; *brep && isspace(*brep); brep++);
+				for (; *brep && isspace((unsigned char) *brep); brep++);
 			}
 			close(fd);
 			if (r == -1)
@@ -2781,7 +2781,7 @@ main(int argc, char **argv)
 void
 getversion_qmta_send_c()
 {
-	const char     *x = "$Id: qmta-send.c,v 1.34 2026-11-11 19:26:59+05:30 Cprogrammer Exp mbhangui $";
+	const char     *x = "$Id: qmta-send.c,v 1.35 2026-11-22 00:57:03+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x)
 		x++;
@@ -2789,6 +2789,9 @@ getversion_qmta_send_c()
 
 /*
  * $Log: qmta-send.c,v $
+ * Revision 1.35  2026-11-22 00:57:03+05:30  Cprogrammer
+ * fixed compilation warning
+ *
  * Revision 1.34  2026-11-11 19:26:59+05:30  Cprogrammer
  * Fix warnings from -Wextra
  *

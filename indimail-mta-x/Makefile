@@ -19,7 +19,7 @@ edit = sed \
 	-e 's,@version\@,$(version),g' \
 	-e 's,@release\@,$(release),g' \
 	-e 's,@email\@,$(email),g' \
-	-e 's,@DATE\@,$(DATE),g'
+	-e 's{@DATE\@{$(DATE){g'
 
 it = 822date 822field 822header 822print 822received addrlist analyzer \
 	atrn authcram autoresponder backup.conf batv binm1 binm1+df binm2 \
