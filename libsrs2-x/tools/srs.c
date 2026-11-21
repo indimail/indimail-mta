@@ -191,7 +191,7 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 	maxfd = sock + 1;
 
 #define FINISH(fd) close(fd); FD_CLR(fd, &readfds_sv)
-#define SKIPWHITE(cp) while (isspace(*cp)) cp++;
+#define SKIPWHITE(cp) while (isspace((unsigned char) *cp)) cp++;
 
 	if (!(daemonflags & DF_NOFORK)) {
 #ifdef DARWIN
@@ -245,7 +245,7 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 
 					if (strncasecmp(line, "forward ", 8) == 0) {
 						cp = line + 8;
-						while (isspace(*cp))
+						while (isspace((unsigned char) *cp))
 							cp++;
 						address = cp;
 						cp = strchr(address, ' ');
@@ -255,7 +255,7 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 							continue;
 						}
 						*cp++ = '\0';
-						while (isspace(*cp))
+						while (isspace((unsigned char) *cp))
 							cp++;
 						alias = cp;
 						ret = srs_forward(srs, buf, BUFSIZ, address, alias);
@@ -275,7 +275,7 @@ rundaemon(srs_t *srs, char *path, int daemonflags)
 					}
 					else if (strncasecmp(line, "reverse ", 8) == 0) {
 						cp = line + 8;
-						while (isspace(*cp))
+						while (isspace((unsigned char) *cp))
 							cp++;
 						address = cp;
 						ret = srs_reverse(srs, buf, BUFSIZ, address);

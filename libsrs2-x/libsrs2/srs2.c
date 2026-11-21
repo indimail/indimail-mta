@@ -314,7 +314,7 @@ srs_hash_create_v(srs_t *srs, int idx, char *buf, int nargs, va_list ap)
 		len = strlen(data);
 		lcdata = alloca(len + 1);
 		for (j = 0; j < len; j++) {
-			if (isupper(data[j]))
+			if (isupper((unsigned char) data[j]))
 				lcdata[j] = tolower(data[j]);
 			else
 				lcdata[j] = data[j];
