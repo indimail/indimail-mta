@@ -7317,6 +7317,17 @@ test_spf()
 		cmd=$(echo $line |cut -d: -f2-)
 		$cmd > $tmpdir/spf.out 2>$tmpdir/spf.err
 		ret=$?
+		case $ret in
+			0) text="SPF_OK";;
+			1) text="SPF_NONE";;
+			2) text="SPF_UNKNOWN";;
+			3) text="SPF_NEUTRAL";;
+			4) text="SPF_SOFTFAIL";;
+			5) text="SPF FAILURE";;
+			6) text="SPF ERROR";;
+			7) text="SPF NOMEM";;
+			*) text="SPF Flumoxed"
+		esac
 		if [ $ret -eq $exit_val ] ; then
 			t2=$(date +"%s.%4N")
 			secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
@@ -7327,7 +7338,7 @@ test_spf()
 				echo "  $l1"
 				echo "  $l2"
 			fi
-			printf "\r  testing spf test%02d succeded ret=%d == %d %63s [%0.4f sec]\n" $count $ret $exit_val " " $secs
+			printf "\r  testing spf test%02d succeded ret=%d == %d type=%-12s %46s [%0.4f sec]\n" $count $ret $exit_val "$text" " " $secs
 			print_pct
 		else
 			t2=$(date +"%s.%4N")
@@ -7338,7 +7349,7 @@ test_spf()
 				echo "  $l1"
 				echo "  $l2"
 			fi
-			printf "\r  testing spf test%02d failed   ret=%d != %d %63s [%0.4f sec]\n" $count $ret $exit_val " " $secs
+			printf "\r  testing spf test%02d failed   ret=%d != %d type=%-12s %46s [%0.4f sec]\n" $count $ret $exit_val "$text" " " $secs
 			print_pct
 			#cat $tmpdir/spf.err
 			#l1=$(cat $tmpdir/spf.out|sed -n 1p)
@@ -10198,6 +10209,37 @@ EOT
 	fi
 	t_end "REJECT_SHA1"
 
+	# Test No 28
+	# unsigned-message verification path.
+	printf "\r%118s\r" " "
+	echo "28. testing qmail-dkim(8) environment options and queue handling"
+	# No signature is neutral by default; qmail-dkim still emits DKIM-Status.
+	(
+	echo "From: postmaster@example.com"
+	echo "To: postmaster@example.com"
+	echo "Subject: unsigned"
+	echo "Date: $(date -R)"
+	echo
+	echo "Unsigned message"
+	) >$tmpdir/mail.txt
+	env - CONTROLDIR=$cntrldir DKVERIFY="" DKIMQUEUE=/bin/cat \
+		$qmail_dkim <$tmpdir/mail.txt >$tmpdir/result.out
+	ret=$?
+	if [ $ret -eq 0 ] && grep -qi '^DKIM-Status:' $tmpdir/result.out &&
+		! grep -qi '^DKIM-Signature:' $tmpdir/result.out
+	then
+		tcount=$(expr $tcount + 1)
+		echo "    unsigned message accepted and DKIM-Status emitted"
+	else
+		echo "FAILED: qmail-dkim unsigned-message default handling ret=$ret"
+		failed=1
+	fi
+	/bin/rm -f $tmpdir/mail.txt $tmpdir/result.out $tmpdir/err.out
+	if [ $failed -eq 1 ] ; then
+		echo "Test Failed for qmail-dkim environment options"
+		exit 1
+	fi
+
 	t2=$(date +"%s.%4N")
 	secs=$(echo $t1 $t2 | awk '{printf("%0.4f\n", $2-$1)}')
 	printf "\r%118s\r" " "
@@ -10302,10 +10344,12 @@ if [ $? -ne 0 ] ; then
 	echo "This script requires sudo privileges" 1>&2
 	exit 1
 fi
+spf_tests=$(grep -Ev "^#" spfquery.txt | wc -l)
 if [ -f $testdir/qtotal.count ] ; then
 	total_tests=$(cat $testdir/qtotal.count)
 else
-	total_tests=465
+	total_tests=449
+	total_tests=$((total_tests + spf_tests))
 fi
 failed=0
 do_setup
