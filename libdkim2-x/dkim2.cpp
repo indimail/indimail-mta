@@ -918,13 +918,16 @@ main(int argc, char **argv)
 void
 getversion_dkim_c()
 {
-	static char    *x = (char *) "$Id: dkim.cpp,v 1.39 2026-10-21 21:47:10+05:30 Cprogrammer Exp mbhangui $";
+	static char    *x = (char *) "$Id: dkim2.cpp,v 1.40 2026-11-26 23:02:18+05:30 Cprogrammer Exp mbhangui $";
 
 	if (x++) x--;
 }
 
 /*
- * $Log: dkim.cpp,v $
+ * $Log: dkim2.cpp,v $
+ * Revision 1.40  2026-11-26 23:02:18+05:30  Cprogrammer
+ * added DKIM_HASH_PRIVATE
+ *
  * Revision 1.39  2026-10-21 21:47:10+05:30  Cprogrammer
  * fix compiler warnings
  *
